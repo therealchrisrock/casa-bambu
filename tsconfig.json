@@ -7,6 +7,7 @@
       "dom.iterable",
       "esnext"
     ],
+    "baseUrl": ".",
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -25,6 +26,7 @@
     ],
     "paths": {
       "react": ["./node_modules/@types/react"],
+      "@/*": ["src/app/*"]
     }
   },
   "include": [

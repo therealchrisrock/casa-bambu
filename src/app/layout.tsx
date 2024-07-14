@@ -7,9 +7,15 @@ import { Header } from './_components/Header'
 import { Providers } from './_providers'
 import { InitTheme } from './_providers/Theme/InitTheme'
 import { mergeOpenGraph } from './_utilities/mergeOpenGraph'
-
 import './_css/app.scss'
+import { cn } from "@/lib/utils"
+import { Inter as FontSans } from "next/font/google"
+import './globals.css'
 
+const fontSans = FontSans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+})
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -18,7 +24,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="icon" href="/favicon.ico" sizes="32x32" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body>
+      <body
+        className={cn(
+          "min-h-screen bg-blue-500 font-sans antialiased",
+          fontSans.variable
+        )}>
         <Providers>
           <AdminBar />
           {/* @ts-expect-error */}

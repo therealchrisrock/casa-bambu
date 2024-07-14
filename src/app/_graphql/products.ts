@@ -18,6 +18,14 @@ export const PRODUCT = `
       docs {
         id
         title
+        gallery {
+          id
+          image {
+            alt
+            url 
+            caption
+          }
+        }
         stripeProductID
         ${CATEGORIES}
         layout {

@@ -1,17 +1,17 @@
-import type { CollectionConfig } from 'payload/types';
+import type { CollectionConfig } from 'payload/types'
 
-import { admins } from '../../access/admins';
-import { Archive } from '../../blocks/ArchiveBlock';
-import { CallToAction } from '../../blocks/CallToAction';
-import { Content } from '../../blocks/Content';
-import { MediaBlock } from '../../blocks/MediaBlock';
-import { slugField } from '../../fields/slug';
-import { populateArchiveBlock } from '../../hooks/populateArchiveBlock';
-import { checkUserPurchases } from './access/checkUserPurchases';
-import { beforeProductChange } from './hooks/beforeChange';
-import { deleteProductFromCarts } from './hooks/deleteProductFromCarts';
-import { revalidateProduct } from './hooks/revalidateProduct';
-import { ProductSelect } from './ui/ProductSelect';
+import { admins } from '../../access/admins'
+import { Archive } from '../../blocks/ArchiveBlock'
+import { CallToAction } from '../../blocks/CallToAction'
+import { Content } from '../../blocks/Content'
+import { MediaBlock } from '../../blocks/MediaBlock'
+import { slugField } from '../../fields/slug'
+import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
+import { checkUserPurchases } from './access/checkUserPurchases'
+import { beforeProductChange } from './hooks/beforeChange'
+import { deleteProductFromCarts } from './hooks/deleteProductFromCarts'
+import { revalidateProduct } from './hooks/revalidateProduct'
+import { ProductSelect } from './ui/ProductSelect'
 
 const Products: CollectionConfig = {
   slug: 'products',
@@ -21,7 +21,7 @@ const Products: CollectionConfig = {
     preview: doc => {
       return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/next/preview?url=${encodeURIComponent(
         `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/products/${doc.slug}`,
-      )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`;
+      )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
     },
   },
   hooks: {
@@ -58,9 +58,9 @@ const Products: CollectionConfig = {
         beforeChange: [
           ({ siblingData, value }) => {
             if (siblingData._status === 'published' && !value) {
-              return new Date();
+              return new Date()
             }
-            return value;
+            return value
           },
         ],
       },
@@ -86,7 +86,7 @@ const Products: CollectionConfig = {
       admin: {
         components: {
           RowLabel: ({ data, index }) => {
-            return data?.title || `Image ${String(index).padStart(2, '0')}`;
+            return data?.title || `Image ${String(index).padStart(2, '0')}`
           },
         },
       },
@@ -165,7 +165,7 @@ const Products: CollectionConfig = {
           id: {
             not_in: [id],
           },
-        };
+        }
       },
     },
     slugField(),
@@ -180,6 +180,6 @@ const Products: CollectionConfig = {
       },
     },
   ],
-};
+}
 
-export default Products;
+export default Products

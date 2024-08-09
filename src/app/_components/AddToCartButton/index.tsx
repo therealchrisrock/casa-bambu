@@ -4,8 +4,9 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { Product } from '../../../payload/payload-types'
-import { useCart } from '../../_providers/Cart'
 import { Button, Props } from '../Button'
+
+import { useCart } from '@/_providers/Cart'
 
 import classes from './index.module.scss'
 
@@ -47,6 +48,8 @@ export const AddToCartButton: React.FC<{
               addItemToCart({
                 product,
                 quantity,
+                startDate: '2022-01-06T05:00:00.000Z',
+                endDate: '2022-01-10T05:00:00.000Z',
               })
 
               router.push('/cart')

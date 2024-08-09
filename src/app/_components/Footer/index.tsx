@@ -26,32 +26,19 @@ export async function Footer() {
   return (
     <footer className={classes.footer}>
       <Gutter className={classes.wrap}>
-        <Link href="/">
-          <picture>
-            <img
-              className={classes.logo}
-              alt="Payload Logo"
-              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
-            />
-          </picture>
-        </Link>
         <nav className={classes.nav}>
-          <ThemeSelector />
+          {/*<ThemeSelector />*/}
           {navItems.map(({ link }, i) => {
-            return <CMSLink key={i} {...link} />
+            return <CMSLink appearance={'none'} key={i} {...link} />
           })}
-          <Link href="/admin">Admin</Link>
-          <Link
-            href="https://github.com/payloadcms/payload/tree/main/templates/ecommerce"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Source Code
-          </Link>
-          <Link href="https://payloadcms.com" target="_blank" rel="noopener noreferrer">
-            Payload
-          </Link>
         </nav>
+        <img
+          className={'w-48'}
+          src={'/media/large-logo.png'}
+          alt={
+            'The logo of Casa Bambu, a company offering vacation rental properties in West Bay, Roatan, Honduras, featuring a stylized design with the company’s name in a modern, elegant font.'
+          }
+        />
       </Gutter>
     </footer>
   )

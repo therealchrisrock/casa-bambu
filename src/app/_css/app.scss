@@ -7,18 +7,18 @@
   --base: 24px;
   --font-body: system-ui;
   --font-mono: 'Roboto Mono', monospace;
-
-  --gutter-h: 180px;
-  --block-padding: 120px;
+  --header-height: 4rem;
+  --gutter-h: 3rem;
+  --block-padding: 4rem;
 
   @include large-break {
-    --gutter-h: 144px;
-    --block-padding: 96px;
+    --gutter-h: 3rem;
+    --block-padding: 3rem;
   }
 
   @include mid-break {
-    --gutter-h: 24px;
-    --block-padding: 60px;
+    --gutter-h: 2rem;
+    --block-padding: 2rem;
   }
 }
 

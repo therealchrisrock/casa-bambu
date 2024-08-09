@@ -1,35 +1,38 @@
 import React from 'react'
 
 import { Page } from '../../../payload/payload-types'
-import { Gutter } from '../../_components/Gutter'
-import { CMSLink } from '../../_components/Link'
-import { Media } from '../../_components/Media'
+import { CMSLink } from '@/_components/Link'
+import { Media } from '@/_components/Media'
 import RichText from '../../_components/RichText'
 
 import classes from './index.module.scss'
 
 export const MediumImpactHero: React.FC<Page['hero']> = props => {
   const { richText, media, links } = props
-
   return (
-    <Gutter className={classes.hero}>
-      <div className={classes.background}>
-        <RichText className={classes.richText} content={richText} />
+    <div className={`relative w-full isolate flex items-center ${classes.wrap}`}>
+      <div className={'w-11/12 max-w-2xl mx-auto text-center text-white space-y-4'}>
+        <div className={'absolute w-full h-full inset-0 bg-black opacity-20 -z-10'}></div>
+        <RichText size={'prose-lg'} className={'prose:h1'} content={richText} />
         {Array.isArray(links) && (
-          <ul className={classes.links}>
+          <ul className={'flex justify-center gap-4 list-none'}>
             {links.map(({ link }, i) => {
               return (
                 <li key={i}>
-                  <CMSLink className={classes.link} {...link} />
+                  <CMSLink className={classes.link} {...link} invert={link.appearance === 'link'} />
                 </li>
               )
             })}
           </ul>
         )}
       </div>
-      <div className={classes.media}>
-        {typeof media === 'object' && <Media className={classes.media} resource={media} />}
-      </div>
-    </Gutter>
+      {typeof media === 'object' && (
+        <Media
+          htmlElement={null}
+          className={'absolute w-full h-full inset-0 -z-20'}
+          resource={media}
+        />
+      )}
+    </div>
   )
 }

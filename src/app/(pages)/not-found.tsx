@@ -8,7 +8,7 @@ export default function NotFound() {
       <VerticalPadding top="none" bottom="large">
         <h1 style={{ marginBottom: 0 }}>404</h1>
         <p>This page could not be found.</p>
-        <Button href="/" label="Go Home" appearance="primary" />
+        <Button href="/" label="Go Home" />
       </VerticalPadding>
     </Gutter>
   )

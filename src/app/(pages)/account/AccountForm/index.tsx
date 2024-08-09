@@ -152,7 +152,7 @@ const AccountForm: React.FC = () => {
         type="submit"
         label={isLoading ? 'Processing' : changePassword ? 'Change Password' : 'Update Account'}
         disabled={isLoading}
-        appearance="primary"
+
         className={classes.submit}
       />
     </form>

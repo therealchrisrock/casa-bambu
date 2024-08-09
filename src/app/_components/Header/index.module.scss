@@ -1,8 +1,5 @@
 @use '../../_css/queries.scss' as *;
 
-.header {
-  padding: var(--base) 0;
-}
 
 .wrap {
   display: flex;
@@ -15,7 +12,7 @@
   width: 150px;
 }
 
-:global([data-theme="light"]) {
+:global([data-theme="dark"]) {
   .logo {
     filter: invert(1);
   }

@@ -95,7 +95,7 @@ export default async function Account() {
         <Button
           className={classes.ordersButton}
           href="/orders"
-          appearance="primary"
+
           label="View orders"
         />
         <HR />

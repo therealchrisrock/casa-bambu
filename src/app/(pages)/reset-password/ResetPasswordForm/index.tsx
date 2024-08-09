@@ -78,7 +78,7 @@ export const ResetPasswordForm: React.FC = () => {
       <input type="hidden" {...register('token')} />
       <Button
         type="submit"
-        appearance="primary"
+
         label="Reset Password"
         className={classes.submit}
       />

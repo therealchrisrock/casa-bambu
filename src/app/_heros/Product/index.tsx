@@ -10,6 +10,7 @@ import { Price } from '../../_components/Price'
 import RichText from '../../_components/RichText'
 
 import classes from './index.module.scss'
+import { DatePickerWithRange } from '@/_components/DateSelector'
 
 export const ProductHero: React.FC<{
   product: Product
@@ -75,6 +76,7 @@ export const ProductHero: React.FC<{
             </p>
           </div>
           <Price product={product} button={false} />
+          <DatePickerWithRange />
           <AddToCartButton product={product} className={classes.addToCartButton} />
         </div>
         <div className={classes.media}>

@@ -22,8 +22,8 @@ export const ArchiveBlock: React.FC<
     populatedDocsTotal,
     selectedDocs,
     categories,
+    appearance
   } = props
-
   return (
     <div id={`block-${id}`} className={classes.archiveBlock}>
       {introContent && (
@@ -39,7 +39,9 @@ export const ArchiveBlock: React.FC<
         selectedDocs={selectedDocs}
         categories={categories}
         limit={limit}
+        showPageRange={false}
         sort="-publishedOn"
+        appearance={appearance}
       />
     </div>
   )

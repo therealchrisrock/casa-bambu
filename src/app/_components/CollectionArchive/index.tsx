@@ -35,6 +35,7 @@ export type Props = {
   selectedDocs?: ArchiveBlockProps['selectedDocs']
   showPageRange?: boolean
   sort?: string
+  appearance: ArchiveBlockProps['appearance']
 }
 
 export const CollectionArchive: React.FC<Props> = props => {
@@ -50,6 +51,7 @@ export const CollectionArchive: React.FC<Props> = props => {
     selectedDocs,
     showPageRange,
     sort = '-createdAt',
+    appearance,
   } = props
 
   const [results, setResults] = useState<Result>({
@@ -163,7 +165,6 @@ export const CollectionArchive: React.FC<Props> = props => {
       if (timer) clearTimeout(timer)
     }
   }, [page, categories, relationTo, onResultChange, sort, limit, populateBy])
-
   return (
     <div className={[classes.collectionArchive, className].filter(Boolean).join(' ')}>
       <div className={classes.scrollRef} ref={scrollRef} />
@@ -182,19 +183,51 @@ export const CollectionArchive: React.FC<Props> = props => {
           </Gutter>
         )}
         <Gutter>
-          <div className={classes.grid}>
-            {results.docs?.map((result, index) => {
-              if (typeof result === 'object' && result !== null) {
-                return (
-                  <div className={classes.column} key={index}>
-                    <Card doc={result} relationTo={relationTo} showCategories />
-                  </div>
-                )
-              }
+          {appearance === 'wide' ? (
+            <div>
+              <div className={'lg:block hidden'}>
+                {results.docs?.map((result, index) => {
+                  if (typeof result === 'object' && result !== null) {
+                    return (
+                      <div className={'grid grid-cols-2'} key={index}>
+                        <Card size={'large'} doc={result} relationTo={relationTo} showCategories />
+                      </div>
+                    )
+                  }
+                  return null
+                })}
+              </div>
+              <div className={'lg:hidden block'}>
+                <div className={classes.grid}>
+                  {results.docs?.map((result, index) => {
+                    if (typeof result === 'object' && result !== null) {
+                      return (
+                        <div className={classes.column} key={index}>
+                          <Card doc={result} relationTo={relationTo} showCategories />
+                        </div>
+                      )
+                    }
 
-              return null
-            })}
-          </div>
+                    return null
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className={classes.grid}>
+              {results.docs?.map((result, index) => {
+                if (typeof result === 'object' && result !== null) {
+                  return (
+                    <div className={classes.column} key={index}>
+                      <Card doc={result} relationTo={relationTo} showCategories />
+                    </div>
+                  )
+                }
+
+                return null
+              })}
+            </div>
+          )}
           {results.totalPages > 1 && populateBy !== 'selection' && (
             <Pagination
               className={classes.pagination}

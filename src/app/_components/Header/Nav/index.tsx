@@ -28,14 +28,14 @@ export const HeaderNav: React.FC<{ header: HeaderType }> = ({ header }) => {
       {navItems.map(({ link }, i) => {
         return <CMSLink key={i} {...link} appearance="none" />
       })}
-      <CartLink />
-      {user && <Link href="/account">Account</Link>}
-      {!user && (
-        <React.Fragment>
-          <Link href="/login">Login</Link>
-          <Link href="/create-account">Create Account</Link>
-        </React.Fragment>
-      )}
+      {/*<CartLink />*/}
+      {/*{user && <Link href="/account">Account</Link>}*/}
+      {/*{!user && (*/}
+      {/*  <React.Fragment>*/}
+      {/*    <Link href="/login">Login</Link>*/}
+      {/*    <Link href="/create-account">Create Account</Link>*/}
+      {/*  </React.Fragment>*/}
+      {/*)}*/}
     </nav>
   )
 }

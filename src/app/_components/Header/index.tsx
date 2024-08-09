@@ -28,7 +28,7 @@ export async function Header() {
     <>
       <header className={classes.header}>
         <Gutter className={classes.wrap}>
-          <Link href="/">
+          <Link href="/" className={'flex items-center'}>
             {/* Cannot use the `<picture>` element here with `srcSet`
               This is because the theme is able to be overridden by the user
               And so `@media (prefers-color-scheme: dark)` will not work
@@ -37,7 +37,7 @@ export async function Header() {
             <img
               className={classes.logo}
               alt="Payload Logo"
-              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
+              src="/media/small-logo.png"
             />
           </Link>
           <HeaderNav header={header} />

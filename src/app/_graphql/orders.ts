@@ -25,3 +25,18 @@ export const ORDER = `
     }
   }
 `
+export const AVAILABILITY = `
+  query Order($id: String ) {
+    Orders(where: { id: { equals: $id}}) {
+      docs {
+        id
+        orderedBy
+        items {
+          product ${PRODUCT}
+          title
+          priceJSON
+        }
+      }
+    }
+  }
+`

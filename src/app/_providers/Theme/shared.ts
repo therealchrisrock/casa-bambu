@@ -9,9 +9,9 @@ export const getImplicitPreference = (): Theme | null => {
   const mql = window.matchMedia(mediaQuery)
   const hasImplicitPreference = typeof mql.matches === 'boolean'
 
-  if (hasImplicitPreference) {
+  /*  if (hasImplicitPreference) {
     return mql.matches ? 'dark' : 'light'
-  }
-
-  return null
+  }*/
+  // return null
+  return 'light'
 }

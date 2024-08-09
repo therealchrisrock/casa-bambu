@@ -15,7 +15,7 @@ export const hero: Field = {
       name: 'type',
       label: 'Type',
       required: true,
-      defaultValue: 'lowImpact',
+      defaultValue: 'none',
       options: [
         {
           label: 'None',
@@ -26,7 +26,7 @@ export const hero: Field = {
           value: 'highImpact',
         },
         {
-          label: 'Medium Impact',
+          label: 'Full Screen',
           value: 'mediumImpact',
         },
         {
@@ -40,6 +40,7 @@ export const hero: Field = {
         elements: ['h1', largeBody, label, 'link'],
         leaves: [],
       },
+      required: false,
     }),
     linkGroup({
       overrides: {

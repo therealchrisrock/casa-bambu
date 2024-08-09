@@ -118,6 +118,24 @@ const Users: CollectionConfig = {
                 step: 1,
               },
             },
+            {
+              name: 'startDate',
+              label: 'Start Date',
+              type: 'date',
+              admin: {
+                position: 'sidebar',
+              },
+              required: true,
+            },
+            {
+              name: 'endDate',
+              label: 'End Date',
+              type: 'date',
+              admin: {
+                position: 'sidebar',
+              },
+              required: true,
+            },
           ],
         },
         // If you wanted to maintain a 'created on'

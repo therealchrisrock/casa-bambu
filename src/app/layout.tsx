@@ -11,7 +11,7 @@ import { mergeOpenGraph } from './_utilities/mergeOpenGraph'
 
 import './_css/app.scss'
 import './globals.css'
-import { cn } from '@/lib/utils'
+import { cn } from '@/_lib/utils'
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -25,12 +25,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="icon" href="/favicon.ico" sizes="32x32" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className={cn('min-h-screen font-sans antialiased', fontSans.variable)}>
+      <body className={cn('min-h-screen flex flex-col font-sans antialiased', fontSans.variable)}>
         <Providers>
           <AdminBar />
           {/* @ts-expect-error */}
           <Header />
-          {children}
+          <main className={'flex-1'} id={'mainContent'}>
+            {children}
+          </main>
           {/* @ts-expect-error */}
           <Footer />
         </Providers>

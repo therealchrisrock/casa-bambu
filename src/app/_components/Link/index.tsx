@@ -37,6 +37,7 @@ export const CMSLink: React.FC<CMSLinkType> = ({
         }`
       : url
 
+
   if (!href) return null
 
   if (!appearance) {
@@ -51,7 +52,6 @@ export const CMSLink: React.FC<CMSLinkType> = ({
       )
     }
   }
-
   return (
     <Button
       className={className}

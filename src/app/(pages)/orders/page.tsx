@@ -84,7 +84,7 @@ export default async function Orders() {
         </ul>
       )}
       <HR />
-      <Button href="/account" appearance="primary" label="Go to account" />
+      <Button href="/account"  label="Go to account" />
     </Gutter>
   )
 }

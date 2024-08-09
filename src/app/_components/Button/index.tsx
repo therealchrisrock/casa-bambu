@@ -1,13 +1,16 @@
 'use client'
 
-import React, { ElementType } from 'react'
+import React from 'react'
+import { ArrowRightIcon, MoveRightIcon } from 'lucide-react'
 import Link from 'next/link'
+
+import { Button as ShadButton } from '@/_components/ui/button'
 
 import classes from './index.module.scss'
 
 export type Props = {
   label?: string
-  appearance?: 'default' | 'primary' | 'secondary' | 'none'
+  appearance?: 'default' | 'primary' | 'secondary' | 'link' | 'none'
   el?: 'button' | 'link' | 'a'
   onClick?: () => void
   href?: string
@@ -23,7 +26,7 @@ export const Button: React.FC<Props> = ({
   label,
   newTab,
   href,
-  appearance,
+  appearance = 'secondary',
   className: classNameFromProps,
   onClick,
   type = 'button',
@@ -34,43 +37,38 @@ export const Button: React.FC<Props> = ({
 
   const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
 
-  const className = [
-    classes.button,
-    classNameFromProps,
-    classes[`appearance--${appearance}`],
-    invert && classes[`${appearance}--invert`],
-  ]
-    .filter(Boolean)
-    .join(' ')
-
+  const className = [classes.button, classNameFromProps].filter(Boolean).join(' ')
+  let variant = appearance === 'primary' ? 'default' : appearance
   const content = (
-    <div className={classes.content}>
-      <span className={classes.label}>{label}</span>
-    </div>
+    <ShadButton variant={variant} className={invert ? 'invert' : ''} disabled={disabled}>
+      {label}&nbsp;{variant === 'link' && <MoveRightIcon strokeWidth={1} />}
+    </ShadButton>
   )
 
   if (onClick || type === 'submit') el = 'button'
 
   if (el === 'link') {
     return (
-      <Link href={href || ''} className={className} {...newTabProps} onClick={onClick}>
+      <Link href={href || ''} {...newTabProps} onClick={onClick}>
         {content}
       </Link>
     )
   }
+  return <ShadButton className={invert ? 'invert' : ''} disabled={disabled} variant={'default'}>{label}</ShadButton>
 
-  const Element: ElementType = el
-
-  return (
-    <Element
-      href={href}
-      className={className}
-      type={type}
-      {...newTabProps}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {content}
-    </Element>
-  )
+  //
+  // const Element: ElementType = el
+  //
+  // return (
+  //   <Element
+  //     href={href}
+  //     className={className}
+  //     type={type}
+  //     {...newTabProps}
+  //     onClick={onClick}
+  //     disabled={disabled}
+  //   >
+  //     {content}
+  //   </Element>
+  // )
 }

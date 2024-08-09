@@ -1,6 +1,7 @@
 import { webpackBundler } from '@payloadcms/bundler-webpack'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { payloadCloud } from '@payloadcms/plugin-cloud'
+import formBuilder from '@payloadcms/plugin-form-builder'
 import nestedDocs from '@payloadcms/plugin-nested-docs'
 import redirects from '@payloadcms/plugin-redirects'
 import seo from '@payloadcms/plugin-seo'
@@ -19,6 +20,8 @@ import Products from './collections/Products'
 import Users from './collections/Users'
 import BeforeDashboard from './components/BeforeDashboard'
 import BeforeLogin from './components/BeforeLogin'
+import BeforeNavLinks from './components/BeforeNavLinks'
+import Calendar from './components/Calendar'
 import { createPaymentIntent } from './endpoints/create-payment-intent'
 import { customersProxy } from './endpoints/customers'
 import { productsProxy } from './endpoints/products'
@@ -28,6 +31,8 @@ import { Header } from './globals/Header'
 import { Settings } from './globals/Settings'
 import { priceUpdated } from './stripe/webhooks/priceUpdated'
 import { productUpdated } from './stripe/webhooks/productUpdated'
+import { getAvailability } from './endpoints/get-availability'
+import { Reviews } from './collections/Reviews'
 
 const generateTitle: GenerateTitle = () => {
   return 'My Store'
@@ -43,7 +48,19 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     bundler: webpackBundler(),
+    meta: {
+      titleSuffix: '- Custom Title',
+      favicon: '/assets/favicon.svg',
+      ogImage: '/media/large-logo.png',
+    },
     components: {
+      beforeNavLinks: [BeforeNavLinks],
+      views: {
+        Calendar: {
+          Component: Calendar,
+          path: '/calendar',
+        },
+      },
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
       beforeLogin: [BeforeLogin],
@@ -66,6 +83,7 @@ export default buildConfig({
             [path.resolve(__dirname, 'endpoints/create-payment-intent')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/customers')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/products')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/get-availability')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/seed')]: mockModulePath,
             stripe: mockModulePath,
             express: mockModulePath,
@@ -79,7 +97,7 @@ export default buildConfig({
     url: process.env.DATABASE_URI,
   }),
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
-  collections: [Pages, Products, Orders, Media, Categories, Users],
+  collections: [Pages, Products, Orders, Media, Categories, Users, Reviews],
   upload: {
     limits: {
       fileSize: 10 * 1000000, // 10MB
@@ -105,6 +123,11 @@ export default buildConfig({
       handler: createPaymentIntent,
     },
     {
+      path: '/get-availability',
+      method: 'get',
+      handler: getAvailability
+    },
+    {
       path: '/stripe/customers',
       method: 'get',
       handler: customersProxy,
@@ -123,6 +146,21 @@ export default buildConfig({
     },
   ],
   plugins: [
+    formBuilder({
+      // ...
+      fields: {
+        text: true,
+        textarea: true,
+        select: true,
+        email: true,
+        state: true,
+        country: true,
+        checkbox: true,
+        number: true,
+        message: true,
+        payment: false,
+      },
+    }),
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
       isTestKey: Boolean(process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY),

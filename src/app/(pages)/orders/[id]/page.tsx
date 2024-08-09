@@ -123,7 +123,7 @@ export default async function Order({ params: { id } }) {
       </div>
       <HR />
       <div className={classes.actions}>
-        <Button href="/orders" appearance="primary" label="See all orders" />
+        <Button href="/orders"  label="See all orders" />
         <Button href="/account" appearance="secondary" label="Go to account" />
       </div>
     </Gutter>

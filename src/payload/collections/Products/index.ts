@@ -1,3 +1,4 @@
+import type { RowLabelArgs } from 'payload/dist/admin/components/forms/RowLabel/types'
 import type { CollectionConfig } from 'payload/types'
 
 import { admins } from '../../access/admins'
@@ -15,6 +16,10 @@ import { ProductSelect } from './ui/ProductSelect'
 
 const Products: CollectionConfig = {
   slug: 'products',
+  labels: {
+    singular: 'Listing',
+    plural: 'Listings',
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'stripeProductID', '_status'],
@@ -85,7 +90,7 @@ const Products: CollectionConfig = {
       ],
       admin: {
         components: {
-          RowLabel: ({ data, index }) => {
+          RowLabel: ({ data, index }: RowLabelArgs) => {
             return data?.title || `Image ${String(index).padStart(2, '0')}`
           },
         },

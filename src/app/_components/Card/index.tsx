@@ -1,11 +1,14 @@
 'use client'
 
 import React, { Fragment, useEffect, useState } from 'react'
+import { MoveRightIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useMediaQuery } from 'usehooks-ts'
 
 import { Product } from '../../../payload/payload-types'
 import { Media } from '../Media'
-import { Price } from '../Price'
+
+import { Button } from '@/_components/ui/button'
 
 import classes from './index.module.scss'
 
@@ -41,6 +44,7 @@ export const Card: React.FC<{
   title?: string
   relationTo?: 'products'
   doc?: Product
+  size?: 'small' | 'large'
 }> = props => {
   const {
     showCategories,
@@ -48,7 +52,9 @@ export const Card: React.FC<{
     doc,
     doc: { slug, title, categories, meta, priceJSON } = {},
     className,
+    size = 'small',
   } = props
+  const matches = useMediaQuery('(min-width: 768px)')
 
   const { description, image: metaImage } = meta || {}
 
@@ -66,8 +72,62 @@ export const Card: React.FC<{
     setPrice(priceFromJSON(priceJSON))
   }, [priceJSON])
 
+  if (size === 'small') {
+    return (
+      <Link href={href} className={[classes.card, className].filter(Boolean).join(' ')}>
+        <div className={classes.mediaWrapper}>
+          {!metaImage && <div className={classes.placeholder}>No image</div>}
+          {metaImage && typeof metaImage !== 'string' && (
+            <Media imgClassName={classes.image} resource={metaImage} fill />
+          )}
+        </div>
+        <div className={classes.content}>
+          {showCategories && hasCategories && (
+            <div className={classes.leader}>
+              {showCategories && hasCategories && (
+                <div className={'text-xs'}>
+                  {categories?.map((category, index) => {
+                    if (typeof category === 'object' && category !== null) {
+                      const { title: titleFromCategory } = category
+
+                      const categoryTitle = titleFromCategory || ''
+
+                      const isLast = index === categories.length - 1
+
+                      return (
+                        <Fragment key={index}>
+                          {categoryTitle}
+                          {!isLast && <Fragment>, &nbsp;</Fragment>}
+                        </Fragment>
+                      )
+                    }
+
+                    return null
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+          {titleToUse && <h4 className={classes.title}>{titleToUse}</h4>}
+          {description && (
+            <div className={classes.body}>
+              {description && <p className={classes.description}>{sanitizedDescription}</p>}
+            </div>
+          )}
+          <div className={'mt-4 flex gap-2'}>
+            <Button>Book Now</Button>
+            <Button variant={'link'}>
+              Learn More &nbsp;
+              <MoveRightIcon strokeWidth={1} />
+            </Button>
+          </div>
+        </div>
+      </Link>
+    )
+  }
+
   return (
-    <div className={[classes.card, className].filter(Boolean).join(' ')}>
+    <div className={'grid'}>
       <Link href={href} className={classes.mediaWrapper}>
         {!metaImage && <div className={classes.placeholder}>No image</div>}
         {metaImage && typeof metaImage !== 'string' && (
@@ -113,7 +173,6 @@ export const Card: React.FC<{
             {description && <p className={classes.description}>{sanitizedDescription}</p>}
           </div>
         )}
-        {doc && <Price product={doc} />}
       </div>
     </div>
   )

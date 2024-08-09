@@ -44,6 +44,21 @@ export const Archive: Block = {
       ],
     },
     {
+      name: 'appearance',
+      type: 'select',
+      defaultValue: 'wide',
+      options: [
+        {
+          value: 'card',
+          label: 'Card',
+        },
+        {
+          value: 'wide',
+          label: 'Wide',
+        },
+      ]
+    },
+    {
       type: 'relationship',
       name: 'categories',
       label: 'Categories To Show',

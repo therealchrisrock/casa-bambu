@@ -20,7 +20,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
     "payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts payload",
-    "deploy": "pm2 restart yarn --name \"casa-bambu\" -- serve ecosystem.yml --env production"
+    "deploy": "pm2 restart ecosystem.config.js --env production"
   },
   "dependencies": {
     "@payloadcms/bundler-webpack": "^1.0.0",

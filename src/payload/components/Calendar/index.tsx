@@ -7,10 +7,10 @@ import { DefaultTemplate } from 'payload/components/templates'
 import { useConfig } from 'payload/components/utilities'
 
 import { Orders } from '../../collections/Orders'
+import { AppointmentModal } from './AppointmentModal'
 import { AppointmentProvider, useAppointments } from './providers/AppointmentsProvider'
 
 import './index.scss'
-import { AppointmentModal } from './AppointmentModal'
 
 export type EventData = {
   id: string
@@ -151,11 +151,10 @@ function formatEventData(e: any): EventData {
   }
 }
 
-function Calendar() {
+export const Calendar = () => {
   return (
     <AppointmentProvider>
       <CalendarView />
     </AppointmentProvider>
   )
 }
-export default Calendar

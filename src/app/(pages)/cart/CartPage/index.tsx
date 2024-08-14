@@ -123,6 +123,8 @@ export const CartPage: React.FC<{
                                 value={typeof quantity === 'number' ? quantity : ''}
                                 onChange={e => {
                                   addItemToCart({
+                                    startDate: '2022-01-06T05:00:00.000Z',
+                                    endDate: '2022-01-10T05:00:00.000Z',
                                     product,
                                     quantity: Number(e.target.value),
                                   })

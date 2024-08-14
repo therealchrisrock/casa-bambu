@@ -40,9 +40,15 @@ export const Button: React.FC<Props> = ({
   const className = [classes.button, classNameFromProps].filter(Boolean).join(' ')
   let variant = appearance === 'primary' ? 'default' : appearance
   const content = (
-    <ShadButton variant={variant} className={invert ? 'invert' : ''} disabled={disabled}>
-      {label}&nbsp;{variant === 'link' && <MoveRightIcon strokeWidth={1} />}
-    </ShadButton>
+    <>
+      {variant === 'none' ? (
+        <>{label}</>
+      ) : (
+        <ShadButton variant={variant} className={invert ? 'invert' : ''} disabled={disabled}>
+          {label}&nbsp;{variant === 'link' && <MoveRightIcon strokeWidth={1} />}
+        </ShadButton>
+      )}
+    </>
   )
 
   if (onClick || type === 'submit') el = 'button'
@@ -54,7 +60,11 @@ export const Button: React.FC<Props> = ({
       </Link>
     )
   }
-  return <ShadButton className={invert ? 'invert' : ''} disabled={disabled} variant={'default'}>{label}</ShadButton>
+  return (
+    <ShadButton className={invert ? 'invert' : ''} disabled={disabled} variant={'default'}>
+      {label}
+    </ShadButton>
+  )
 
   //
   // const Element: ElementType = el

@@ -19,14 +19,19 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "noEmitOnError": false,
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "react": ["./node_modules/@types/react"],
-      "@/*": ["./src/app/*"]
+      "react": [
+        "./node_modules/@types/react"
+      ],
+      "@/*": [
+        "./src/app/*"
+      ]
     }
   },
   "include": [

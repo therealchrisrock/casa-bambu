@@ -9,6 +9,7 @@ import { RelatedProducts, type RelatedProductsProps } from '../../_blocks/Relate
 import { toKebabCase } from '../../_utilities/toKebabCase'
 import { BackgroundColor } from '../BackgroundColor/index'
 import { VerticalPadding, VerticalPaddingOptions } from '../VerticalPadding/index'
+import { ReviewBlock } from '@/_blocks/ReviewBlock'
 
 const blockComponents = {
   cta: CallToActionBlock,
@@ -16,7 +17,7 @@ const blockComponents = {
   mediaBlock: MediaBlock,
   archive: ArchiveBlock,
   relatedProducts: RelatedProducts,
-  reviewBlock
+  reviewBlock: ReviewBlock
 }
 
 export const Blocks: React.FC<{

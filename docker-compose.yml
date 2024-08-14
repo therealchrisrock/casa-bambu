@@ -2,6 +2,9 @@ version: '3'
 
 services:
   payload:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: node:18-alpine
     ports:
       - '3000:3000'
@@ -11,6 +14,8 @@ services:
     working_dir: /home/node/app/
     command: sh -c "yarn install && yarn dev"
     depends_on:
+      - mongo
+    links:
       - mongo
     env_file:
       - .env

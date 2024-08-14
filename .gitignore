@@ -8,3 +8,4 @@ node_modules
 .vercel
 /.idea/vcs.xml
 appointments-plugin
+ecosystem.config.js

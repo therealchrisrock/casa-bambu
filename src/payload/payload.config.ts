@@ -110,9 +110,12 @@ export default buildConfig({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
   },
-  cors: ['https://checkout.stripe.com', process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(
-    Boolean,
-  ),
+  cors: [
+    'https://checkout.stripe.com',
+    'https://bambu.tilde.technology',
+    'http://localhost:3000',
+    process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
+  ].filter(Boolean),
   csrf: ['https://checkout.stripe.com', process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(
     Boolean,
   ),
@@ -125,7 +128,7 @@ export default buildConfig({
     {
       path: '/get-availability',
       method: 'get',
-      handler: getAvailability
+      handler: getAvailability,
     },
     {
       path: '/stripe/customers',

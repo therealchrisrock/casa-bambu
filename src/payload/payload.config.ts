@@ -12,6 +12,8 @@ import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload/config'
 
+import { Amenities } from './collections/Amenities'
+import { Bookings } from './collections/Bookings'
 import Categories from './collections/Categories'
 import { Media } from './collections/Media'
 import { Orders } from './collections/Orders'
@@ -23,6 +25,7 @@ import BeforeDashboard from './components/BeforeDashboard'
 import BeforeLogin from './components/BeforeLogin'
 import BeforeNavLinks from './components/BeforeNavLinks'
 import { Calendar } from './components/Calendar'
+import { createInvoice } from './endpoints/create-invoice'
 import { createPaymentIntent } from './endpoints/create-payment-intent'
 import { customersProxy } from './endpoints/customers'
 import { getAvailability } from './endpoints/get-availability'
@@ -81,6 +84,7 @@ export default buildConfig({
               mockModulePath,
             [path.resolve(__dirname, 'collections/Users/endpoints/customer')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/create-payment-intent')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/create-invoice')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/customers')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/products')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/get-availability')]: mockModulePath,
@@ -97,7 +101,7 @@ export default buildConfig({
     url: process.env.DATABASE_URI,
   }),
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
-  collections: [Pages, Products, Orders, Media, Categories, Users, Reviews],
+  collections: [Pages, Products, Orders, Media, Categories, Users, Reviews, Bookings, Amenities],
   upload: {
     limits: {
       fileSize: 10 * 1000000, // 10MB
@@ -126,6 +130,11 @@ export default buildConfig({
       handler: createPaymentIntent,
     },
     {
+      path: '/create-invoice',
+      method: 'post',
+      handler: createInvoice,
+    },
+    {
       path: '/get-availability',
       method: 'get',
       handler: getAvailability,
@@ -150,6 +159,16 @@ export default buildConfig({
   ],
   plugins: [
     formBuilder({
+      formSubmissionOverrides: {
+        admin: {
+          group: 'Ecommerce Data',
+        },
+      },
+      formOverrides: {
+        admin: {
+          group: 'Website Content',
+        },
+      },
       // ...
       fields: {
         text: true,
@@ -176,6 +195,11 @@ export default buildConfig({
       },
     }),
     redirects({
+      overrides: {
+        admin: {
+          group: 'Website Content'
+        }
+      },
       collections: ['pages', 'products'],
     }),
     nestedDocs({

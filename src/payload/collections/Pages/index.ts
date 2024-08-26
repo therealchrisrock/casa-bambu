@@ -15,6 +15,7 @@ import { ReviewBlock } from '../../blocks/ReviewBlock'
 export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
+    group: 'Website Content',
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'updatedAt'],
     preview: doc => {
@@ -75,7 +76,6 @@ export const Pages: CollectionConfig = {
             {
               name: 'layout',
               type: 'blocks',
-              required: true,
               blocks: [CallToAction, Content, MediaBlock, Archive, ReviewBlock],
             },
           ],

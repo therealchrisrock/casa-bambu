@@ -35,6 +35,14 @@ type Query {
   docAccessReview(id: String!): reviewsDocAccess
   versionReview(id: String): ReviewVersion
   versionsReviews(where: versionsReview_where, limit: Int, page: Int, sort: String): versionsReviews
+  Booking(id: String!): Booking
+  Bookings(where: Booking_where, limit: Int, page: Int, sort: String): Bookings
+  countBookings(where: Booking_where): countBookings
+  docAccessBooking(id: String!): bookingsDocAccess
+  Amenity(id: String!): Amenity
+  Amenities(where: Amenity_where, limit: Int, page: Int, sort: String): Amenities
+  countAmenities(where: Amenity_where): countAmenities
+  docAccessAmenity(id: String!): amenitiesDocAccess
   Form(id: String!): Form
   Forms(where: Form_where, limit: Int, page: Int, sort: String): Forms
   countForms(where: Form_where): countForms
@@ -65,7 +73,7 @@ type Page {
   title: String
   publishedOn: DateTime
   hero: Page_Hero
-  layout: [Page_Layout!]!
+  layout: [Page_Layout!]
   slug: String
   meta: Page_Meta
   updatedAt: DateTime
@@ -703,9 +711,19 @@ type Product {
   id: String
   title: String
   publishedOn: DateTime
+  available: Boolean
   gallery: [Product_Gallery!]
+  productDescription(depth: Int): JSON
+  amenities: [Product_Amenities!]
   layout: [Product_Layout!]!
   stripeProductID: String
+  bedroomQuantity: Float
+  bathQuantity: Float
+  maxGuestQuantity: Float
+  baseGuestQuantity: Float
+  stripeGuestFeeID: String
+  guestFeePriceJSON: String
+  variants: [Product_Variants!]
   priceJSON: String
   enablePaywall: Boolean
   paywall: [Product_Paywall!]
@@ -720,29 +738,29 @@ type Product {
 }
 
 type Product_Gallery {
-  image(where: Product_Gallery_Image_where): Media
+  media(where: Product_Gallery_Media_where): Media
   id: String
 }
 
-input Product_Gallery_Image_where {
-  alt: Product_Gallery_Image_alt_operator
-  caption: Product_Gallery_Image_caption_operator
-  updatedAt: Product_Gallery_Image_updatedAt_operator
-  createdAt: Product_Gallery_Image_createdAt_operator
-  url: Product_Gallery_Image_url_operator
-  filename: Product_Gallery_Image_filename_operator
-  mimeType: Product_Gallery_Image_mimeType_operator
-  filesize: Product_Gallery_Image_filesize_operator
-  width: Product_Gallery_Image_width_operator
-  height: Product_Gallery_Image_height_operator
-  focalX: Product_Gallery_Image_focalX_operator
-  focalY: Product_Gallery_Image_focalY_operator
-  id: Product_Gallery_Image_id_operator
-  AND: [Product_Gallery_Image_where_and]
-  OR: [Product_Gallery_Image_where_or]
+input Product_Gallery_Media_where {
+  alt: Product_Gallery_Media_alt_operator
+  caption: Product_Gallery_Media_caption_operator
+  updatedAt: Product_Gallery_Media_updatedAt_operator
+  createdAt: Product_Gallery_Media_createdAt_operator
+  url: Product_Gallery_Media_url_operator
+  filename: Product_Gallery_Media_filename_operator
+  mimeType: Product_Gallery_Media_mimeType_operator
+  filesize: Product_Gallery_Media_filesize_operator
+  width: Product_Gallery_Media_width_operator
+  height: Product_Gallery_Media_height_operator
+  focalX: Product_Gallery_Media_focalX_operator
+  focalY: Product_Gallery_Media_focalY_operator
+  id: Product_Gallery_Media_id_operator
+  AND: [Product_Gallery_Media_where_and]
+  OR: [Product_Gallery_Media_where_or]
 }
 
-input Product_Gallery_Image_alt_operator {
+input Product_Gallery_Media_alt_operator {
   equals: String
   not_equals: String
   like: String
@@ -753,7 +771,7 @@ input Product_Gallery_Image_alt_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_caption_operator {
+input Product_Gallery_Media_caption_operator {
   equals: JSON
   not_equals: JSON
   like: JSON
@@ -761,7 +779,7 @@ input Product_Gallery_Image_caption_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_updatedAt_operator {
+input Product_Gallery_Media_updatedAt_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -772,7 +790,7 @@ input Product_Gallery_Image_updatedAt_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_createdAt_operator {
+input Product_Gallery_Media_createdAt_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -783,7 +801,7 @@ input Product_Gallery_Image_createdAt_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_url_operator {
+input Product_Gallery_Media_url_operator {
   equals: String
   not_equals: String
   like: String
@@ -794,7 +812,7 @@ input Product_Gallery_Image_url_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_filename_operator {
+input Product_Gallery_Media_filename_operator {
   equals: String
   not_equals: String
   like: String
@@ -805,7 +823,7 @@ input Product_Gallery_Image_filename_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_mimeType_operator {
+input Product_Gallery_Media_mimeType_operator {
   equals: String
   not_equals: String
   like: String
@@ -816,7 +834,7 @@ input Product_Gallery_Image_mimeType_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_filesize_operator {
+input Product_Gallery_Media_filesize_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -826,7 +844,7 @@ input Product_Gallery_Image_filesize_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_width_operator {
+input Product_Gallery_Media_width_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -836,7 +854,7 @@ input Product_Gallery_Image_width_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_height_operator {
+input Product_Gallery_Media_height_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -846,7 +864,7 @@ input Product_Gallery_Image_height_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_focalX_operator {
+input Product_Gallery_Media_focalX_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -856,7 +874,7 @@ input Product_Gallery_Image_focalX_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_focalY_operator {
+input Product_Gallery_Media_focalY_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -866,7 +884,7 @@ input Product_Gallery_Image_focalY_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_id_operator {
+input Product_Gallery_Media_id_operator {
   equals: String
   not_equals: String
   like: String
@@ -877,43 +895,64 @@ input Product_Gallery_Image_id_operator {
   exists: Boolean
 }
 
-input Product_Gallery_Image_where_and {
-  alt: Product_Gallery_Image_alt_operator
-  caption: Product_Gallery_Image_caption_operator
-  updatedAt: Product_Gallery_Image_updatedAt_operator
-  createdAt: Product_Gallery_Image_createdAt_operator
-  url: Product_Gallery_Image_url_operator
-  filename: Product_Gallery_Image_filename_operator
-  mimeType: Product_Gallery_Image_mimeType_operator
-  filesize: Product_Gallery_Image_filesize_operator
-  width: Product_Gallery_Image_width_operator
-  height: Product_Gallery_Image_height_operator
-  focalX: Product_Gallery_Image_focalX_operator
-  focalY: Product_Gallery_Image_focalY_operator
-  id: Product_Gallery_Image_id_operator
-  AND: [Product_Gallery_Image_where_and]
-  OR: [Product_Gallery_Image_where_or]
+input Product_Gallery_Media_where_and {
+  alt: Product_Gallery_Media_alt_operator
+  caption: Product_Gallery_Media_caption_operator
+  updatedAt: Product_Gallery_Media_updatedAt_operator
+  createdAt: Product_Gallery_Media_createdAt_operator
+  url: Product_Gallery_Media_url_operator
+  filename: Product_Gallery_Media_filename_operator
+  mimeType: Product_Gallery_Media_mimeType_operator
+  filesize: Product_Gallery_Media_filesize_operator
+  width: Product_Gallery_Media_width_operator
+  height: Product_Gallery_Media_height_operator
+  focalX: Product_Gallery_Media_focalX_operator
+  focalY: Product_Gallery_Media_focalY_operator
+  id: Product_Gallery_Media_id_operator
+  AND: [Product_Gallery_Media_where_and]
+  OR: [Product_Gallery_Media_where_or]
 }
 
-input Product_Gallery_Image_where_or {
-  alt: Product_Gallery_Image_alt_operator
-  caption: Product_Gallery_Image_caption_operator
-  updatedAt: Product_Gallery_Image_updatedAt_operator
-  createdAt: Product_Gallery_Image_createdAt_operator
-  url: Product_Gallery_Image_url_operator
-  filename: Product_Gallery_Image_filename_operator
-  mimeType: Product_Gallery_Image_mimeType_operator
-  filesize: Product_Gallery_Image_filesize_operator
-  width: Product_Gallery_Image_width_operator
-  height: Product_Gallery_Image_height_operator
-  focalX: Product_Gallery_Image_focalX_operator
-  focalY: Product_Gallery_Image_focalY_operator
-  id: Product_Gallery_Image_id_operator
-  AND: [Product_Gallery_Image_where_and]
-  OR: [Product_Gallery_Image_where_or]
+input Product_Gallery_Media_where_or {
+  alt: Product_Gallery_Media_alt_operator
+  caption: Product_Gallery_Media_caption_operator
+  updatedAt: Product_Gallery_Media_updatedAt_operator
+  createdAt: Product_Gallery_Media_createdAt_operator
+  url: Product_Gallery_Media_url_operator
+  filename: Product_Gallery_Media_filename_operator
+  mimeType: Product_Gallery_Media_mimeType_operator
+  filesize: Product_Gallery_Media_filesize_operator
+  width: Product_Gallery_Media_width_operator
+  height: Product_Gallery_Media_height_operator
+  focalX: Product_Gallery_Media_focalX_operator
+  focalY: Product_Gallery_Media_focalY_operator
+  id: Product_Gallery_Media_id_operator
+  AND: [Product_Gallery_Media_where_and]
+  OR: [Product_Gallery_Media_where_or]
+}
+
+type Product_Amenities {
+  amenity: Amenity
+  id: String
+}
+
+type Amenity {
+  id: String
+  title: String!
+  media: Media!
+  updatedAt: DateTime
+  createdAt: DateTime
 }
 
 union Product_Layout = Cta | Content | MediaBlock | Archive
+
+type Product_Variants {
+  stripeVariantProductID: String
+  priceJSON: String
+  seasonStart: DateTime
+  seasonEnd: DateTime
+  id: String
+}
 
 union Product_Paywall = Cta | Content | MediaBlock | Archive
 
@@ -1175,14 +1214,15 @@ enum User_roles {
 }
 
 type User_Cart {
+  headProduct(draft: Boolean): Product
+  startDate: DateTime
+  endDate: DateTime
   items: [CartItems!]
 }
 
 type CartItems {
   product(draft: Boolean): Product
   quantity: Float
-  startDate: DateTime
-  endDate: DateTime
   id: String
 }
 
@@ -2532,7 +2572,7 @@ type PageVersion_Version {
   title: String
   publishedOn: DateTime
   hero: PageVersion_Version_Hero
-  layout: [PageVersion_Version_Layout!]!
+  layout: [PageVersion_Version_Layout!]
   slug: String
   meta: PageVersion_Version_Meta
   updatedAt: DateTime
@@ -3344,9 +3384,24 @@ type Products {
 input Product_where {
   title: Product_title_operator
   publishedOn: Product_publishedOn_operator
-  gallery__image: Product_gallery__image_operator
+  available: Product_available_operator
+  gallery__media: Product_gallery__media_operator
   gallery__id: Product_gallery__id_operator
+  productDescription: Product_productDescription_operator
+  amenities__amenity: Product_amenities__amenity_operator
+  amenities__id: Product_amenities__id_operator
   stripeProductID: Product_stripeProductID_operator
+  bedroomQuantity: Product_bedroomQuantity_operator
+  bathQuantity: Product_bathQuantity_operator
+  maxGuestQuantity: Product_maxGuestQuantity_operator
+  baseGuestQuantity: Product_baseGuestQuantity_operator
+  stripeGuestFeeID: Product_stripeGuestFeeID_operator
+  guestFeePriceJSON: Product_guestFeePriceJSON_operator
+  variants__stripeVariantProductID: Product_variants__stripeVariantProductID_operator
+  variants__priceJSON: Product_variants__priceJSON_operator
+  variants__seasonStart: Product_variants__seasonStart_operator
+  variants__seasonEnd: Product_variants__seasonEnd_operator
+  variants__id: Product_variants__id_operator
   priceJSON: Product_priceJSON_operator
   enablePaywall: Product_enablePaywall_operator
   categories: Product_categories_operator
@@ -3385,7 +3440,13 @@ input Product_publishedOn_operator {
   exists: Boolean
 }
 
-input Product_gallery__image_operator {
+input Product_available_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
+input Product_gallery__media_operator {
   equals: String
   not_equals: String
 }
@@ -3401,7 +3462,138 @@ input Product_gallery__id_operator {
   exists: Boolean
 }
 
+input Product_productDescription_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+}
+
+input Product_amenities__amenity_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input Product_amenities__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input Product_stripeProductID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Product_bedroomQuantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+}
+
+input Product_bathQuantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+}
+
+input Product_maxGuestQuantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+}
+
+input Product_baseGuestQuantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+}
+
+input Product_stripeGuestFeeID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Product_guestFeePriceJSON_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
+}
+
+input Product_variants__stripeVariantProductID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input Product_variants__priceJSON_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
+}
+
+input Product_variants__seasonStart_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+}
+
+input Product_variants__seasonEnd_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+}
+
+input Product_variants__id_operator {
   equals: String
   not_equals: String
   like: String
@@ -3536,9 +3728,24 @@ input Product_id_operator {
 input Product_where_and {
   title: Product_title_operator
   publishedOn: Product_publishedOn_operator
-  gallery__image: Product_gallery__image_operator
+  available: Product_available_operator
+  gallery__media: Product_gallery__media_operator
   gallery__id: Product_gallery__id_operator
+  productDescription: Product_productDescription_operator
+  amenities__amenity: Product_amenities__amenity_operator
+  amenities__id: Product_amenities__id_operator
   stripeProductID: Product_stripeProductID_operator
+  bedroomQuantity: Product_bedroomQuantity_operator
+  bathQuantity: Product_bathQuantity_operator
+  maxGuestQuantity: Product_maxGuestQuantity_operator
+  baseGuestQuantity: Product_baseGuestQuantity_operator
+  stripeGuestFeeID: Product_stripeGuestFeeID_operator
+  guestFeePriceJSON: Product_guestFeePriceJSON_operator
+  variants__stripeVariantProductID: Product_variants__stripeVariantProductID_operator
+  variants__priceJSON: Product_variants__priceJSON_operator
+  variants__seasonStart: Product_variants__seasonStart_operator
+  variants__seasonEnd: Product_variants__seasonEnd_operator
+  variants__id: Product_variants__id_operator
   priceJSON: Product_priceJSON_operator
   enablePaywall: Product_enablePaywall_operator
   categories: Product_categories_operator
@@ -3559,9 +3766,24 @@ input Product_where_and {
 input Product_where_or {
   title: Product_title_operator
   publishedOn: Product_publishedOn_operator
-  gallery__image: Product_gallery__image_operator
+  available: Product_available_operator
+  gallery__media: Product_gallery__media_operator
   gallery__id: Product_gallery__id_operator
+  productDescription: Product_productDescription_operator
+  amenities__amenity: Product_amenities__amenity_operator
+  amenities__id: Product_amenities__id_operator
   stripeProductID: Product_stripeProductID_operator
+  bedroomQuantity: Product_bedroomQuantity_operator
+  bathQuantity: Product_bathQuantity_operator
+  maxGuestQuantity: Product_maxGuestQuantity_operator
+  baseGuestQuantity: Product_baseGuestQuantity_operator
+  stripeGuestFeeID: Product_stripeGuestFeeID_operator
+  guestFeePriceJSON: Product_guestFeePriceJSON_operator
+  variants__stripeVariantProductID: Product_variants__stripeVariantProductID_operator
+  variants__priceJSON: Product_variants__priceJSON_operator
+  variants__seasonStart: Product_variants__seasonStart_operator
+  variants__seasonEnd: Product_variants__seasonEnd_operator
+  variants__id: Product_variants__id_operator
   priceJSON: Product_priceJSON_operator
   enablePaywall: Product_enablePaywall_operator
   categories: Product_categories_operator
@@ -3595,9 +3817,19 @@ type productsDocAccess {
 type ProductsDocAccessFields {
   title: ProductsDocAccessFields_title
   publishedOn: ProductsDocAccessFields_publishedOn
+  available: ProductsDocAccessFields_available
   gallery: ProductsDocAccessFields_gallery
+  productDescription: ProductsDocAccessFields_productDescription
+  amenities: ProductsDocAccessFields_amenities
   layout: ProductsDocAccessFields_layout
   stripeProductID: ProductsDocAccessFields_stripeProductID
+  bedroomQuantity: ProductsDocAccessFields_bedroomQuantity
+  bathQuantity: ProductsDocAccessFields_bathQuantity
+  maxGuestQuantity: ProductsDocAccessFields_maxGuestQuantity
+  baseGuestQuantity: ProductsDocAccessFields_baseGuestQuantity
+  stripeGuestFeeID: ProductsDocAccessFields_stripeGuestFeeID
+  guestFeePriceJSON: ProductsDocAccessFields_guestFeePriceJSON
+  variants: ProductsDocAccessFields_variants
   priceJSON: ProductsDocAccessFields_priceJSON
   enablePaywall: ProductsDocAccessFields_enablePaywall
   paywall: ProductsDocAccessFields_paywall
@@ -3657,6 +3889,29 @@ type ProductsDocAccessFields_publishedOn_Delete {
   permission: Boolean!
 }
 
+type ProductsDocAccessFields_available {
+  create: ProductsDocAccessFields_available_Create
+  read: ProductsDocAccessFields_available_Read
+  update: ProductsDocAccessFields_available_Update
+  delete: ProductsDocAccessFields_available_Delete
+}
+
+type ProductsDocAccessFields_available_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_available_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_available_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_available_Delete {
+  permission: Boolean!
+}
+
 type ProductsDocAccessFields_gallery {
   create: ProductsDocAccessFields_gallery_Create
   read: ProductsDocAccessFields_gallery_Read
@@ -3682,30 +3937,30 @@ type ProductsDocAccessFields_gallery_Delete {
 }
 
 type ProductsDocAccessFields_gallery_Fields {
-  image: ProductsDocAccessFields_gallery_image
+  media: ProductsDocAccessFields_gallery_media
   id: ProductsDocAccessFields_gallery_id
 }
 
-type ProductsDocAccessFields_gallery_image {
-  create: ProductsDocAccessFields_gallery_image_Create
-  read: ProductsDocAccessFields_gallery_image_Read
-  update: ProductsDocAccessFields_gallery_image_Update
-  delete: ProductsDocAccessFields_gallery_image_Delete
+type ProductsDocAccessFields_gallery_media {
+  create: ProductsDocAccessFields_gallery_media_Create
+  read: ProductsDocAccessFields_gallery_media_Read
+  update: ProductsDocAccessFields_gallery_media_Update
+  delete: ProductsDocAccessFields_gallery_media_Delete
 }
 
-type ProductsDocAccessFields_gallery_image_Create {
+type ProductsDocAccessFields_gallery_media_Create {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_gallery_image_Read {
+type ProductsDocAccessFields_gallery_media_Read {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_gallery_image_Update {
+type ProductsDocAccessFields_gallery_media_Update {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_gallery_image_Delete {
+type ProductsDocAccessFields_gallery_media_Delete {
   permission: Boolean!
 }
 
@@ -3729,6 +3984,104 @@ type ProductsDocAccessFields_gallery_id_Update {
 }
 
 type ProductsDocAccessFields_gallery_id_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_productDescription {
+  create: ProductsDocAccessFields_productDescription_Create
+  read: ProductsDocAccessFields_productDescription_Read
+  update: ProductsDocAccessFields_productDescription_Update
+  delete: ProductsDocAccessFields_productDescription_Delete
+}
+
+type ProductsDocAccessFields_productDescription_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_productDescription_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_productDescription_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_productDescription_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities {
+  create: ProductsDocAccessFields_amenities_Create
+  read: ProductsDocAccessFields_amenities_Read
+  update: ProductsDocAccessFields_amenities_Update
+  delete: ProductsDocAccessFields_amenities_Delete
+  fields: ProductsDocAccessFields_amenities_Fields
+}
+
+type ProductsDocAccessFields_amenities_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities_Fields {
+  amenity: ProductsDocAccessFields_amenities_amenity
+  id: ProductsDocAccessFields_amenities_id
+}
+
+type ProductsDocAccessFields_amenities_amenity {
+  create: ProductsDocAccessFields_amenities_amenity_Create
+  read: ProductsDocAccessFields_amenities_amenity_Read
+  update: ProductsDocAccessFields_amenities_amenity_Update
+  delete: ProductsDocAccessFields_amenities_amenity_Delete
+}
+
+type ProductsDocAccessFields_amenities_amenity_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities_amenity_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities_amenity_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities_amenity_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities_id {
+  create: ProductsDocAccessFields_amenities_id_Create
+  read: ProductsDocAccessFields_amenities_id_Read
+  update: ProductsDocAccessFields_amenities_id_Update
+  delete: ProductsDocAccessFields_amenities_id_Delete
+}
+
+type ProductsDocAccessFields_amenities_id_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities_id_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities_id_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_amenities_id_Delete {
   permission: Boolean!
 }
 
@@ -3775,6 +4128,291 @@ type ProductsDocAccessFields_stripeProductID_Update {
 }
 
 type ProductsDocAccessFields_stripeProductID_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_bedroomQuantity {
+  create: ProductsDocAccessFields_bedroomQuantity_Create
+  read: ProductsDocAccessFields_bedroomQuantity_Read
+  update: ProductsDocAccessFields_bedroomQuantity_Update
+  delete: ProductsDocAccessFields_bedroomQuantity_Delete
+}
+
+type ProductsDocAccessFields_bedroomQuantity_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_bedroomQuantity_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_bedroomQuantity_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_bedroomQuantity_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_bathQuantity {
+  create: ProductsDocAccessFields_bathQuantity_Create
+  read: ProductsDocAccessFields_bathQuantity_Read
+  update: ProductsDocAccessFields_bathQuantity_Update
+  delete: ProductsDocAccessFields_bathQuantity_Delete
+}
+
+type ProductsDocAccessFields_bathQuantity_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_bathQuantity_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_bathQuantity_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_bathQuantity_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_maxGuestQuantity {
+  create: ProductsDocAccessFields_maxGuestQuantity_Create
+  read: ProductsDocAccessFields_maxGuestQuantity_Read
+  update: ProductsDocAccessFields_maxGuestQuantity_Update
+  delete: ProductsDocAccessFields_maxGuestQuantity_Delete
+}
+
+type ProductsDocAccessFields_maxGuestQuantity_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_maxGuestQuantity_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_maxGuestQuantity_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_maxGuestQuantity_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_baseGuestQuantity {
+  create: ProductsDocAccessFields_baseGuestQuantity_Create
+  read: ProductsDocAccessFields_baseGuestQuantity_Read
+  update: ProductsDocAccessFields_baseGuestQuantity_Update
+  delete: ProductsDocAccessFields_baseGuestQuantity_Delete
+}
+
+type ProductsDocAccessFields_baseGuestQuantity_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_baseGuestQuantity_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_baseGuestQuantity_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_baseGuestQuantity_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_stripeGuestFeeID {
+  create: ProductsDocAccessFields_stripeGuestFeeID_Create
+  read: ProductsDocAccessFields_stripeGuestFeeID_Read
+  update: ProductsDocAccessFields_stripeGuestFeeID_Update
+  delete: ProductsDocAccessFields_stripeGuestFeeID_Delete
+}
+
+type ProductsDocAccessFields_stripeGuestFeeID_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_stripeGuestFeeID_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_stripeGuestFeeID_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_stripeGuestFeeID_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_guestFeePriceJSON {
+  create: ProductsDocAccessFields_guestFeePriceJSON_Create
+  read: ProductsDocAccessFields_guestFeePriceJSON_Read
+  update: ProductsDocAccessFields_guestFeePriceJSON_Update
+  delete: ProductsDocAccessFields_guestFeePriceJSON_Delete
+}
+
+type ProductsDocAccessFields_guestFeePriceJSON_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_guestFeePriceJSON_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_guestFeePriceJSON_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_guestFeePriceJSON_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants {
+  create: ProductsDocAccessFields_variants_Create
+  read: ProductsDocAccessFields_variants_Read
+  update: ProductsDocAccessFields_variants_Update
+  delete: ProductsDocAccessFields_variants_Delete
+  fields: ProductsDocAccessFields_variants_Fields
+}
+
+type ProductsDocAccessFields_variants_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_Fields {
+  stripeVariantProductID: ProductsDocAccessFields_variants_stripeVariantProductID
+  priceJSON: ProductsDocAccessFields_variants_priceJSON
+  seasonStart: ProductsDocAccessFields_variants_seasonStart
+  seasonEnd: ProductsDocAccessFields_variants_seasonEnd
+  id: ProductsDocAccessFields_variants_id
+}
+
+type ProductsDocAccessFields_variants_stripeVariantProductID {
+  create: ProductsDocAccessFields_variants_stripeVariantProductID_Create
+  read: ProductsDocAccessFields_variants_stripeVariantProductID_Read
+  update: ProductsDocAccessFields_variants_stripeVariantProductID_Update
+  delete: ProductsDocAccessFields_variants_stripeVariantProductID_Delete
+}
+
+type ProductsDocAccessFields_variants_stripeVariantProductID_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_stripeVariantProductID_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_stripeVariantProductID_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_stripeVariantProductID_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_priceJSON {
+  create: ProductsDocAccessFields_variants_priceJSON_Create
+  read: ProductsDocAccessFields_variants_priceJSON_Read
+  update: ProductsDocAccessFields_variants_priceJSON_Update
+  delete: ProductsDocAccessFields_variants_priceJSON_Delete
+}
+
+type ProductsDocAccessFields_variants_priceJSON_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_priceJSON_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_priceJSON_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_priceJSON_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_seasonStart {
+  create: ProductsDocAccessFields_variants_seasonStart_Create
+  read: ProductsDocAccessFields_variants_seasonStart_Read
+  update: ProductsDocAccessFields_variants_seasonStart_Update
+  delete: ProductsDocAccessFields_variants_seasonStart_Delete
+}
+
+type ProductsDocAccessFields_variants_seasonStart_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_seasonStart_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_seasonStart_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_seasonStart_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_seasonEnd {
+  create: ProductsDocAccessFields_variants_seasonEnd_Create
+  read: ProductsDocAccessFields_variants_seasonEnd_Read
+  update: ProductsDocAccessFields_variants_seasonEnd_Update
+  delete: ProductsDocAccessFields_variants_seasonEnd_Delete
+}
+
+type ProductsDocAccessFields_variants_seasonEnd_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_seasonEnd_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_seasonEnd_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_seasonEnd_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_id {
+  create: ProductsDocAccessFields_variants_id_Create
+  read: ProductsDocAccessFields_variants_id_Read
+  update: ProductsDocAccessFields_variants_id_Update
+  delete: ProductsDocAccessFields_variants_id_Delete
+}
+
+type ProductsDocAccessFields_variants_id_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_id_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_id_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_variants_id_Delete {
   permission: Boolean!
 }
 
@@ -4144,9 +4782,19 @@ type ProductVersion {
 type ProductVersion_Version {
   title: String
   publishedOn: DateTime
+  available: Boolean
   gallery: [ProductVersion_Version_Gallery!]
+  productDescription(depth: Int): JSON
+  amenities: [ProductVersion_Version_Amenities!]
   layout: [ProductVersion_Version_Layout!]!
   stripeProductID: String
+  bedroomQuantity: Float
+  bathQuantity: Float
+  maxGuestQuantity: Float
+  baseGuestQuantity: Float
+  stripeGuestFeeID: String
+  guestFeePriceJSON: String
+  variants: [ProductVersion_Version_Variants!]
   priceJSON: String
   enablePaywall: Boolean
   paywall: [ProductVersion_Version_Paywall!]
@@ -4161,29 +4809,29 @@ type ProductVersion_Version {
 }
 
 type ProductVersion_Version_Gallery {
-  image(where: ProductVersion_Version_Gallery_Image_where): Media
+  media(where: ProductVersion_Version_Gallery_Media_where): Media
   id: String
 }
 
-input ProductVersion_Version_Gallery_Image_where {
-  alt: ProductVersion_Version_Gallery_Image_alt_operator
-  caption: ProductVersion_Version_Gallery_Image_caption_operator
-  updatedAt: ProductVersion_Version_Gallery_Image_updatedAt_operator
-  createdAt: ProductVersion_Version_Gallery_Image_createdAt_operator
-  url: ProductVersion_Version_Gallery_Image_url_operator
-  filename: ProductVersion_Version_Gallery_Image_filename_operator
-  mimeType: ProductVersion_Version_Gallery_Image_mimeType_operator
-  filesize: ProductVersion_Version_Gallery_Image_filesize_operator
-  width: ProductVersion_Version_Gallery_Image_width_operator
-  height: ProductVersion_Version_Gallery_Image_height_operator
-  focalX: ProductVersion_Version_Gallery_Image_focalX_operator
-  focalY: ProductVersion_Version_Gallery_Image_focalY_operator
-  id: ProductVersion_Version_Gallery_Image_id_operator
-  AND: [ProductVersion_Version_Gallery_Image_where_and]
-  OR: [ProductVersion_Version_Gallery_Image_where_or]
+input ProductVersion_Version_Gallery_Media_where {
+  alt: ProductVersion_Version_Gallery_Media_alt_operator
+  caption: ProductVersion_Version_Gallery_Media_caption_operator
+  updatedAt: ProductVersion_Version_Gallery_Media_updatedAt_operator
+  createdAt: ProductVersion_Version_Gallery_Media_createdAt_operator
+  url: ProductVersion_Version_Gallery_Media_url_operator
+  filename: ProductVersion_Version_Gallery_Media_filename_operator
+  mimeType: ProductVersion_Version_Gallery_Media_mimeType_operator
+  filesize: ProductVersion_Version_Gallery_Media_filesize_operator
+  width: ProductVersion_Version_Gallery_Media_width_operator
+  height: ProductVersion_Version_Gallery_Media_height_operator
+  focalX: ProductVersion_Version_Gallery_Media_focalX_operator
+  focalY: ProductVersion_Version_Gallery_Media_focalY_operator
+  id: ProductVersion_Version_Gallery_Media_id_operator
+  AND: [ProductVersion_Version_Gallery_Media_where_and]
+  OR: [ProductVersion_Version_Gallery_Media_where_or]
 }
 
-input ProductVersion_Version_Gallery_Image_alt_operator {
+input ProductVersion_Version_Gallery_Media_alt_operator {
   equals: String
   not_equals: String
   like: String
@@ -4194,7 +4842,7 @@ input ProductVersion_Version_Gallery_Image_alt_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_caption_operator {
+input ProductVersion_Version_Gallery_Media_caption_operator {
   equals: JSON
   not_equals: JSON
   like: JSON
@@ -4202,7 +4850,7 @@ input ProductVersion_Version_Gallery_Image_caption_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_updatedAt_operator {
+input ProductVersion_Version_Gallery_Media_updatedAt_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -4213,7 +4861,7 @@ input ProductVersion_Version_Gallery_Image_updatedAt_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_createdAt_operator {
+input ProductVersion_Version_Gallery_Media_createdAt_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -4224,7 +4872,7 @@ input ProductVersion_Version_Gallery_Image_createdAt_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_url_operator {
+input ProductVersion_Version_Gallery_Media_url_operator {
   equals: String
   not_equals: String
   like: String
@@ -4235,7 +4883,7 @@ input ProductVersion_Version_Gallery_Image_url_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_filename_operator {
+input ProductVersion_Version_Gallery_Media_filename_operator {
   equals: String
   not_equals: String
   like: String
@@ -4246,7 +4894,7 @@ input ProductVersion_Version_Gallery_Image_filename_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_mimeType_operator {
+input ProductVersion_Version_Gallery_Media_mimeType_operator {
   equals: String
   not_equals: String
   like: String
@@ -4257,7 +4905,7 @@ input ProductVersion_Version_Gallery_Image_mimeType_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_filesize_operator {
+input ProductVersion_Version_Gallery_Media_filesize_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -4267,7 +4915,7 @@ input ProductVersion_Version_Gallery_Image_filesize_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_width_operator {
+input ProductVersion_Version_Gallery_Media_width_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -4277,7 +4925,7 @@ input ProductVersion_Version_Gallery_Image_width_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_height_operator {
+input ProductVersion_Version_Gallery_Media_height_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -4287,7 +4935,7 @@ input ProductVersion_Version_Gallery_Image_height_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_focalX_operator {
+input ProductVersion_Version_Gallery_Media_focalX_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -4297,7 +4945,7 @@ input ProductVersion_Version_Gallery_Image_focalX_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_focalY_operator {
+input ProductVersion_Version_Gallery_Media_focalY_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -4307,7 +4955,7 @@ input ProductVersion_Version_Gallery_Image_focalY_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_id_operator {
+input ProductVersion_Version_Gallery_Media_id_operator {
   equals: String
   not_equals: String
   like: String
@@ -4318,43 +4966,56 @@ input ProductVersion_Version_Gallery_Image_id_operator {
   exists: Boolean
 }
 
-input ProductVersion_Version_Gallery_Image_where_and {
-  alt: ProductVersion_Version_Gallery_Image_alt_operator
-  caption: ProductVersion_Version_Gallery_Image_caption_operator
-  updatedAt: ProductVersion_Version_Gallery_Image_updatedAt_operator
-  createdAt: ProductVersion_Version_Gallery_Image_createdAt_operator
-  url: ProductVersion_Version_Gallery_Image_url_operator
-  filename: ProductVersion_Version_Gallery_Image_filename_operator
-  mimeType: ProductVersion_Version_Gallery_Image_mimeType_operator
-  filesize: ProductVersion_Version_Gallery_Image_filesize_operator
-  width: ProductVersion_Version_Gallery_Image_width_operator
-  height: ProductVersion_Version_Gallery_Image_height_operator
-  focalX: ProductVersion_Version_Gallery_Image_focalX_operator
-  focalY: ProductVersion_Version_Gallery_Image_focalY_operator
-  id: ProductVersion_Version_Gallery_Image_id_operator
-  AND: [ProductVersion_Version_Gallery_Image_where_and]
-  OR: [ProductVersion_Version_Gallery_Image_where_or]
+input ProductVersion_Version_Gallery_Media_where_and {
+  alt: ProductVersion_Version_Gallery_Media_alt_operator
+  caption: ProductVersion_Version_Gallery_Media_caption_operator
+  updatedAt: ProductVersion_Version_Gallery_Media_updatedAt_operator
+  createdAt: ProductVersion_Version_Gallery_Media_createdAt_operator
+  url: ProductVersion_Version_Gallery_Media_url_operator
+  filename: ProductVersion_Version_Gallery_Media_filename_operator
+  mimeType: ProductVersion_Version_Gallery_Media_mimeType_operator
+  filesize: ProductVersion_Version_Gallery_Media_filesize_operator
+  width: ProductVersion_Version_Gallery_Media_width_operator
+  height: ProductVersion_Version_Gallery_Media_height_operator
+  focalX: ProductVersion_Version_Gallery_Media_focalX_operator
+  focalY: ProductVersion_Version_Gallery_Media_focalY_operator
+  id: ProductVersion_Version_Gallery_Media_id_operator
+  AND: [ProductVersion_Version_Gallery_Media_where_and]
+  OR: [ProductVersion_Version_Gallery_Media_where_or]
 }
 
-input ProductVersion_Version_Gallery_Image_where_or {
-  alt: ProductVersion_Version_Gallery_Image_alt_operator
-  caption: ProductVersion_Version_Gallery_Image_caption_operator
-  updatedAt: ProductVersion_Version_Gallery_Image_updatedAt_operator
-  createdAt: ProductVersion_Version_Gallery_Image_createdAt_operator
-  url: ProductVersion_Version_Gallery_Image_url_operator
-  filename: ProductVersion_Version_Gallery_Image_filename_operator
-  mimeType: ProductVersion_Version_Gallery_Image_mimeType_operator
-  filesize: ProductVersion_Version_Gallery_Image_filesize_operator
-  width: ProductVersion_Version_Gallery_Image_width_operator
-  height: ProductVersion_Version_Gallery_Image_height_operator
-  focalX: ProductVersion_Version_Gallery_Image_focalX_operator
-  focalY: ProductVersion_Version_Gallery_Image_focalY_operator
-  id: ProductVersion_Version_Gallery_Image_id_operator
-  AND: [ProductVersion_Version_Gallery_Image_where_and]
-  OR: [ProductVersion_Version_Gallery_Image_where_or]
+input ProductVersion_Version_Gallery_Media_where_or {
+  alt: ProductVersion_Version_Gallery_Media_alt_operator
+  caption: ProductVersion_Version_Gallery_Media_caption_operator
+  updatedAt: ProductVersion_Version_Gallery_Media_updatedAt_operator
+  createdAt: ProductVersion_Version_Gallery_Media_createdAt_operator
+  url: ProductVersion_Version_Gallery_Media_url_operator
+  filename: ProductVersion_Version_Gallery_Media_filename_operator
+  mimeType: ProductVersion_Version_Gallery_Media_mimeType_operator
+  filesize: ProductVersion_Version_Gallery_Media_filesize_operator
+  width: ProductVersion_Version_Gallery_Media_width_operator
+  height: ProductVersion_Version_Gallery_Media_height_operator
+  focalX: ProductVersion_Version_Gallery_Media_focalX_operator
+  focalY: ProductVersion_Version_Gallery_Media_focalY_operator
+  id: ProductVersion_Version_Gallery_Media_id_operator
+  AND: [ProductVersion_Version_Gallery_Media_where_and]
+  OR: [ProductVersion_Version_Gallery_Media_where_or]
+}
+
+type ProductVersion_Version_Amenities {
+  amenity: Amenity
+  id: String
 }
 
 union ProductVersion_Version_Layout = Cta | Content | MediaBlock | Archive
+
+type ProductVersion_Version_Variants {
+  stripeVariantProductID: String
+  priceJSON: String
+  seasonStart: DateTime
+  seasonEnd: DateTime
+  id: String
+}
 
 union ProductVersion_Version_Paywall = Cta | Content | MediaBlock | Archive
 
@@ -4576,9 +5237,24 @@ input versionsProduct_where {
   parent: versionsProduct_parent_operator
   version__title: versionsProduct_version__title_operator
   version__publishedOn: versionsProduct_version__publishedOn_operator
-  version__gallery__image: versionsProduct_version__gallery__image_operator
+  version__available: versionsProduct_version__available_operator
+  version__gallery__media: versionsProduct_version__gallery__media_operator
   version__gallery__id: versionsProduct_version__gallery__id_operator
+  version__productDescription: versionsProduct_version__productDescription_operator
+  version__amenities__amenity: versionsProduct_version__amenities__amenity_operator
+  version__amenities__id: versionsProduct_version__amenities__id_operator
   version__stripeProductID: versionsProduct_version__stripeProductID_operator
+  version__bedroomQuantity: versionsProduct_version__bedroomQuantity_operator
+  version__bathQuantity: versionsProduct_version__bathQuantity_operator
+  version__maxGuestQuantity: versionsProduct_version__maxGuestQuantity_operator
+  version__baseGuestQuantity: versionsProduct_version__baseGuestQuantity_operator
+  version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
+  version__guestFeePriceJSON: versionsProduct_version__guestFeePriceJSON_operator
+  version__variants__stripeVariantProductID: versionsProduct_version__variants__stripeVariantProductID_operator
+  version__variants__priceJSON: versionsProduct_version__variants__priceJSON_operator
+  version__variants__seasonStart: versionsProduct_version__variants__seasonStart_operator
+  version__variants__seasonEnd: versionsProduct_version__variants__seasonEnd_operator
+  version__variants__id: versionsProduct_version__variants__id_operator
   version__priceJSON: versionsProduct_version__priceJSON_operator
   version__enablePaywall: versionsProduct_version__enablePaywall_operator
   version__categories: versionsProduct_version__categories_operator
@@ -4629,7 +5305,13 @@ input versionsProduct_version__publishedOn_operator {
   exists: Boolean
 }
 
-input versionsProduct_version__gallery__image_operator {
+input versionsProduct_version__available_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
+input versionsProduct_version__gallery__media_operator {
   equals: String
   not_equals: String
 }
@@ -4645,7 +5327,138 @@ input versionsProduct_version__gallery__id_operator {
   exists: Boolean
 }
 
+input versionsProduct_version__productDescription_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+}
+
+input versionsProduct_version__amenities__amenity_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input versionsProduct_version__amenities__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input versionsProduct_version__stripeProductID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsProduct_version__bedroomQuantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+}
+
+input versionsProduct_version__bathQuantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+}
+
+input versionsProduct_version__maxGuestQuantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+}
+
+input versionsProduct_version__baseGuestQuantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+}
+
+input versionsProduct_version__stripeGuestFeeID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsProduct_version__guestFeePriceJSON_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
+}
+
+input versionsProduct_version__variants__stripeVariantProductID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input versionsProduct_version__variants__priceJSON_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
+}
+
+input versionsProduct_version__variants__seasonStart_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+}
+
+input versionsProduct_version__variants__seasonEnd_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+}
+
+input versionsProduct_version__variants__id_operator {
   equals: String
   not_equals: String
   like: String
@@ -4809,9 +5622,24 @@ input versionsProduct_where_and {
   parent: versionsProduct_parent_operator
   version__title: versionsProduct_version__title_operator
   version__publishedOn: versionsProduct_version__publishedOn_operator
-  version__gallery__image: versionsProduct_version__gallery__image_operator
+  version__available: versionsProduct_version__available_operator
+  version__gallery__media: versionsProduct_version__gallery__media_operator
   version__gallery__id: versionsProduct_version__gallery__id_operator
+  version__productDescription: versionsProduct_version__productDescription_operator
+  version__amenities__amenity: versionsProduct_version__amenities__amenity_operator
+  version__amenities__id: versionsProduct_version__amenities__id_operator
   version__stripeProductID: versionsProduct_version__stripeProductID_operator
+  version__bedroomQuantity: versionsProduct_version__bedroomQuantity_operator
+  version__bathQuantity: versionsProduct_version__bathQuantity_operator
+  version__maxGuestQuantity: versionsProduct_version__maxGuestQuantity_operator
+  version__baseGuestQuantity: versionsProduct_version__baseGuestQuantity_operator
+  version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
+  version__guestFeePriceJSON: versionsProduct_version__guestFeePriceJSON_operator
+  version__variants__stripeVariantProductID: versionsProduct_version__variants__stripeVariantProductID_operator
+  version__variants__priceJSON: versionsProduct_version__variants__priceJSON_operator
+  version__variants__seasonStart: versionsProduct_version__variants__seasonStart_operator
+  version__variants__seasonEnd: versionsProduct_version__variants__seasonEnd_operator
+  version__variants__id: versionsProduct_version__variants__id_operator
   version__priceJSON: versionsProduct_version__priceJSON_operator
   version__enablePaywall: versionsProduct_version__enablePaywall_operator
   version__categories: versionsProduct_version__categories_operator
@@ -4836,9 +5664,24 @@ input versionsProduct_where_or {
   parent: versionsProduct_parent_operator
   version__title: versionsProduct_version__title_operator
   version__publishedOn: versionsProduct_version__publishedOn_operator
-  version__gallery__image: versionsProduct_version__gallery__image_operator
+  version__available: versionsProduct_version__available_operator
+  version__gallery__media: versionsProduct_version__gallery__media_operator
   version__gallery__id: versionsProduct_version__gallery__id_operator
+  version__productDescription: versionsProduct_version__productDescription_operator
+  version__amenities__amenity: versionsProduct_version__amenities__amenity_operator
+  version__amenities__id: versionsProduct_version__amenities__id_operator
   version__stripeProductID: versionsProduct_version__stripeProductID_operator
+  version__bedroomQuantity: versionsProduct_version__bedroomQuantity_operator
+  version__bathQuantity: versionsProduct_version__bathQuantity_operator
+  version__maxGuestQuantity: versionsProduct_version__maxGuestQuantity_operator
+  version__baseGuestQuantity: versionsProduct_version__baseGuestQuantity_operator
+  version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
+  version__guestFeePriceJSON: versionsProduct_version__guestFeePriceJSON_operator
+  version__variants__stripeVariantProductID: versionsProduct_version__variants__stripeVariantProductID_operator
+  version__variants__priceJSON: versionsProduct_version__variants__priceJSON_operator
+  version__variants__seasonStart: versionsProduct_version__variants__seasonStart_operator
+  version__variants__seasonEnd: versionsProduct_version__variants__seasonEnd_operator
+  version__variants__id: versionsProduct_version__variants__id_operator
   version__priceJSON: versionsProduct_version__priceJSON_operator
   version__enablePaywall: versionsProduct_version__enablePaywall_operator
   version__categories: versionsProduct_version__categories_operator
@@ -4861,18 +5704,12 @@ input versionsProduct_where_or {
 
 type Order {
   id: String
-  appointmentType: Order_appointmentType!
   orderedBy: User
   stripePaymentIntentID: String
   total: Float!
   items: [Order_Items!]
   updatedAt: DateTime
   createdAt: DateTime
-}
-
-enum Order_appointmentType {
-  booking
-  blockout
 }
 
 type Order_Items {
@@ -4899,7 +5736,6 @@ type Orders {
 }
 
 input Order_where {
-  appointmentType: Order_appointmentType_operator
   orderedBy: Order_orderedBy_operator
   stripePaymentIntentID: Order_stripePaymentIntentID_operator
   total: Order_total_operator
@@ -4914,19 +5750,6 @@ input Order_where {
   id: Order_id_operator
   AND: [Order_where_and]
   OR: [Order_where_or]
-}
-
-input Order_appointmentType_operator {
-  equals: Order_appointmentType_Input
-  not_equals: Order_appointmentType_Input
-  in: [Order_appointmentType_Input]
-  not_in: [Order_appointmentType_Input]
-  all: [Order_appointmentType_Input]
-}
-
-enum Order_appointmentType_Input {
-  booking
-  blockout
 }
 
 input Order_orderedBy_operator {
@@ -5053,7 +5876,6 @@ input Order_id_operator {
 }
 
 input Order_where_and {
-  appointmentType: Order_appointmentType_operator
   orderedBy: Order_orderedBy_operator
   stripePaymentIntentID: Order_stripePaymentIntentID_operator
   total: Order_total_operator
@@ -5071,7 +5893,6 @@ input Order_where_and {
 }
 
 input Order_where_or {
-  appointmentType: Order_appointmentType_operator
   orderedBy: Order_orderedBy_operator
   stripePaymentIntentID: Order_stripePaymentIntentID_operator
   total: Order_total_operator
@@ -5101,36 +5922,12 @@ type ordersDocAccess {
 }
 
 type OrdersDocAccessFields {
-  appointmentType: OrdersDocAccessFields_appointmentType
   orderedBy: OrdersDocAccessFields_orderedBy
   stripePaymentIntentID: OrdersDocAccessFields_stripePaymentIntentID
   total: OrdersDocAccessFields_total
   items: OrdersDocAccessFields_items
   updatedAt: OrdersDocAccessFields_updatedAt
   createdAt: OrdersDocAccessFields_createdAt
-}
-
-type OrdersDocAccessFields_appointmentType {
-  create: OrdersDocAccessFields_appointmentType_Create
-  read: OrdersDocAccessFields_appointmentType_Read
-  update: OrdersDocAccessFields_appointmentType_Update
-  delete: OrdersDocAccessFields_appointmentType_Delete
-}
-
-type OrdersDocAccessFields_appointmentType_Create {
-  permission: Boolean!
-}
-
-type OrdersDocAccessFields_appointmentType_Read {
-  permission: Boolean!
-}
-
-type OrdersDocAccessFields_appointmentType_Update {
-  permission: Boolean!
-}
-
-type OrdersDocAccessFields_appointmentType_Delete {
-  permission: Boolean!
 }
 
 type OrdersDocAccessFields_orderedBy {
@@ -6390,10 +7187,11 @@ input User_where {
   roles: User_roles_operator
   purchases: User_purchases_operator
   stripeCustomerID: User_stripeCustomerID_operator
+  cart__headProduct: User_cart__headProduct_operator
+  cart__startDate: User_cart__startDate_operator
+  cart__endDate: User_cart__endDate_operator
   cart__items__product: User_cart__items__product_operator
   cart__items__quantity: User_cart__items__quantity_operator
-  cart__items__startDate: User_cart__items__startDate_operator
-  cart__items__endDate: User_cart__items__endDate_operator
   cart__items__id: User_cart__items__id_operator
   skipSync: User_skipSync_operator
   updatedAt: User_updatedAt_operator
@@ -6449,6 +7247,37 @@ input User_stripeCustomerID_operator {
   exists: Boolean
 }
 
+input User_cart__headProduct_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input User_cart__startDate_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input User_cart__endDate_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
 input User_cart__items__product_operator {
   equals: JSON
   not_equals: JSON
@@ -6466,26 +7295,6 @@ input User_cart__items__quantity_operator {
   less_than_equal: Float
   less_than: Float
   exists: Boolean
-}
-
-input User_cart__items__startDate_operator {
-  equals: DateTime
-  not_equals: DateTime
-  greater_than_equal: DateTime
-  greater_than: DateTime
-  less_than_equal: DateTime
-  less_than: DateTime
-  like: DateTime
-}
-
-input User_cart__items__endDate_operator {
-  equals: DateTime
-  not_equals: DateTime
-  greater_than_equal: DateTime
-  greater_than: DateTime
-  less_than_equal: DateTime
-  less_than: DateTime
-  like: DateTime
 }
 
 input User_cart__items__id_operator {
@@ -6553,10 +7362,11 @@ input User_where_and {
   roles: User_roles_operator
   purchases: User_purchases_operator
   stripeCustomerID: User_stripeCustomerID_operator
+  cart__headProduct: User_cart__headProduct_operator
+  cart__startDate: User_cart__startDate_operator
+  cart__endDate: User_cart__endDate_operator
   cart__items__product: User_cart__items__product_operator
   cart__items__quantity: User_cart__items__quantity_operator
-  cart__items__startDate: User_cart__items__startDate_operator
-  cart__items__endDate: User_cart__items__endDate_operator
   cart__items__id: User_cart__items__id_operator
   skipSync: User_skipSync_operator
   updatedAt: User_updatedAt_operator
@@ -6572,10 +7382,11 @@ input User_where_or {
   roles: User_roles_operator
   purchases: User_purchases_operator
   stripeCustomerID: User_stripeCustomerID_operator
+  cart__headProduct: User_cart__headProduct_operator
+  cart__startDate: User_cart__startDate_operator
+  cart__endDate: User_cart__endDate_operator
   cart__items__product: User_cart__items__product_operator
   cart__items__quantity: User_cart__items__quantity_operator
-  cart__items__startDate: User_cart__items__startDate_operator
-  cart__items__endDate: User_cart__items__endDate_operator
   cart__items__id: User_cart__items__id_operator
   skipSync: User_skipSync_operator
   updatedAt: User_updatedAt_operator
@@ -6729,7 +7540,79 @@ type UsersDocAccessFields_cart_Delete {
 }
 
 type UsersDocAccessFields_cart_Fields {
+  headProduct: UsersDocAccessFields_cart_headProduct
+  startDate: UsersDocAccessFields_cart_startDate
+  endDate: UsersDocAccessFields_cart_endDate
   items: UsersDocAccessFields_cart_items
+}
+
+type UsersDocAccessFields_cart_headProduct {
+  create: UsersDocAccessFields_cart_headProduct_Create
+  read: UsersDocAccessFields_cart_headProduct_Read
+  update: UsersDocAccessFields_cart_headProduct_Update
+  delete: UsersDocAccessFields_cart_headProduct_Delete
+}
+
+type UsersDocAccessFields_cart_headProduct_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_headProduct_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_headProduct_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_headProduct_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_startDate {
+  create: UsersDocAccessFields_cart_startDate_Create
+  read: UsersDocAccessFields_cart_startDate_Read
+  update: UsersDocAccessFields_cart_startDate_Update
+  delete: UsersDocAccessFields_cart_startDate_Delete
+}
+
+type UsersDocAccessFields_cart_startDate_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_startDate_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_startDate_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_startDate_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_endDate {
+  create: UsersDocAccessFields_cart_endDate_Create
+  read: UsersDocAccessFields_cart_endDate_Read
+  update: UsersDocAccessFields_cart_endDate_Update
+  delete: UsersDocAccessFields_cart_endDate_Delete
+}
+
+type UsersDocAccessFields_cart_endDate_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_endDate_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_endDate_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_endDate_Delete {
+  permission: Boolean!
 }
 
 type UsersDocAccessFields_cart_items {
@@ -6759,8 +7642,6 @@ type UsersDocAccessFields_cart_items_Delete {
 type UsersDocAccessFields_cart_items_Fields {
   product: UsersDocAccessFields_cart_items_product
   quantity: UsersDocAccessFields_cart_items_quantity
-  startDate: UsersDocAccessFields_cart_items_startDate
-  endDate: UsersDocAccessFields_cart_items_endDate
   id: UsersDocAccessFields_cart_items_id
 }
 
@@ -6807,52 +7688,6 @@ type UsersDocAccessFields_cart_items_quantity_Update {
 }
 
 type UsersDocAccessFields_cart_items_quantity_Delete {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_startDate {
-  create: UsersDocAccessFields_cart_items_startDate_Create
-  read: UsersDocAccessFields_cart_items_startDate_Read
-  update: UsersDocAccessFields_cart_items_startDate_Update
-  delete: UsersDocAccessFields_cart_items_startDate_Delete
-}
-
-type UsersDocAccessFields_cart_items_startDate_Create {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_startDate_Read {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_startDate_Update {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_startDate_Delete {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_endDate {
-  create: UsersDocAccessFields_cart_items_endDate_Create
-  read: UsersDocAccessFields_cart_items_endDate_Read
-  update: UsersDocAccessFields_cart_items_endDate_Update
-  delete: UsersDocAccessFields_cart_items_endDate_Delete
-}
-
-type UsersDocAccessFields_cart_items_endDate_Create {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_endDate_Read {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_endDate_Update {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_endDate_Delete {
   permission: Boolean!
 }
 
@@ -7685,6 +8520,624 @@ input versionsReview_where_or {
   id: versionsReview_id_operator
   AND: [versionsReview_where_and]
   OR: [versionsReview_where_or]
+}
+
+type Booking {
+  id: String
+  startDate: DateTime!
+  endDate: DateTime!
+  product(draft: Boolean): Product!
+  type: Booking_type
+  order: Order
+  user: User
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+enum Booking_type {
+  blockout
+  reservation
+}
+
+type Bookings {
+  docs: [Booking]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input Booking_where {
+  startDate: Booking_startDate_operator
+  endDate: Booking_endDate_operator
+  product: Booking_product_operator
+  type: Booking_type_operator
+  order: Booking_order_operator
+  user: Booking_user_operator
+  updatedAt: Booking_updatedAt_operator
+  createdAt: Booking_createdAt_operator
+  id: Booking_id_operator
+  AND: [Booking_where_and]
+  OR: [Booking_where_or]
+}
+
+input Booking_startDate_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+}
+
+input Booking_endDate_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+}
+
+input Booking_product_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+}
+
+input Booking_type_operator {
+  equals: Booking_type_Input
+  not_equals: Booking_type_Input
+  in: [Booking_type_Input]
+  not_in: [Booking_type_Input]
+  all: [Booking_type_Input]
+}
+
+enum Booking_type_Input {
+  blockout
+  reservation
+}
+
+input Booking_order_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input Booking_user_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input Booking_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Booking_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Booking_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Booking_where_and {
+  startDate: Booking_startDate_operator
+  endDate: Booking_endDate_operator
+  product: Booking_product_operator
+  type: Booking_type_operator
+  order: Booking_order_operator
+  user: Booking_user_operator
+  updatedAt: Booking_updatedAt_operator
+  createdAt: Booking_createdAt_operator
+  id: Booking_id_operator
+  AND: [Booking_where_and]
+  OR: [Booking_where_or]
+}
+
+input Booking_where_or {
+  startDate: Booking_startDate_operator
+  endDate: Booking_endDate_operator
+  product: Booking_product_operator
+  type: Booking_type_operator
+  order: Booking_order_operator
+  user: Booking_user_operator
+  updatedAt: Booking_updatedAt_operator
+  createdAt: Booking_createdAt_operator
+  id: Booking_id_operator
+  AND: [Booking_where_and]
+  OR: [Booking_where_or]
+}
+
+type countBookings {
+  totalDocs: Int
+}
+
+type bookingsDocAccess {
+  fields: BookingsDocAccessFields
+  create: BookingsCreateDocAccess
+  read: BookingsReadDocAccess
+  update: BookingsUpdateDocAccess
+  delete: BookingsDeleteDocAccess
+}
+
+type BookingsDocAccessFields {
+  startDate: BookingsDocAccessFields_startDate
+  endDate: BookingsDocAccessFields_endDate
+  product: BookingsDocAccessFields_product
+  type: BookingsDocAccessFields_type
+  order: BookingsDocAccessFields_order
+  user: BookingsDocAccessFields_user
+  updatedAt: BookingsDocAccessFields_updatedAt
+  createdAt: BookingsDocAccessFields_createdAt
+}
+
+type BookingsDocAccessFields_startDate {
+  create: BookingsDocAccessFields_startDate_Create
+  read: BookingsDocAccessFields_startDate_Read
+  update: BookingsDocAccessFields_startDate_Update
+  delete: BookingsDocAccessFields_startDate_Delete
+}
+
+type BookingsDocAccessFields_startDate_Create {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_startDate_Read {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_startDate_Update {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_startDate_Delete {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_endDate {
+  create: BookingsDocAccessFields_endDate_Create
+  read: BookingsDocAccessFields_endDate_Read
+  update: BookingsDocAccessFields_endDate_Update
+  delete: BookingsDocAccessFields_endDate_Delete
+}
+
+type BookingsDocAccessFields_endDate_Create {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_endDate_Read {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_endDate_Update {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_endDate_Delete {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_product {
+  create: BookingsDocAccessFields_product_Create
+  read: BookingsDocAccessFields_product_Read
+  update: BookingsDocAccessFields_product_Update
+  delete: BookingsDocAccessFields_product_Delete
+}
+
+type BookingsDocAccessFields_product_Create {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_product_Read {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_product_Update {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_product_Delete {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_type {
+  create: BookingsDocAccessFields_type_Create
+  read: BookingsDocAccessFields_type_Read
+  update: BookingsDocAccessFields_type_Update
+  delete: BookingsDocAccessFields_type_Delete
+}
+
+type BookingsDocAccessFields_type_Create {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_type_Read {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_type_Update {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_type_Delete {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_order {
+  create: BookingsDocAccessFields_order_Create
+  read: BookingsDocAccessFields_order_Read
+  update: BookingsDocAccessFields_order_Update
+  delete: BookingsDocAccessFields_order_Delete
+}
+
+type BookingsDocAccessFields_order_Create {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_order_Read {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_order_Update {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_order_Delete {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_user {
+  create: BookingsDocAccessFields_user_Create
+  read: BookingsDocAccessFields_user_Read
+  update: BookingsDocAccessFields_user_Update
+  delete: BookingsDocAccessFields_user_Delete
+}
+
+type BookingsDocAccessFields_user_Create {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_user_Read {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_user_Update {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_user_Delete {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_updatedAt {
+  create: BookingsDocAccessFields_updatedAt_Create
+  read: BookingsDocAccessFields_updatedAt_Read
+  update: BookingsDocAccessFields_updatedAt_Update
+  delete: BookingsDocAccessFields_updatedAt_Delete
+}
+
+type BookingsDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_createdAt {
+  create: BookingsDocAccessFields_createdAt_Create
+  read: BookingsDocAccessFields_createdAt_Read
+  update: BookingsDocAccessFields_createdAt_Update
+  delete: BookingsDocAccessFields_createdAt_Delete
+}
+
+type BookingsDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type BookingsCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type BookingsReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type BookingsUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type BookingsDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Amenities {
+  docs: [Amenity]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input Amenity_where {
+  title: Amenity_title_operator
+  media: Amenity_media_operator
+  updatedAt: Amenity_updatedAt_operator
+  createdAt: Amenity_createdAt_operator
+  id: Amenity_id_operator
+  AND: [Amenity_where_and]
+  OR: [Amenity_where_or]
+}
+
+input Amenity_title_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input Amenity_media_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+}
+
+input Amenity_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Amenity_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Amenity_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Amenity_where_and {
+  title: Amenity_title_operator
+  media: Amenity_media_operator
+  updatedAt: Amenity_updatedAt_operator
+  createdAt: Amenity_createdAt_operator
+  id: Amenity_id_operator
+  AND: [Amenity_where_and]
+  OR: [Amenity_where_or]
+}
+
+input Amenity_where_or {
+  title: Amenity_title_operator
+  media: Amenity_media_operator
+  updatedAt: Amenity_updatedAt_operator
+  createdAt: Amenity_createdAt_operator
+  id: Amenity_id_operator
+  AND: [Amenity_where_and]
+  OR: [Amenity_where_or]
+}
+
+type countAmenities {
+  totalDocs: Int
+}
+
+type amenitiesDocAccess {
+  fields: AmenitiesDocAccessFields
+  create: AmenitiesCreateDocAccess
+  read: AmenitiesReadDocAccess
+  update: AmenitiesUpdateDocAccess
+  delete: AmenitiesDeleteDocAccess
+}
+
+type AmenitiesDocAccessFields {
+  title: AmenitiesDocAccessFields_title
+  media: AmenitiesDocAccessFields_media
+  updatedAt: AmenitiesDocAccessFields_updatedAt
+  createdAt: AmenitiesDocAccessFields_createdAt
+}
+
+type AmenitiesDocAccessFields_title {
+  create: AmenitiesDocAccessFields_title_Create
+  read: AmenitiesDocAccessFields_title_Read
+  update: AmenitiesDocAccessFields_title_Update
+  delete: AmenitiesDocAccessFields_title_Delete
+}
+
+type AmenitiesDocAccessFields_title_Create {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_title_Read {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_title_Update {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_title_Delete {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_media {
+  create: AmenitiesDocAccessFields_media_Create
+  read: AmenitiesDocAccessFields_media_Read
+  update: AmenitiesDocAccessFields_media_Update
+  delete: AmenitiesDocAccessFields_media_Delete
+}
+
+type AmenitiesDocAccessFields_media_Create {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_media_Read {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_media_Update {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_media_Delete {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_updatedAt {
+  create: AmenitiesDocAccessFields_updatedAt_Create
+  read: AmenitiesDocAccessFields_updatedAt_Read
+  update: AmenitiesDocAccessFields_updatedAt_Update
+  delete: AmenitiesDocAccessFields_updatedAt_Delete
+}
+
+type AmenitiesDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_createdAt {
+  create: AmenitiesDocAccessFields_createdAt_Create
+  read: AmenitiesDocAccessFields_createdAt_Read
+  update: AmenitiesDocAccessFields_createdAt_Update
+  delete: AmenitiesDocAccessFields_createdAt_Delete
+}
+
+type AmenitiesDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type AmenitiesCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type AmenitiesReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type AmenitiesUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type AmenitiesDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
 }
 
 type Form {
@@ -10243,6 +11696,8 @@ type Access {
   categories: categoriesAccess
   users: usersAccess
   reviews: reviewsAccess
+  bookings: bookingsAccess
+  amenities: amenitiesAccess
   forms: formsAccess
   form_submissions: form_submissionsAccess
   redirects: redirectsAccess
@@ -10893,9 +12348,19 @@ type productsAccess {
 type ProductsFields {
   title: ProductsFields_title
   publishedOn: ProductsFields_publishedOn
+  available: ProductsFields_available
   gallery: ProductsFields_gallery
+  productDescription: ProductsFields_productDescription
+  amenities: ProductsFields_amenities
   layout: ProductsFields_layout
   stripeProductID: ProductsFields_stripeProductID
+  bedroomQuantity: ProductsFields_bedroomQuantity
+  bathQuantity: ProductsFields_bathQuantity
+  maxGuestQuantity: ProductsFields_maxGuestQuantity
+  baseGuestQuantity: ProductsFields_baseGuestQuantity
+  stripeGuestFeeID: ProductsFields_stripeGuestFeeID
+  guestFeePriceJSON: ProductsFields_guestFeePriceJSON
+  variants: ProductsFields_variants
   priceJSON: ProductsFields_priceJSON
   enablePaywall: ProductsFields_enablePaywall
   paywall: ProductsFields_paywall
@@ -10955,6 +12420,29 @@ type ProductsFields_publishedOn_Delete {
   permission: Boolean!
 }
 
+type ProductsFields_available {
+  create: ProductsFields_available_Create
+  read: ProductsFields_available_Read
+  update: ProductsFields_available_Update
+  delete: ProductsFields_available_Delete
+}
+
+type ProductsFields_available_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_available_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_available_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_available_Delete {
+  permission: Boolean!
+}
+
 type ProductsFields_gallery {
   create: ProductsFields_gallery_Create
   read: ProductsFields_gallery_Read
@@ -10980,30 +12468,30 @@ type ProductsFields_gallery_Delete {
 }
 
 type ProductsFields_gallery_Fields {
-  image: ProductsFields_gallery_image
+  media: ProductsFields_gallery_media
   id: ProductsFields_gallery_id
 }
 
-type ProductsFields_gallery_image {
-  create: ProductsFields_gallery_image_Create
-  read: ProductsFields_gallery_image_Read
-  update: ProductsFields_gallery_image_Update
-  delete: ProductsFields_gallery_image_Delete
+type ProductsFields_gallery_media {
+  create: ProductsFields_gallery_media_Create
+  read: ProductsFields_gallery_media_Read
+  update: ProductsFields_gallery_media_Update
+  delete: ProductsFields_gallery_media_Delete
 }
 
-type ProductsFields_gallery_image_Create {
+type ProductsFields_gallery_media_Create {
   permission: Boolean!
 }
 
-type ProductsFields_gallery_image_Read {
+type ProductsFields_gallery_media_Read {
   permission: Boolean!
 }
 
-type ProductsFields_gallery_image_Update {
+type ProductsFields_gallery_media_Update {
   permission: Boolean!
 }
 
-type ProductsFields_gallery_image_Delete {
+type ProductsFields_gallery_media_Delete {
   permission: Boolean!
 }
 
@@ -11027,6 +12515,104 @@ type ProductsFields_gallery_id_Update {
 }
 
 type ProductsFields_gallery_id_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_productDescription {
+  create: ProductsFields_productDescription_Create
+  read: ProductsFields_productDescription_Read
+  update: ProductsFields_productDescription_Update
+  delete: ProductsFields_productDescription_Delete
+}
+
+type ProductsFields_productDescription_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_productDescription_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_productDescription_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_productDescription_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities {
+  create: ProductsFields_amenities_Create
+  read: ProductsFields_amenities_Read
+  update: ProductsFields_amenities_Update
+  delete: ProductsFields_amenities_Delete
+  fields: ProductsFields_amenities_Fields
+}
+
+type ProductsFields_amenities_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities_Fields {
+  amenity: ProductsFields_amenities_amenity
+  id: ProductsFields_amenities_id
+}
+
+type ProductsFields_amenities_amenity {
+  create: ProductsFields_amenities_amenity_Create
+  read: ProductsFields_amenities_amenity_Read
+  update: ProductsFields_amenities_amenity_Update
+  delete: ProductsFields_amenities_amenity_Delete
+}
+
+type ProductsFields_amenities_amenity_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities_amenity_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities_amenity_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities_amenity_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities_id {
+  create: ProductsFields_amenities_id_Create
+  read: ProductsFields_amenities_id_Read
+  update: ProductsFields_amenities_id_Update
+  delete: ProductsFields_amenities_id_Delete
+}
+
+type ProductsFields_amenities_id_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities_id_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities_id_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_amenities_id_Delete {
   permission: Boolean!
 }
 
@@ -11073,6 +12659,291 @@ type ProductsFields_stripeProductID_Update {
 }
 
 type ProductsFields_stripeProductID_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_bedroomQuantity {
+  create: ProductsFields_bedroomQuantity_Create
+  read: ProductsFields_bedroomQuantity_Read
+  update: ProductsFields_bedroomQuantity_Update
+  delete: ProductsFields_bedroomQuantity_Delete
+}
+
+type ProductsFields_bedroomQuantity_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_bedroomQuantity_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_bedroomQuantity_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_bedroomQuantity_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_bathQuantity {
+  create: ProductsFields_bathQuantity_Create
+  read: ProductsFields_bathQuantity_Read
+  update: ProductsFields_bathQuantity_Update
+  delete: ProductsFields_bathQuantity_Delete
+}
+
+type ProductsFields_bathQuantity_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_bathQuantity_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_bathQuantity_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_bathQuantity_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_maxGuestQuantity {
+  create: ProductsFields_maxGuestQuantity_Create
+  read: ProductsFields_maxGuestQuantity_Read
+  update: ProductsFields_maxGuestQuantity_Update
+  delete: ProductsFields_maxGuestQuantity_Delete
+}
+
+type ProductsFields_maxGuestQuantity_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_maxGuestQuantity_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_maxGuestQuantity_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_maxGuestQuantity_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_baseGuestQuantity {
+  create: ProductsFields_baseGuestQuantity_Create
+  read: ProductsFields_baseGuestQuantity_Read
+  update: ProductsFields_baseGuestQuantity_Update
+  delete: ProductsFields_baseGuestQuantity_Delete
+}
+
+type ProductsFields_baseGuestQuantity_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_baseGuestQuantity_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_baseGuestQuantity_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_baseGuestQuantity_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_stripeGuestFeeID {
+  create: ProductsFields_stripeGuestFeeID_Create
+  read: ProductsFields_stripeGuestFeeID_Read
+  update: ProductsFields_stripeGuestFeeID_Update
+  delete: ProductsFields_stripeGuestFeeID_Delete
+}
+
+type ProductsFields_stripeGuestFeeID_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_stripeGuestFeeID_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_stripeGuestFeeID_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_stripeGuestFeeID_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_guestFeePriceJSON {
+  create: ProductsFields_guestFeePriceJSON_Create
+  read: ProductsFields_guestFeePriceJSON_Read
+  update: ProductsFields_guestFeePriceJSON_Update
+  delete: ProductsFields_guestFeePriceJSON_Delete
+}
+
+type ProductsFields_guestFeePriceJSON_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_guestFeePriceJSON_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_guestFeePriceJSON_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_guestFeePriceJSON_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_variants {
+  create: ProductsFields_variants_Create
+  read: ProductsFields_variants_Read
+  update: ProductsFields_variants_Update
+  delete: ProductsFields_variants_Delete
+  fields: ProductsFields_variants_Fields
+}
+
+type ProductsFields_variants_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_Fields {
+  stripeVariantProductID: ProductsFields_variants_stripeVariantProductID
+  priceJSON: ProductsFields_variants_priceJSON
+  seasonStart: ProductsFields_variants_seasonStart
+  seasonEnd: ProductsFields_variants_seasonEnd
+  id: ProductsFields_variants_id
+}
+
+type ProductsFields_variants_stripeVariantProductID {
+  create: ProductsFields_variants_stripeVariantProductID_Create
+  read: ProductsFields_variants_stripeVariantProductID_Read
+  update: ProductsFields_variants_stripeVariantProductID_Update
+  delete: ProductsFields_variants_stripeVariantProductID_Delete
+}
+
+type ProductsFields_variants_stripeVariantProductID_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_stripeVariantProductID_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_stripeVariantProductID_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_stripeVariantProductID_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_priceJSON {
+  create: ProductsFields_variants_priceJSON_Create
+  read: ProductsFields_variants_priceJSON_Read
+  update: ProductsFields_variants_priceJSON_Update
+  delete: ProductsFields_variants_priceJSON_Delete
+}
+
+type ProductsFields_variants_priceJSON_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_priceJSON_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_priceJSON_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_priceJSON_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_seasonStart {
+  create: ProductsFields_variants_seasonStart_Create
+  read: ProductsFields_variants_seasonStart_Read
+  update: ProductsFields_variants_seasonStart_Update
+  delete: ProductsFields_variants_seasonStart_Delete
+}
+
+type ProductsFields_variants_seasonStart_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_seasonStart_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_seasonStart_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_seasonStart_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_seasonEnd {
+  create: ProductsFields_variants_seasonEnd_Create
+  read: ProductsFields_variants_seasonEnd_Read
+  update: ProductsFields_variants_seasonEnd_Update
+  delete: ProductsFields_variants_seasonEnd_Delete
+}
+
+type ProductsFields_variants_seasonEnd_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_seasonEnd_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_seasonEnd_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_seasonEnd_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_id {
+  create: ProductsFields_variants_id_Create
+  read: ProductsFields_variants_id_Read
+  update: ProductsFields_variants_id_Update
+  delete: ProductsFields_variants_id_Delete
+}
+
+type ProductsFields_variants_id_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_id_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_id_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_variants_id_Delete {
   permission: Boolean!
 }
 
@@ -11439,36 +13310,12 @@ type ordersAccess {
 }
 
 type OrdersFields {
-  appointmentType: OrdersFields_appointmentType
   orderedBy: OrdersFields_orderedBy
   stripePaymentIntentID: OrdersFields_stripePaymentIntentID
   total: OrdersFields_total
   items: OrdersFields_items
   updatedAt: OrdersFields_updatedAt
   createdAt: OrdersFields_createdAt
-}
-
-type OrdersFields_appointmentType {
-  create: OrdersFields_appointmentType_Create
-  read: OrdersFields_appointmentType_Read
-  update: OrdersFields_appointmentType_Update
-  delete: OrdersFields_appointmentType_Delete
-}
-
-type OrdersFields_appointmentType_Create {
-  permission: Boolean!
-}
-
-type OrdersFields_appointmentType_Read {
-  permission: Boolean!
-}
-
-type OrdersFields_appointmentType_Update {
-  permission: Boolean!
-}
-
-type OrdersFields_appointmentType_Delete {
-  permission: Boolean!
 }
 
 type OrdersFields_orderedBy {
@@ -12486,7 +14333,79 @@ type UsersFields_cart_Delete {
 }
 
 type UsersFields_cart_Fields {
+  headProduct: UsersFields_cart_headProduct
+  startDate: UsersFields_cart_startDate
+  endDate: UsersFields_cart_endDate
   items: UsersFields_cart_items
+}
+
+type UsersFields_cart_headProduct {
+  create: UsersFields_cart_headProduct_Create
+  read: UsersFields_cart_headProduct_Read
+  update: UsersFields_cart_headProduct_Update
+  delete: UsersFields_cart_headProduct_Delete
+}
+
+type UsersFields_cart_headProduct_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_headProduct_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_headProduct_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_headProduct_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_startDate {
+  create: UsersFields_cart_startDate_Create
+  read: UsersFields_cart_startDate_Read
+  update: UsersFields_cart_startDate_Update
+  delete: UsersFields_cart_startDate_Delete
+}
+
+type UsersFields_cart_startDate_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_startDate_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_startDate_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_startDate_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_endDate {
+  create: UsersFields_cart_endDate_Create
+  read: UsersFields_cart_endDate_Read
+  update: UsersFields_cart_endDate_Update
+  delete: UsersFields_cart_endDate_Delete
+}
+
+type UsersFields_cart_endDate_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_endDate_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_endDate_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_endDate_Delete {
+  permission: Boolean!
 }
 
 type UsersFields_cart_items {
@@ -12516,8 +14435,6 @@ type UsersFields_cart_items_Delete {
 type UsersFields_cart_items_Fields {
   product: UsersFields_cart_items_product
   quantity: UsersFields_cart_items_quantity
-  startDate: UsersFields_cart_items_startDate
-  endDate: UsersFields_cart_items_endDate
   id: UsersFields_cart_items_id
 }
 
@@ -12564,52 +14481,6 @@ type UsersFields_cart_items_quantity_Update {
 }
 
 type UsersFields_cart_items_quantity_Delete {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_startDate {
-  create: UsersFields_cart_items_startDate_Create
-  read: UsersFields_cart_items_startDate_Read
-  update: UsersFields_cart_items_startDate_Update
-  delete: UsersFields_cart_items_startDate_Delete
-}
-
-type UsersFields_cart_items_startDate_Create {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_startDate_Read {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_startDate_Update {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_startDate_Delete {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_endDate {
-  create: UsersFields_cart_items_endDate_Create
-  read: UsersFields_cart_items_endDate_Read
-  update: UsersFields_cart_items_endDate_Update
-  delete: UsersFields_cart_items_endDate_Delete
-}
-
-type UsersFields_cart_items_endDate_Create {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_endDate_Read {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_endDate_Update {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_endDate_Delete {
   permission: Boolean!
 }
 
@@ -13025,6 +14896,356 @@ type ReviewsDeleteAccess {
 }
 
 type ReviewsReadVersionsAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type bookingsAccess {
+  fields: BookingsFields
+  create: BookingsCreateAccess
+  read: BookingsReadAccess
+  update: BookingsUpdateAccess
+  delete: BookingsDeleteAccess
+}
+
+type BookingsFields {
+  startDate: BookingsFields_startDate
+  endDate: BookingsFields_endDate
+  product: BookingsFields_product
+  type: BookingsFields_type
+  order: BookingsFields_order
+  user: BookingsFields_user
+  updatedAt: BookingsFields_updatedAt
+  createdAt: BookingsFields_createdAt
+}
+
+type BookingsFields_startDate {
+  create: BookingsFields_startDate_Create
+  read: BookingsFields_startDate_Read
+  update: BookingsFields_startDate_Update
+  delete: BookingsFields_startDate_Delete
+}
+
+type BookingsFields_startDate_Create {
+  permission: Boolean!
+}
+
+type BookingsFields_startDate_Read {
+  permission: Boolean!
+}
+
+type BookingsFields_startDate_Update {
+  permission: Boolean!
+}
+
+type BookingsFields_startDate_Delete {
+  permission: Boolean!
+}
+
+type BookingsFields_endDate {
+  create: BookingsFields_endDate_Create
+  read: BookingsFields_endDate_Read
+  update: BookingsFields_endDate_Update
+  delete: BookingsFields_endDate_Delete
+}
+
+type BookingsFields_endDate_Create {
+  permission: Boolean!
+}
+
+type BookingsFields_endDate_Read {
+  permission: Boolean!
+}
+
+type BookingsFields_endDate_Update {
+  permission: Boolean!
+}
+
+type BookingsFields_endDate_Delete {
+  permission: Boolean!
+}
+
+type BookingsFields_product {
+  create: BookingsFields_product_Create
+  read: BookingsFields_product_Read
+  update: BookingsFields_product_Update
+  delete: BookingsFields_product_Delete
+}
+
+type BookingsFields_product_Create {
+  permission: Boolean!
+}
+
+type BookingsFields_product_Read {
+  permission: Boolean!
+}
+
+type BookingsFields_product_Update {
+  permission: Boolean!
+}
+
+type BookingsFields_product_Delete {
+  permission: Boolean!
+}
+
+type BookingsFields_type {
+  create: BookingsFields_type_Create
+  read: BookingsFields_type_Read
+  update: BookingsFields_type_Update
+  delete: BookingsFields_type_Delete
+}
+
+type BookingsFields_type_Create {
+  permission: Boolean!
+}
+
+type BookingsFields_type_Read {
+  permission: Boolean!
+}
+
+type BookingsFields_type_Update {
+  permission: Boolean!
+}
+
+type BookingsFields_type_Delete {
+  permission: Boolean!
+}
+
+type BookingsFields_order {
+  create: BookingsFields_order_Create
+  read: BookingsFields_order_Read
+  update: BookingsFields_order_Update
+  delete: BookingsFields_order_Delete
+}
+
+type BookingsFields_order_Create {
+  permission: Boolean!
+}
+
+type BookingsFields_order_Read {
+  permission: Boolean!
+}
+
+type BookingsFields_order_Update {
+  permission: Boolean!
+}
+
+type BookingsFields_order_Delete {
+  permission: Boolean!
+}
+
+type BookingsFields_user {
+  create: BookingsFields_user_Create
+  read: BookingsFields_user_Read
+  update: BookingsFields_user_Update
+  delete: BookingsFields_user_Delete
+}
+
+type BookingsFields_user_Create {
+  permission: Boolean!
+}
+
+type BookingsFields_user_Read {
+  permission: Boolean!
+}
+
+type BookingsFields_user_Update {
+  permission: Boolean!
+}
+
+type BookingsFields_user_Delete {
+  permission: Boolean!
+}
+
+type BookingsFields_updatedAt {
+  create: BookingsFields_updatedAt_Create
+  read: BookingsFields_updatedAt_Read
+  update: BookingsFields_updatedAt_Update
+  delete: BookingsFields_updatedAt_Delete
+}
+
+type BookingsFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type BookingsFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type BookingsFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type BookingsFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type BookingsFields_createdAt {
+  create: BookingsFields_createdAt_Create
+  read: BookingsFields_createdAt_Read
+  update: BookingsFields_createdAt_Update
+  delete: BookingsFields_createdAt_Delete
+}
+
+type BookingsFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type BookingsFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type BookingsFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type BookingsFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type BookingsCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type BookingsReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type BookingsUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type BookingsDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type amenitiesAccess {
+  fields: AmenitiesFields
+  create: AmenitiesCreateAccess
+  read: AmenitiesReadAccess
+  update: AmenitiesUpdateAccess
+  delete: AmenitiesDeleteAccess
+}
+
+type AmenitiesFields {
+  title: AmenitiesFields_title
+  media: AmenitiesFields_media
+  updatedAt: AmenitiesFields_updatedAt
+  createdAt: AmenitiesFields_createdAt
+}
+
+type AmenitiesFields_title {
+  create: AmenitiesFields_title_Create
+  read: AmenitiesFields_title_Read
+  update: AmenitiesFields_title_Update
+  delete: AmenitiesFields_title_Delete
+}
+
+type AmenitiesFields_title_Create {
+  permission: Boolean!
+}
+
+type AmenitiesFields_title_Read {
+  permission: Boolean!
+}
+
+type AmenitiesFields_title_Update {
+  permission: Boolean!
+}
+
+type AmenitiesFields_title_Delete {
+  permission: Boolean!
+}
+
+type AmenitiesFields_media {
+  create: AmenitiesFields_media_Create
+  read: AmenitiesFields_media_Read
+  update: AmenitiesFields_media_Update
+  delete: AmenitiesFields_media_Delete
+}
+
+type AmenitiesFields_media_Create {
+  permission: Boolean!
+}
+
+type AmenitiesFields_media_Read {
+  permission: Boolean!
+}
+
+type AmenitiesFields_media_Update {
+  permission: Boolean!
+}
+
+type AmenitiesFields_media_Delete {
+  permission: Boolean!
+}
+
+type AmenitiesFields_updatedAt {
+  create: AmenitiesFields_updatedAt_Create
+  read: AmenitiesFields_updatedAt_Read
+  update: AmenitiesFields_updatedAt_Update
+  delete: AmenitiesFields_updatedAt_Delete
+}
+
+type AmenitiesFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type AmenitiesFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type AmenitiesFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type AmenitiesFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type AmenitiesFields_createdAt {
+  create: AmenitiesFields_createdAt_Create
+  read: AmenitiesFields_createdAt_Read
+  update: AmenitiesFields_createdAt_Update
+  delete: AmenitiesFields_createdAt_Delete
+}
+
+type AmenitiesFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type AmenitiesFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type AmenitiesFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type AmenitiesFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type AmenitiesCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type AmenitiesReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type AmenitiesUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type AmenitiesDeleteAccess {
   permission: Boolean!
   where: JSONObject
 }
@@ -14714,6 +16935,12 @@ type Mutation {
   updateReview(id: String!, autosave: Boolean, data: mutationReviewUpdateInput!, draft: Boolean): Review
   deleteReview(id: String!): Review
   restoreVersionReview(id: String): Review
+  createBooking(data: mutationBookingInput!): Booking
+  updateBooking(id: String!, autosave: Boolean, data: mutationBookingUpdateInput!): Booking
+  deleteBooking(id: String!): Booking
+  createAmenity(data: mutationAmenityInput!): Amenity
+  updateAmenity(id: String!, autosave: Boolean, data: mutationAmenityUpdateInput!): Amenity
+  deleteAmenity(id: String!): Amenity
   createForm(data: mutationFormInput!): Form
   updateForm(id: String!, autosave: Boolean, data: mutationFormUpdateInput!): Form
   deleteForm(id: String!): Form
@@ -14868,9 +17095,19 @@ enum PageUpdate__status_MutationInput {
 input mutationProductInput {
   title: String!
   publishedOn: String
+  available: Boolean
   gallery: [mutationProduct_GalleryInput]
+  productDescription: JSON!
+  amenities: [mutationProduct_AmenitiesInput]
   layout: JSON
   stripeProductID: String
+  bedroomQuantity: Float!
+  bathQuantity: Float!
+  maxGuestQuantity: Float!
+  baseGuestQuantity: Float!
+  stripeGuestFeeID: String
+  guestFeePriceJSON: String
+  variants: [mutationProduct_VariantsInput]
   priceJSON: String
   enablePaywall: Boolean
   paywall: JSON
@@ -14885,7 +17122,20 @@ input mutationProductInput {
 }
 
 input mutationProduct_GalleryInput {
-  image: String!
+  media: String!
+  id: String
+}
+
+input mutationProduct_AmenitiesInput {
+  amenity: String
+  id: String
+}
+
+input mutationProduct_VariantsInput {
+  stripeVariantProductID: String!
+  priceJSON: String
+  seasonStart: String!
+  seasonEnd: String!
   id: String
 }
 
@@ -14903,9 +17153,19 @@ enum Product__status_MutationInput {
 input mutationProductUpdateInput {
   title: String
   publishedOn: String
+  available: Boolean
   gallery: [mutationProductUpdate_GalleryInput]
+  productDescription: JSON
+  amenities: [mutationProductUpdate_AmenitiesInput]
   layout: JSON
   stripeProductID: String
+  bedroomQuantity: Float
+  bathQuantity: Float
+  maxGuestQuantity: Float
+  baseGuestQuantity: Float
+  stripeGuestFeeID: String
+  guestFeePriceJSON: String
+  variants: [mutationProductUpdate_VariantsInput]
   priceJSON: String
   enablePaywall: Boolean
   paywall: JSON
@@ -14920,7 +17180,20 @@ input mutationProductUpdateInput {
 }
 
 input mutationProductUpdate_GalleryInput {
-  image: String!
+  media: String!
+  id: String
+}
+
+input mutationProductUpdate_AmenitiesInput {
+  amenity: String
+  id: String
+}
+
+input mutationProductUpdate_VariantsInput {
+  stripeVariantProductID: String!
+  priceJSON: String
+  seasonStart: String!
+  seasonEnd: String!
   id: String
 }
 
@@ -14936,18 +17209,12 @@ enum ProductUpdate__status_MutationInput {
 }
 
 input mutationOrderInput {
-  appointmentType: Order_appointmentType_MutationInput!
   orderedBy: String
   stripePaymentIntentID: String
   total: Float!
   items: [mutationOrder_ItemsInput]
   updatedAt: String
   createdAt: String
-}
-
-enum Order_appointmentType_MutationInput {
-  booking
-  blockout
 }
 
 input mutationOrder_ItemsInput {
@@ -14960,18 +17227,12 @@ input mutationOrder_ItemsInput {
 }
 
 input mutationOrderUpdateInput {
-  appointmentType: OrderUpdate_appointmentType_MutationInput
   orderedBy: String
   stripePaymentIntentID: String
   total: Float
   items: [mutationOrderUpdate_ItemsInput]
   updatedAt: String
   createdAt: String
-}
-
-enum OrderUpdate_appointmentType_MutationInput {
-  booking
-  blockout
 }
 
 input mutationOrderUpdate_ItemsInput {
@@ -15068,14 +17329,15 @@ enum User_roles_MutationInput {
 }
 
 input mutationUser_CartInput {
+  headProduct: String
+  startDate: String
+  endDate: String
   items: [mutationUser_Cart_ItemsInput]
 }
 
 input mutationUser_Cart_ItemsInput {
   product: String
   quantity: Float
-  startDate: String!
-  endDate: String!
   id: String
 }
 
@@ -15104,14 +17366,15 @@ enum UserUpdate_roles_MutationInput {
 }
 
 input mutationUserUpdate_CartInput {
+  headProduct: String
+  startDate: String
+  endDate: String
   items: [mutationUserUpdate_Cart_ItemsInput]
 }
 
 input mutationUserUpdate_Cart_ItemsInput {
   product: String
   quantity: Float
-  startDate: String!
-  endDate: String!
   id: String
 }
 
@@ -15170,6 +17433,52 @@ input mutationReviewUpdateInput {
 enum ReviewUpdate__status_MutationInput {
   draft
   published
+}
+
+input mutationBookingInput {
+  startDate: String!
+  endDate: String!
+  product: String
+  type: Booking_type_MutationInput
+  order: String
+  user: String
+  updatedAt: String
+  createdAt: String
+}
+
+enum Booking_type_MutationInput {
+  blockout
+  reservation
+}
+
+input mutationBookingUpdateInput {
+  startDate: String
+  endDate: String
+  product: String
+  type: BookingUpdate_type_MutationInput
+  order: String
+  user: String
+  updatedAt: String
+  createdAt: String
+}
+
+enum BookingUpdate_type_MutationInput {
+  blockout
+  reservation
+}
+
+input mutationAmenityInput {
+  title: String!
+  media: String
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationAmenityUpdateInput {
+  title: String
+  media: String
+  updatedAt: String
+  createdAt: String
 }
 
 input mutationFormInput {

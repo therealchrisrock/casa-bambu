@@ -6,8 +6,10 @@ import { Archive } from '../../blocks/ArchiveBlock'
 import { CallToAction } from '../../blocks/CallToAction'
 import { Content } from '../../blocks/Content'
 import { MediaBlock } from '../../blocks/MediaBlock'
+import richText from '../../fields/richText'
 import { slugField } from '../../fields/slug'
 import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
+import { validateSeasonalPricing } from '../Bookings/hooks/validateAvailability'
 import { checkUserPurchases } from './access/checkUserPurchases'
 import { beforeProductChange } from './hooks/beforeChange'
 import { deleteProductFromCarts } from './hooks/deleteProductFromCarts'
@@ -21,6 +23,7 @@ const Products: CollectionConfig = {
     plural: 'Listings',
   },
   admin: {
+    group: 'Ecommerce Data',
     useAsTitle: 'title',
     defaultColumns: ['title', 'stripeProductID', '_status'],
     preview: doc => {
@@ -71,18 +74,23 @@ const Products: CollectionConfig = {
       },
     },
     {
+      name: 'available',
+      type: 'checkbox',
+      defaultValue: 'true',
+      label: 'Available for Booking Requests',
+    },
+    {
       name: 'gallery', // required
       type: 'array', // required
       label: 'Product Images',
-      minRows: 0,
-      maxRows: 10,
+      minRows: 5,
       labels: {
         singular: 'Image',
         plural: 'Images',
       },
       fields: [
         {
-          name: 'image', // required
+          name: 'media', // required
           type: 'upload', // required
           relationTo: 'media', // required
           required: true,
@@ -102,6 +110,18 @@ const Products: CollectionConfig = {
         {
           label: 'Content',
           fields: [
+            richText({ name: 'productDescription' }),
+            {
+              name: 'amenities',
+              type: 'array',
+              fields: [
+                {
+                  name: 'amenity',
+                  type: 'relationship',
+                  relationTo: 'amenities',
+                },
+              ],
+            },
             {
               name: 'layout',
               type: 'blocks',
@@ -115,13 +135,102 @@ const Products: CollectionConfig = {
           fields: [
             {
               name: 'stripeProductID',
-              label: 'Stripe Product',
+              label: 'Stripe Product (Default)',
               type: 'text',
               admin: {
                 components: {
                   Field: ProductSelect,
                 },
               },
+            },
+            {
+              name: 'bedroomQuantity',
+              type: 'number',
+              label: 'Number of Bedrooms',
+              required: true,
+            },
+            {
+              name: 'bathQuantity',
+              type: 'number',
+              label: 'Number of Bathrooms',
+              required: true,
+            },
+            {
+              name: 'maxGuestQuantity',
+              type: 'number',
+              label: 'Maximum Number of Guests',
+              required: true,
+            },
+            {
+              name: 'baseGuestQuantity',
+              type: 'number',
+              label: 'Number of Allowable Guests Without Incurring Guest Fees',
+              required: true
+            },
+            {
+              name: 'stripeGuestFeeID',
+              type: 'text',
+              admin: {
+                components: {
+                  Field: ProductSelect,
+                },
+              },
+            },
+            {
+              name: 'guestFeePriceJSON',
+              label: 'Guest Fee Price JSON',
+              type: 'textarea',
+              admin: {
+                readOnly: true,
+                hidden: true,
+                rows: 10,
+              },
+            },
+            {
+              name: 'variants',
+              label: 'Seasonal Prices',
+              type: 'array',
+              fields: [
+                {
+                  name: 'stripeVariantProductID',
+                  label: 'Stripe Product',
+                  type: 'text',
+                  required: true,
+                  admin: {
+                    components: {
+                      Field: ProductSelect,
+                    },
+                  },
+                },
+                {
+                  name: 'priceJSON',
+                  label: 'Price JSON',
+                  type: 'textarea',
+                  admin: {
+                    readOnly: true,
+                    hidden: true,
+                    rows: 10,
+                  },
+                },
+                {
+                  name: 'seasonStart',
+                  label: 'Season (start date)',
+                  type: 'date',
+                  required: true,
+                  hooks: {
+                    beforeChange: [validateSeasonalPricing],
+                  },
+                },
+                {
+                  name: 'seasonEnd',
+                  label: 'Season (end date)',
+                  type: 'date',
+                  required: true,
+                  hooks: {
+                    beforeChange: [validateSeasonalPricing],
+                  },
+                },
+              ],
             },
             {
               name: 'priceJSON',

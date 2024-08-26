@@ -1,6 +1,7 @@
 import { ARCHIVE_BLOCK, CALL_TO_ACTION, CONTENT, MEDIA_BLOCK } from './blocks'
 import { CATEGORIES } from './categories'
 import { META } from './meta'
+import { MEDIA } from '@/_graphql/media'
 
 export const PRODUCTS = `
   query Products {
@@ -18,13 +19,16 @@ export const PRODUCT = `
       docs {
         id
         title
+        productDescription
+        maxGuestQuantity
+        baseGuestQuantity
+        stripeGuestFeeID
+        guestFeePriceJSON
+        bathQuantity
+        bedroomQuantity
         gallery {
           id
-          image {
-            alt
-            url 
-            caption
-          }
+          ${MEDIA}
         }
         stripeProductID
         ${CATEGORIES}
@@ -35,6 +39,12 @@ export const PRODUCT = `
           ${ARCHIVE_BLOCK}
         }
         priceJSON
+        variants {
+          stripeVariantProductID
+          priceJSON
+          seasonStart
+          seasonEnd
+        }
         enablePaywall
         relatedProducts {
           id

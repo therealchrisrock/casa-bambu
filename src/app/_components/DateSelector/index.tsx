@@ -10,27 +10,33 @@ import { Button } from '@/_components/ui/button'
 import { Calendar } from '@/_components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/_components/ui/popover'
 import { cn } from '@/_lib/utils'
-
-export function DatePickerWithRange({ className, date: propsDate, setDate: propsSetDate }: {
-  className?: HTMLDivElement['className'],
-  date?: DateRange,
-  setDate?: Dispatch<SetStateAction<DateRange>>
+import { MIN_DAYS } from '@/(pages)/products/utils'
+export function DatePickerWithRange({
+  className,
+  dates: propsDate,
+  setDates: propsSetDate,
+  disabled = [],
+}: {
+  className?: HTMLDivElement['className']
+  dates?: DateRange
+  setDates?: Dispatch<SetStateAction<DateRange>>
+  disabled?: Date[]
 }) {
   const [internalDate, setInternalDate] = React.useState<DateRange | undefined>({
-    from: new Date(2022, 0, 20),
-    to: addDays(new Date(2022, 0, 20), 20),
+    from: new Date(),
+    to: addDays(new Date(), MIN_DAYS),
   })
-  const date = propsDate || internalDate
-  const setDate = propsSetDate || setInternalDate
+  const date = propsDate && propsSetDate ? propsDate : internalDate
+  const setDate = propsDate && propsSetDate ? propsSetDate : setInternalDate
   return (
     <div className={cn('grid gap-2', className)}>
-      <Popover>
+      <Popover >
         <PopoverTrigger asChild>
           <Button
             id="date"
             variant={'outline'}
             className={cn(
-              'w-[300px] justify-start text-left font-normal',
+              ' justify-start text-left font-normal',
               !date && 'text-muted-foreground',
             )}
           >
@@ -48,14 +54,23 @@ export function DatePickerWithRange({ className, date: propsDate, setDate: props
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0" align="end">
           <Calendar
-            initialFocus
+            showOutsideDays={false}
+            fromDate={new Date()}
+            today={null}
             mode="range"
             defaultMonth={date?.from}
             selected={date}
             onSelect={setDate}
             numberOfMonths={2}
+            disabled={disabled}
+            modifiers={{
+              booked: disabled,
+            }}
+            modifiersClassNames={{
+              booked: 'booked--day',
+            }}
           />
         </PopoverContent>
       </Popover>
@@ -69,5 +84,4 @@ export const useDateRangeSelector = () => {
     to: addDays(new Date(2022, 0, 20), 20),
   })
   return [date, setDate]
-
 }

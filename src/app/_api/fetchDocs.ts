@@ -7,6 +7,9 @@ import { PRODUCTS } from '../_graphql/products'
 import { GRAPHQL_API_URL } from './shared'
 import { payloadToken } from './token'
 
+import { BOOKINGS } from '@/_graphql/bookings'
+import { Where } from 'payload/types'
+
 const queryMap = {
   pages: {
     query: PAGES,
@@ -20,11 +23,16 @@ const queryMap = {
     query: ORDERS,
     key: 'Orders',
   },
+  bookings: {
+    query: BOOKINGS,
+    key: 'Bookings',
+  },
 }
 
-export const fetchDocs = async <T>(
+export const fetchDocs = async <T, W extends Where = {}>(
   collection: keyof Config['collections'],
   draft?: boolean,
+  where?: W,
 ): Promise<T[]> => {
   if (!queryMap[collection]) throw new Error(`Collection ${collection} not found`)
 
@@ -34,7 +42,6 @@ export const fetchDocs = async <T>(
     const { cookies } = await import('next/headers')
     token = cookies().get(payloadToken)
   }
-
   const docs: T[] = await fetch(`${GRAPHQL_API_URL}/api/graphql`, {
     method: 'POST',
     headers: {
@@ -42,9 +49,12 @@ export const fetchDocs = async <T>(
       ...(token?.value && draft ? { Authorization: `JWT ${token.value}` } : {}),
     },
     cache: 'no-store',
-    next: { tags: [collection] },
+    next: { tags: [collection, JSON.stringify(where ?? {})] },
     body: JSON.stringify({
       query: queryMap[collection].query,
+      variables: {
+        where: where ?? {},
+      },
     }),
   })
     ?.then(res => res.json())

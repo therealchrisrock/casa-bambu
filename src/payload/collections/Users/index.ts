@@ -14,8 +14,10 @@ import { CustomerSelect } from './ui/CustomerSelect'
 const Users: CollectionConfig = {
   slug: 'users',
   admin: {
+    group: 'Ecommerce Data',
     useAsTitle: 'name',
-    defaultColumns: ['name', 'email'],
+    defaultColumns: ['name', 'email']
+
   },
   access: {
     read: adminsAndUser,
@@ -98,6 +100,9 @@ const Users: CollectionConfig = {
       label: 'Cart',
       name: 'cart',
       type: 'group',
+      admin: {
+        hidden: true
+      },
       fields: [
         {
           name: 'items',

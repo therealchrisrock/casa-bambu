@@ -9,3 +9,4 @@ node_modules
 /.idea/vcs.xml
 appointments-plugin
 ecosystem.config.js
+.env.*

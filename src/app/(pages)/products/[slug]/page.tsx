@@ -1,15 +1,21 @@
-import React from 'react'
+import { DateRange } from 'react-day-picker'
+import { addDays } from 'date-fns'
+import { BathIcon, BedSingleIcon, MapPin, UsersIcon } from 'lucide-react'
 import { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
-import { Product, Product as ProductType } from '../../../../payload/payload-types'
+import { Booking, Product, Product as ProductType } from '../../../../payload/payload-types'
 import { fetchDoc } from '../../../_api/fetchDoc'
 import { fetchDocs } from '../../../_api/fetchDocs'
 import { Blocks } from '../../../_components/Blocks'
 import { PaywallBlocks } from '../../../_components/PaywallBlocks'
-import { ProductHero } from '../../../_heros/Product'
 import { generateMeta } from '../../../_utilities/generateMeta'
+
+import { Gallery } from '@/_components/Gallery'
+import { Gutter } from '@/_components/Gutter'
+import RichText from '@/_components/RichText'
+import { ProductDetails } from '@/(pages)/products/ProductForm'
 
 // Force this page to be dynamic so that Next.js does not cache it
 // See the note in '../../../[slug]/page.tsx' about this
@@ -19,26 +25,37 @@ export default async function Product({ params: { slug } }) {
   const { isEnabled: isDraftMode } = draftMode()
 
   let product: Product | null = null
-
+  let bookings: Booking[] = []
   try {
     product = await fetchDoc<Product>({
       collection: 'products',
       slug,
       draft: isDraftMode,
     })
+    bookings = await fetchDocs<Booking>('bookings', false, {
+      product: { equals: product.id },
+      endDate: { greater_than_equal: new Date().toJSON() },
+    })
   } catch (error) {
     console.error(error) // eslint-disable-line no-console
   }
-
   if (!product) {
     notFound()
   }
 
-  const { layout, relatedProducts } = product
-
+  const { layout, relatedProducts, gallery, productDescription } = product
   return (
-    <React.Fragment>
-      <ProductHero product={product} />
+    <Gutter className={'grid gap-8 lg:gap-12 xl:gap-12'}>
+      <Gallery assets={gallery} />
+      <div className={'flex'}>
+        <div className={'space-y-4 pr-8 flex-1'}>
+          <h2 className={'text-3xl font-semibold'}>About {product.title}</h2>
+          <RichText size={'prose-lg'} content={productDescription} />
+        </div>
+        <div className={'col-span-4 min-w-[338px] max-w-[420px]'}>
+          <ProductDetails bookings={bookings} product={product} />
+        </div>
+      </div>
       <Blocks blocks={layout} />
       {product?.enablePaywall && <PaywallBlocks productSlug={slug as string} disableTopPadding />}
       <Blocks
@@ -82,9 +99,11 @@ export default async function Product({ params: { slug } }) {
           },
         ]}
       />
-    </React.Fragment>
+    </Gutter>
   )
 }
+
+
 
 export async function generateStaticParams() {
   try {

@@ -7,6 +7,9 @@ export const Media: CollectionConfig = {
   upload: {
     staticDir: path.resolve(__dirname, '../../../media'),
   },
+  admin: {
+    group: 'Website Content',
+  },
   access: {
     read: () => true,
   },

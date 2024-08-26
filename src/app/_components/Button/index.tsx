@@ -38,16 +38,18 @@ export const Button: React.FC<Props> = ({
   const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
 
   const className = [classes.button, classNameFromProps].filter(Boolean).join(' ')
-  let variant = appearance === 'primary' ? 'default' : appearance
+  let variant: 'default' | 'secondary' | 'link' | 'ghost' | 'destructive' | 'outline' =
+    appearance === 'primary' ? 'default' : appearance === 'none' ? 'ghost' : appearance
   const content = (
     <>
-      {variant === 'none' ? (
-        <>{label}</>
-      ) : (
-        <ShadButton variant={variant} className={invert ? 'invert' : ''} disabled={disabled}>
-          {label}&nbsp;{variant === 'link' && <MoveRightIcon strokeWidth={1} />}
-        </ShadButton>
-      )}
+      <ShadButton
+        variant={variant}
+        className={invert ? 'invert' : ''}
+        disabled={disabled}
+        onClick={onClick}
+      >
+        {label}&nbsp;{variant === 'link' && <MoveRightIcon strokeWidth={1} />}
+      </ShadButton>
     </>
   )
 
@@ -61,7 +63,12 @@ export const Button: React.FC<Props> = ({
     )
   }
   return (
-    <ShadButton className={invert ? 'invert' : ''} disabled={disabled} variant={'default'}>
+    <ShadButton
+      className={invert ? 'invert' : ''}
+      disabled={disabled}
+      variant={'default'}
+      onClick={onClick}
+    >
       {label}
     </ShadButton>
   )

@@ -12,10 +12,11 @@ import { LinkToPaymentIntent } from './ui/LinkToPaymentIntent'
 export const Orders: CollectionConfig = {
   slug: 'orders',
   labels: {
-    singular: 'Reservation',
-    plural: 'Reservations',
+    singular: 'Order',
+    plural: 'Orders',
   },
   admin: {
+    hidden: true,
     useAsTitle: 'orderedBy',
     defaultColumns: ['createdAt', 'orderedBy'],
     preview: doc => `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/orders/${doc.id}`,
@@ -33,22 +34,6 @@ export const Orders: CollectionConfig = {
     delete: admins,
   },
   fields: [
-    {
-      name: 'appointmentType',
-      type: 'select',
-      label: 'Reservation type',
-      options: [
-        {
-          value: 'booking',
-          label: 'Booking',
-        },
-        {
-          value: 'blockout',
-          label: 'Blockout',
-        },
-      ],
-      required: true,
-    },
     {
       name: 'orderedBy',
       type: 'relationship',

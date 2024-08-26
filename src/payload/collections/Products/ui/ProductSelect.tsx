@@ -4,15 +4,16 @@ import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipbo
 import { TextField } from 'payload/dist/fields/config/types'
 
 export const ProductSelect: React.FC<TextField> = props => {
-  const { name, label } = props
+  // @ts-ignore
+  const { name, label, path } = props
   const [options, setOptions] = React.useState<
     {
       label: string
       value: string
     }[]
   >([])
-
-  const { value: stripeProductID } = useFormFields(([fields]) => fields[name])
+  const v = useFormFields(([fields]) => fields)
+  const { value: stripeProductID } = useFormFields(([fields]) => fields[path])
 
   React.useEffect(() => {
     const getStripeProducts = async () => {
@@ -53,7 +54,7 @@ export const ProductSelect: React.FC<TextField> = props => {
   }products/${stripeProductID}`
 
   return (
-    <div>
+    <div style={{paddingBottom: '12px'}}>
       <p style={{ marginBottom: '0' }}>{typeof label === 'string' ? label : 'Product'}</p>
       <p
         style={{
@@ -78,7 +79,7 @@ export const ProductSelect: React.FC<TextField> = props => {
       {Boolean(stripeProductID) && (
         <div
           style={{
-            marginTop: '-1rem',
+            marginTop: '1rem',
             marginBottom: '1.5rem',
           }}
         >
@@ -87,6 +88,7 @@ export const ProductSelect: React.FC<TextField> = props => {
               className="label"
               style={{
                 color: '#9A9A9A',
+                paddingTop: '12px'
               }}
             >
               {`Manage "${
@@ -117,3 +119,5 @@ export const ProductSelect: React.FC<TextField> = props => {
     </div>
   )
 }
+
+

@@ -14,8 +14,6 @@ export type CartItems =
   | {
       product?: (string | null) | Product;
       quantity?: number | null;
-      startDate: string;
-      endDate: string;
       id?: string | null;
     }[]
   | null;
@@ -29,6 +27,8 @@ export interface Config {
     categories: Category;
     users: User;
     reviews: Review;
+    bookings: Booking;
+    amenities: Amenity;
     forms: Form;
     'form-submissions': FormSubmission;
     redirects: Redirect;
@@ -74,101 +74,103 @@ export interface Page {
       | null;
     media?: string | Media | null;
   };
-  layout: (
-    | {
-        invertBackground?: boolean | null;
-        richText: {
-          [k: string]: unknown;
-        }[];
-        links?:
-          | {
-              link: {
-                type?: ('reference' | 'custom') | null;
-                newTab?: boolean | null;
-                reference?: {
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null;
-                url?: string | null;
-                label: string;
-                appearance?: ('primary' | 'secondary') | null;
-              };
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'cta';
-      }
-    | {
-        invertBackground?: boolean | null;
-        columns?:
-          | {
-              size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-              richText: {
-                [k: string]: unknown;
-              }[];
-              enableLink?: boolean | null;
-              link?: {
-                type?: ('reference' | 'custom') | null;
-                newTab?: boolean | null;
-                reference?: {
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null;
-                url?: string | null;
-                label: string;
-                appearance?: ('default' | 'primary' | 'secondary' | 'link') | null;
-              };
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'content';
-      }
-    | {
-        invertBackground?: boolean | null;
-        position?: ('default' | 'fullscreen') | null;
-        media: string | Media;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'mediaBlock';
-      }
-    | {
-        introContent: {
-          [k: string]: unknown;
-        }[];
-        populateBy?: ('collection' | 'selection') | null;
-        relationTo?: 'products' | null;
-        appearance?: ('card' | 'wide') | null;
-        categories?: (string | Category)[] | null;
-        limit?: number | null;
-        selectedDocs?:
-          | {
-              relationTo: 'products';
-              value: string | Product;
-            }[]
-          | null;
-        populatedDocs?:
-          | {
-              relationTo: 'products';
-              value: string | Product;
-            }[]
-          | null;
-        populatedDocsTotal?: number | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'archive';
-      }
-    | {
-        review: string | Review;
-        media: string | Media;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'reviewBlock';
-      }
-  )[];
+  layout?:
+    | (
+        | {
+            invertBackground?: boolean | null;
+            richText: {
+              [k: string]: unknown;
+            }[];
+            links?:
+              | {
+                  link: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?: {
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null;
+                    url?: string | null;
+                    label: string;
+                    appearance?: ('primary' | 'secondary') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
+        | {
+            invertBackground?: boolean | null;
+            columns?:
+              | {
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+                  richText: {
+                    [k: string]: unknown;
+                  }[];
+                  enableLink?: boolean | null;
+                  link?: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?: {
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null;
+                    url?: string | null;
+                    label: string;
+                    appearance?: ('default' | 'primary' | 'secondary' | 'link') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content';
+          }
+        | {
+            invertBackground?: boolean | null;
+            position?: ('default' | 'fullscreen') | null;
+            media: string | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mediaBlock';
+          }
+        | {
+            introContent: {
+              [k: string]: unknown;
+            }[];
+            populateBy?: ('collection' | 'selection') | null;
+            relationTo?: 'products' | null;
+            appearance?: ('card' | 'wide') | null;
+            categories?: (string | Category)[] | null;
+            limit?: number | null;
+            selectedDocs?:
+              | {
+                  relationTo: 'products';
+                  value: string | Product;
+                }[]
+              | null;
+            populatedDocs?:
+              | {
+                  relationTo: 'products';
+                  value: string | Product;
+                }[]
+              | null;
+            populatedDocsTotal?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'archive';
+          }
+        | {
+            review: string | Review;
+            media: string | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'reviewBlock';
+          }
+      )[]
+    | null;
   slug?: string | null;
   meta?: {
     title?: string | null;
@@ -229,9 +231,19 @@ export interface Product {
   id: string;
   title: string;
   publishedOn?: string | null;
+  available?: boolean | null;
   gallery?:
     | {
-        image: string | Media;
+        media: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  productDescription: {
+    [k: string]: unknown;
+  }[];
+  amenities?:
+    | {
+        amenity?: (string | null) | Amenity;
         id?: string | null;
       }[]
     | null;
@@ -324,6 +336,21 @@ export interface Product {
       }
   )[];
   stripeProductID?: string | null;
+  bedroomQuantity: number;
+  bathQuantity: number;
+  maxGuestQuantity: number;
+  baseGuestQuantity: number;
+  stripeGuestFeeID?: string | null;
+  guestFeePriceJSON?: string | null;
+  variants?:
+    | {
+        stripeVariantProductID: string;
+        priceJSON?: string | null;
+        seasonStart: string;
+        seasonEnd: string;
+        id?: string | null;
+      }[]
+    | null;
   priceJSON?: string | null;
   enablePaywall?: boolean | null;
   paywall?:
@@ -431,6 +458,17 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "amenities".
+ */
+export interface Amenity {
+  id: string;
+  title: string;
+  media: string | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "reviews".
  */
 export interface Review {
@@ -456,6 +494,9 @@ export interface User {
   purchases?: (string | Product)[] | null;
   stripeCustomerID?: string | null;
   cart?: {
+    headProduct?: (string | null) | Product;
+    startDate?: string | null;
+    endDate?: string | null;
     items?: CartItems;
   };
   skipSync?: boolean | null;
@@ -476,7 +517,6 @@ export interface User {
  */
 export interface Order {
   id: string;
-  appointmentType: 'booking' | 'blockout';
   orderedBy?: (string | null) | User;
   stripePaymentIntentID?: string | null;
   total: number;
@@ -490,6 +530,21 @@ export interface Order {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bookings".
+ */
+export interface Booking {
+  id: string;
+  startDate: string;
+  endDate: string;
+  product: string | Product;
+  type: 'blockout' | 'reservation';
+  order?: (string | null) | Order;
+  user?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }

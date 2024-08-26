@@ -1,0 +1,179 @@
+import type { BeforeChangeHook } from 'payload/dist/collections/config/types'
+import { APIError } from 'payload/errors'
+import type { CollectionBeforeChangeHook, FieldHook } from 'payload/types'
+
+import type { Booking, Product } from '../../../payload-types'
+
+interface Conflict {
+  id1: string
+  id2: string
+  message: string
+}
+interface Season {
+  id: string
+  seasonStart: string // ISO date string
+  seasonEnd: string // ISO date string
+  stripeVariantProductID: string
+}
+export const validateAvailability: CollectionBeforeChangeHook<Booking> = async ({
+  data, // incoming data to update or create with
+  req, // full express request
+  originalDoc,
+}) => {
+  const hasValidDateRange = validateDateRange(new Date(data.startDate), new Date(data.endDate))
+  if (!hasValidDateRange.isValid) {
+    throw new APIError(
+      `Issue with the selected date range — ${hasValidDateRange?.message} Please review your selection and try again`,
+      400,
+      data,
+      true,
+    )
+  }
+  const p = await req.payload.find({
+    collection: 'bookings',
+    where: {
+      and: [
+        {
+          product: {
+            equals: data.product,
+          },
+        },
+        {
+          id: {
+            not_equals: originalDoc.id,
+          },
+          startDate: {
+            less_than_equal: data.endDate,
+          },
+          endDate: {
+            greater_than_equal: data.startDate,
+          },
+        },
+      ],
+    },
+  })
+  const conflicts = getConflicts(data, p.docs)
+  if (!p || p.totalDocs === 0 || !conflicts) return data
+  if (conflicts) {
+    throw new APIError(
+      `Scheduling conflict with booking ID(s): ${conflicts.map(c => c.id)}`,
+      409,
+      { data, conflicts },
+      true,
+    )
+  }
+  return data // Return data to either create or update a document with
+}
+// function isAvailable(newBooking: Partial<Booking>, existingBookings: Booking[]) {
+//   for (const existingBooking of existingBookings) {
+//     const isValid =
+//       newBooking.startDate >= existingBooking.endDate ||
+//       newBooking.endDate <= existingBooking.startDate
+//
+//     if (!isValid) {
+//       return false
+//     }
+//   }
+//   return true
+// }
+function getConflicts(newBooking: Partial<Booking>, existingBookings: Booking[]): Booking[] {
+  const conflicts: Booking[] = []
+  const curr = {
+    startDate: new Date(newBooking.startDate),
+    endDate: new Date(newBooking.endDate),
+  }
+  for (const existingBooking of existingBookings) {
+    const isValid =
+      curr.startDate >= new Date(existingBooking.endDate) ||
+      curr.endDate <= new Date(existingBooking.startDate)
+
+    if (!isValid) {
+      conflicts.push(existingBooking)
+    }
+  }
+  return conflicts
+}
+
+interface ValidDateRangeResult {
+  isValid: true
+  message?: string
+}
+
+interface InvalidDateRangeResult {
+  isValid: false
+  message: string
+}
+
+type DateRangeValidationResult = ValidDateRangeResult | InvalidDateRangeResult
+
+export function validateDateRange(startDate: Date, endDate: Date): DateRangeValidationResult {
+  if (startDate.toDateString() === endDate.toDateString()) {
+    return {
+      isValid: false,
+      message: 'Start date and end date cannot be on the same date.',
+    }
+  }
+  if (startDate > endDate) {
+    return {
+      isValid: false,
+      message: 'Start date cannot be after the end date.',
+    }
+  }
+  return {
+    isValid: true,
+  }
+}
+
+export const validateSeasonalPricing: FieldHook = ({
+  value,
+  data,
+  siblingData,
+}) => {
+  const hasValidDateRange = validateDateRange(
+    new Date(siblingData.seasonStart),
+    new Date(siblingData.seasonEnd),
+  )
+  if (!hasValidDateRange.isValid) {
+    throw new APIError(
+      `Issue with the selected date range — ${hasValidDateRange?.message} Please review your selection and try again`,
+      400,
+      data,
+      true,
+    )
+  }
+  const conflicts = getPricingScheduleConflict(data.variants)
+  if (conflicts.length) {
+    throw new APIError(conflicts[0].message, 400, conflicts, true)
+  }
+  return value
+}
+
+function getPricingScheduleConflict(bookings: Season[]): Conflict[] {
+  const conflicts: Conflict[] = []
+
+  for (let i = 0; i < bookings.length; i++) {
+    for (let j = i + 1; j < bookings.length; j++) {
+      const bookingA = bookings[i]
+      const bookingB = bookings[j]
+
+      const startA = new Date(bookingA.seasonStart)
+      const endA = new Date(bookingA.seasonEnd)
+      const startB = new Date(bookingB.seasonStart)
+      const endB = new Date(bookingB.seasonEnd)
+
+      if (
+        (startA < endB && endA > startB) || // Overlapping ranges
+        startA.getTime() === endB.getTime() || // Same start and end date
+        endA.getTime() === startB.getTime() // Same end and start date
+      ) {
+        conflicts.push({
+          id1: bookingA.id,
+          id2: bookingB.id,
+          message: `Conflict between Scheduled (seasonal) Pricing ID ${bookingA.id} and booking ID ${bookingB.id}`,
+        })
+      }
+    }
+  }
+
+  return conflicts
+}

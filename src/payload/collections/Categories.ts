@@ -4,6 +4,7 @@ const Categories: CollectionConfig = {
   slug: 'categories',
   admin: {
     useAsTitle: 'title',
+    group: 'Website Content',
   },
   access: {
     read: () => true,

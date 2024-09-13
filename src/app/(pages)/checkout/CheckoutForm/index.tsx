@@ -45,42 +45,42 @@ export const CheckoutForm: React.FC<{}> = () => {
           // you will be redirected to the `/cart` page before this redirect happens
           // Instead, we clear the cart in an `afterChange` hook on the `orders` collection in Payload
           try {
-            const orderReq = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders`, {
-              method: 'POST',
-              credentials: 'include',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                total: cartTotal.raw,
-                stripePaymentIntentID: paymentIntent.id,
-                items: (cart?.items || [])?.map(({ product, quantity, startDate, endDate }) => ({
-                  product: typeof product === 'string' ? product : product.id,
-                  quantity,
-                  startDate,
-                  endDate,
-                  price:
-                    typeof product === 'object'
-                      ? priceFromJSON(product.priceJSON, 1, true)
-                      : undefined,
-                })),
-              }),
-            })
+            // const orderReq = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders`, {
+            //   method: 'POST',
+            //   credentials: 'include',
+            //   headers: {
+            //     'Content-Type': 'application/json',
+            //   },
+            //   body: JSON.stringify({
+            //     total: cartTotal.raw,
+            //     stripePaymentIntentID: paymentIntent.id,
+            //     items: (cart?.items || [])?.map(({ product, quantity, from, to }) => ({
+            //       product: typeof product === 'string' ? product : product.id,
+            //       quantity,
+            //       from,
+            //       to,
+            //       price:
+            //         typeof product === 'object'
+            //           ? priceFromJSON(product.priceJSON, 1, true)
+            //           : undefined,
+            //     })),
+            //   }),
+            // })
+            //
+            // if (!orderReq.ok) throw new Error(orderReq.statusText || 'Something went wrong.')
+            //
+            // const {
+            //   error: errorFromRes,
+            //   doc,
+            // }: {
+            //   message?: string
+            //   error?: string
+            //   doc: Order
+            // } = await orderReq.json()
+            //
+            // if (errorFromRes) throw new Error(errorFromRes)
 
-            if (!orderReq.ok) throw new Error(orderReq.statusText || 'Something went wrong.')
-
-            const {
-              error: errorFromRes,
-              doc,
-            }: {
-              message?: string
-              error?: string
-              doc: Order
-            } = await orderReq.json()
-
-            if (errorFromRes) throw new Error(errorFromRes)
-
-            router.push(`/order-confirmation?order_id=${doc.id}`)
+            // router.push(`/order-confirmation?order_id=${doc.id}`)
           } catch (err) {
             // don't throw an error if the order was not created successfully
             // this is because payment _did_ in fact go through, and we don't want the user to pay twice

@@ -5,13 +5,19 @@ import { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
-import { Booking, Product, Product as ProductType } from '../../../../payload/payload-types'
+import {
+  Booking,
+  Product,
+  Product as ProductType,
+  Settings,
+} from '../../../../payload/payload-types'
 import { fetchDoc } from '../../../_api/fetchDoc'
 import { fetchDocs } from '../../../_api/fetchDocs'
 import { Blocks } from '../../../_components/Blocks'
 import { PaywallBlocks } from '../../../_components/PaywallBlocks'
 import { generateMeta } from '../../../_utilities/generateMeta'
 
+import { fetchSettings } from '@/_api/fetchGlobals'
 import { Gallery } from '@/_components/Gallery'
 import { Gutter } from '@/_components/Gutter'
 import RichText from '@/_components/RichText'
@@ -26,6 +32,7 @@ export default async function Product({ params: { slug } }) {
 
   let product: Product | null = null
   let bookings: Booking[] = []
+  let settings: Settings = { id: undefined }
   try {
     product = await fetchDoc<Product>({
       collection: 'products',
@@ -36,6 +43,7 @@ export default async function Product({ params: { slug } }) {
       product: { equals: product.id },
       endDate: { greater_than_equal: new Date().toJSON() },
     })
+    settings = await fetchSettings();
   } catch (error) {
     console.error(error) // eslint-disable-line no-console
   }
@@ -53,7 +61,7 @@ export default async function Product({ params: { slug } }) {
           <RichText size={'prose-lg'} content={productDescription} />
         </div>
         <div className={'col-span-4 min-w-[338px] max-w-[420px]'}>
-          <ProductDetails bookings={bookings} product={product} />
+          <ProductDetails bookings={bookings} product={product} settings={settings} />
         </div>
       </div>
       <Blocks blocks={layout} />
@@ -102,8 +110,6 @@ export default async function Product({ params: { slug } }) {
     </Gutter>
   )
 }
-
-
 
 export async function generateStaticParams() {
   try {

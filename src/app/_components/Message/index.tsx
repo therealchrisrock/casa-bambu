@@ -17,10 +17,10 @@ export const Message: React.FC<{
         className={[
           classes.message,
           className,
-          error && classes.error,
           success && classes.success,
           warning && classes.warning,
           !error && !success && !warning && classes.default,
+          'text-destructive-foreground bg-destructive rounded-lg',
         ]
           .filter(Boolean)
           .join(' ')}

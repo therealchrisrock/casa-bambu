@@ -7,6 +7,7 @@ import { AddToCartButton } from '../AddToCartButton'
 import { RemoveFromCartButton } from '../RemoveFromCartButton'
 
 import classes from './index.module.scss'
+import { BookingDetails } from '@/_utilities/bookingCalculations'
 
 export const priceFromJSON = (priceJSON: string, quantity: number = 1, raw?: boolean): string => {
   let price = ''
@@ -77,4 +78,36 @@ export const Price: React.FC<{
       {button && button === 'removeFromCart' && <RemoveFromCartButton product={product} />}
     </div>
   )
+}
+
+export const formattedPrice = (s: number) => {
+  const p = s.toLocaleString('en-CA', {
+    style: 'currency',
+    currency: 'CAD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })
+  return `${p} CAD`
+}
+export function getAvgPrice(product: Product, d?: BookingDetails) {
+  const priceData = JSON.parse(product.priceJSON).data
+  const defaultNightly = priceData[0]
+  if (!defaultNightly?.unit_amount) return ''
+  let p = d?.averageRate ? d.averageRate : defaultNightly.unit_amount / 100
+  return formattedPrice(p)
+}
+
+function findNightlyPrice(prices: any[]): any | null {
+  if (prices.length === 0) return null;
+
+  // Attempt to find the price with lookup_key "low_nightly"
+  const lowNightly = prices.find(price => price.lookup_key === 'low_nightly');
+  if (lowNightly) return lowNightly;
+
+  // If not found, attempt to find any price with a lookup_key ending with "_nightly"
+  const nightlySuffix = prices.find(price => price.lookup_key.endsWith('_nightly'));
+  if (nightlySuffix) return nightlySuffix;
+
+  // If neither is found, return the first item in the array
+  return prices[0];
 }

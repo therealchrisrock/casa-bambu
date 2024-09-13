@@ -36,6 +36,8 @@ import { Header } from './globals/Header'
 import { Settings } from './globals/Settings'
 import { priceUpdated } from './stripe/webhooks/priceUpdated'
 import { productUpdated } from './stripe/webhooks/productUpdated'
+import { pricesProxy } from './endpoints/prices'
+import { couponsProxy } from './endpoints/coupons'
 
 const generateTitle: GenerateTitle = () => {
   return 'My Store'
@@ -87,6 +89,8 @@ export default buildConfig({
             [path.resolve(__dirname, 'endpoints/create-invoice')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/customers')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/products')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/coupons')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/prices')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/get-availability')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/seed')]: mockModulePath,
             stripe: mockModulePath,
@@ -143,6 +147,16 @@ export default buildConfig({
       path: '/stripe/customers',
       method: 'get',
       handler: customersProxy,
+    },
+    {
+      path: '/stripe/prices/:pid',
+      method: 'get',
+      handler: pricesProxy,
+    },
+    {
+      path: '/stripe/coupons',
+      method: 'get',
+      handler: couponsProxy,
     },
     {
       path: '/stripe/products',

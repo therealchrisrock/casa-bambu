@@ -18,12 +18,14 @@ import { useTheme } from '../../../_providers/Theme'
 import cssVariables from '../../../cssVariables'
 import { CheckoutForm } from '../CheckoutForm'
 
+import { Button as ShadButton } from '@/_components/ui/button'
+
 import classes from './index.module.scss'
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
 const INVOICE_MODE = true
-export const CheckoutPage: React.FC<{
+export const BookingCheckoutPage: React.FC<{
   settings: Settings
 }> = props => {
   const {
@@ -38,61 +40,32 @@ export const CheckoutPage: React.FC<{
   const { theme } = useTheme()
 
   const { cart, cartIsEmpty, cartTotal } = useCart()
-
+  const createInvoice = async () => {
+    try {
+      const invoice = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/create-invoice`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+      const res = await invoice.json()
+      console.log('create-invoice', invoice)
+      if (res.error) {
+        setError(res.error)
+      } else if (res.client_secret) {
+        setError(null)
+        setClientSecret(res.client_secret)
+      }
+    } catch (e) {
+      setError('Something went wrong.')
+    }
+  }
   useEffect(() => {
     if (user !== null && cartIsEmpty) {
       router.push('/cart')
     }
   }, [router, user, cartIsEmpty])
-
   useEffect(() => {
     if (user && cart && hasMadePaymentIntent.current === false) {
       hasMadePaymentIntent.current = true
-
-      const makeIntent = async () => {
-        try {
-          const paymentReq = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/api/create-payment-intent`,
-            {
-              method: 'POST',
-              credentials: 'include',
-            },
-          )
-
-          const res = await paymentReq.json()
-
-          if (res.error) {
-            setError(res.error)
-          } else if (res.client_secret) {
-            setError(null)
-            setClientSecret(res.client_secret)
-          }
-        } catch (e) {
-          setError('Something went wrong.')
-        }
-      }
-      const createInvoice = async () => {
-        try {
-          const invoice = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/api/create-invoice`,
-            {
-              method: 'POST',
-              credentials: 'include',
-            },
-          )
-          const res = await invoice.json()
-
-          if (res.error) {
-            setError(res.error)
-          } else if (res.client_secret) {
-            setError(null)
-            setClientSecret(res.client_secret)
-          }
-        } catch (e) {
-          setError('Something went wrong.')
-        }
-      }
-      INVOICE_MODE ? makeIntent() : createInvoice()
     }
   }, [cart, user])
 
@@ -179,38 +152,45 @@ export const CheckoutPage: React.FC<{
           <Button label="Back to cart" href="/cart" appearance="secondary" />
         </div>
       )}
-      {clientSecret && (
-        <Fragment>
-          {error && <p>{`Error: ${error}`}</p>}
-          <Elements
-            stripe={stripe}
-            options={{
-              clientSecret,
-              appearance: {
-                theme: 'stripe',
-                variables: {
-                  colorText:
-                    theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
-                  fontSizeBase: '16px',
-                  fontWeightNormal: '500',
-                  fontWeightBold: '600',
-                  colorBackground:
-                    theme === 'dark' ? cssVariables.colors.base850 : cssVariables.colors.base0,
-                  fontFamily: 'Inter, sans-serif',
-                  colorTextPlaceholder: cssVariables.colors.base500,
-                  colorIcon:
-                    theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
-                  borderRadius: '0px',
-                  colorDanger: cssVariables.colors.error500,
-                  colorDangerText: cssVariables.colors.error500,
-                },
-              },
-            }}
-          >
-            <CheckoutForm />
-          </Elements>
-        </Fragment>
-      )}
+      <ShadButton
+        onClick={() => {
+          createInvoice()
+        }}
+      >
+        Checkout
+      </ShadButton>
+      {/*{clientSecret && (*/}
+      {/*  <Fragment>*/}
+      {/*    {error && <p>{`Error: ${error}`}</p>}*/}
+      {/*    <Elements*/}
+      {/*      stripe={stripe}*/}
+      {/*      options={{*/}
+      {/*        clientSecret,*/}
+      {/*        appearance: {*/}
+      {/*          theme: 'stripe',*/}
+      {/*          variables: {*/}
+      {/*            colorText:*/}
+      {/*              theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,*/}
+      {/*            fontSizeBase: '16px',*/}
+      {/*            fontWeightNormal: '500',*/}
+      {/*            fontWeightBold: '600',*/}
+      {/*            colorBackground:*/}
+      {/*              theme === 'dark' ? cssVariables.colors.base850 : cssVariables.colors.base0,*/}
+      {/*            fontFamily: 'Inter, sans-serif',*/}
+      {/*            colorTextPlaceholder: cssVariables.colors.base500,*/}
+      {/*            colorIcon:*/}
+      {/*              theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,*/}
+      {/*            borderRadius: '0px',*/}
+      {/*            colorDanger: cssVariables.colors.error500,*/}
+      {/*            colorDangerText: cssVariables.colors.error500,*/}
+      {/*          },*/}
+      {/*        },*/}
+      {/*      }}*/}
+      {/*    >*/}
+      {/*      <CheckoutForm />*/}
+      {/*    </Elements>*/}
+      {/*  </Fragment>*/}
+      {/*)}*/}
     </Fragment>
   )
 }

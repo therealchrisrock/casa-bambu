@@ -14,6 +14,8 @@ import { Product, User } from '../../../payload/payload-types'
 import { useAuth } from '../Auth'
 import { CartItem, cartReducer } from './reducer'
 
+import { formattedPrice } from '@/_components/Price'
+
 export type CartContext = {
   cart: User['cart']
   addItemToCart: (item: CartItem) => void
@@ -42,14 +44,14 @@ const flattenCart = (cart: User['cart']): User['cart'] => ({
   ...cart,
   items: cart.items
     .map(item => {
-      if (!item?.product || typeof item?.product !== 'object') {
+      if (!item?.product) {
         return null
       }
 
       return {
         ...item,
         // flatten relationship to product
-        product: item?.product?.id,
+        product: item?.product,
         quantity: typeof item?.quantity === 'number' ? item?.quantity : 0,
       }
     })
@@ -96,16 +98,14 @@ export const CartProvider = props => {
 
         if (parsedCart?.items && parsedCart?.items?.length > 0) {
           const initialCart = await Promise.all(
-            parsedCart.items.map(async ({ product, quantity, startDate, endDate }) => {
+            parsedCart.items.map(async ({ product, ...args }) => {
               const res = await fetch(
-                `${process.env.NEXT_PUBLIC_SERVER_URL}/api/products/${product}`,
+                `${process.env.NEXT_PUBLIC_SERVER_URL}/api/products/${product.id}`,
               )
               const data = await res.json()
               return {
                 product: data,
-                quantity,
-                startDate,
-                endDate,
+                ...args,
               }
             }),
           )
@@ -156,7 +156,7 @@ export const CartProvider = props => {
   useEffect(() => {
     // wait until we have attempted authentication (the user is either an object or `null`)
     if (!hasInitialized.current || user === undefined || !cart.items) return
-
+    console.log('flattenedCart', cart, flattenCart(cart))
     const flattenedCart = flattenCart(cart)
 
     if (user) {
@@ -179,8 +179,9 @@ export const CartProvider = props => {
               'Content-Type': 'application/json',
             },
           })
-
+          console.log(req)
           if (req.ok) {
+            const c = JSON.parse(localStorage.getItem('cart'))
             localStorage.setItem('cart', '[]')
           }
         }
@@ -190,6 +191,7 @@ export const CartProvider = props => {
         console.error('Error while syncing cart to Payload.') // eslint-disable-line no-console
       }
     } else {
+      console.log('set item ', flattenedCart)
       localStorage.setItem('cart', JSON.stringify(flattenedCart))
     }
 
@@ -216,6 +218,7 @@ export const CartProvider = props => {
 
   // this method can be used to add new items AND update existing ones
   const addItemToCart = useCallback(incomingItem => {
+    console.log('addItmeToCart', addItemToCart)
     dispatchCart({
       type: 'ADD_ITEM',
       payload: incomingItem,
@@ -237,25 +240,27 @@ export const CartProvider = props => {
 
   // calculate the new cart total whenever the cart changes
   useEffect(() => {
+    console.log(cart, 'hasInitialized')
     if (!hasInitialized) return
 
-    const newTotal =
+    const subtotal =
       cart?.items?.reduce((acc, item) => {
-        return (
-          acc +
-          (typeof item.product === 'object'
-            ? JSON.parse(item?.product?.priceJSON || '{}')?.data?.[0]?.unit_amount *
-              (typeof item?.quantity === 'number' ? item?.quantity : 0)
-            : 0)
-        )
+        let p = 0
+        console.log(item)
+        if (typeof item.product === 'object') {
+          const variants = item.product.variants
+          const prices = JSON.parse(item?.product?.priceJSON || '{}')?.data
+          const vp = prices.find(price => price?.id === item.priceID)
+          p = vp.unit_amount * item.quantity || 0
+          console.log('prices', p)
+
+        }
+        return acc + p
       }, 0) || 0
 
     setTotal({
-      formatted: (newTotal / 100).toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }),
-      raw: newTotal,
+      formatted: formattedPrice(subtotal / 100),
+      raw: subtotal,
     })
   }, [cart, hasInitialized])
 

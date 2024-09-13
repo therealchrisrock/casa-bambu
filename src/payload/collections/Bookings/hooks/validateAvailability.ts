@@ -13,7 +13,7 @@ interface Season {
   id: string
   seasonStart: string // ISO date string
   seasonEnd: string // ISO date string
-  stripeVariantProductID: string
+  priceID: string
 }
 export const validateAvailability: CollectionBeforeChangeHook<Booking> = async ({
   data, // incoming data to update or create with
@@ -169,7 +169,7 @@ function getPricingScheduleConflict(bookings: Season[]): Conflict[] {
         conflicts.push({
           id1: bookingA.id,
           id2: bookingB.id,
-          message: `Conflict between Scheduled (seasonal) Pricing ID ${bookingA.id} and booking ID ${bookingB.id}`,
+          message: `Conflict between seasonal Pricing schedule (${bookingA.seasonStart} — ${bookingA.seasonEnd}) and (${bookingB.seasonStart} — ${bookingB.seasonEnd})`,
         })
       }
     }

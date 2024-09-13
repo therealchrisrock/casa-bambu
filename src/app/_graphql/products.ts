@@ -39,9 +39,14 @@ export const PRODUCT = `
           ${ARCHIVE_BLOCK}
         }
         priceJSON
+        coupons {
+          nickname
+          quantity
+          stripeCoupon
+          stripeCouponJSON
+        }
         variants {
-          stripeVariantProductID
-          priceJSON
+          priceID
           seasonStart
           seasonEnd
         }

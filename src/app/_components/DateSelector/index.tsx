@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { Dispatch, SetStateAction } from 'react'
-import { DateRange } from 'react-day-picker'
+import { DateRange, Matcher } from 'react-day-picker'
 import { addDays, format } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 
@@ -10,44 +10,40 @@ import { Button } from '@/_components/ui/button'
 import { Calendar } from '@/_components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/_components/ui/popover'
 import { cn } from '@/_lib/utils'
-import { MIN_DAYS } from '@/(pages)/products/utils'
+import { DEFAULT_MIN_DAYS } from '@/(pages)/products/utils'
 export function DatePickerWithRange({
   className,
-  dates: propsDate,
-  setDates: propsSetDate,
+  dates,
+  setDates,
   disabled = [],
+  min = DEFAULT_MIN_DAYS,
 }: {
   className?: HTMLDivElement['className']
   dates?: DateRange
   setDates?: Dispatch<SetStateAction<DateRange>>
-  disabled?: Date[]
+  disabled?: Matcher[]
+  min?: number
 }) {
-  const [internalDate, setInternalDate] = React.useState<DateRange | undefined>({
-    from: new Date(),
-    to: addDays(new Date(), MIN_DAYS),
-  })
-  const date = propsDate && propsSetDate ? propsDate : internalDate
-  const setDate = propsDate && propsSetDate ? propsSetDate : setInternalDate
   return (
     <div className={cn('grid gap-2', className)}>
-      <Popover >
+      <Popover>
         <PopoverTrigger asChild>
           <Button
             id="date"
             variant={'outline'}
             className={cn(
               ' justify-start text-left font-normal',
-              !date && 'text-muted-foreground',
+              !dates && 'text-muted-foreground',
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
+            {dates?.from ? (
+              dates.to ? (
                 <>
-                  {format(date.from, 'LLL dd, y')} - {format(date.to, 'LLL dd, y')}
+                  {format(dates.from, 'LLL dd, y')} - {format(dates.to, 'LLL dd, y')}
                 </>
               ) : (
-                format(date.from, 'LLL dd, y')
+                format(dates.from, 'LLL dd, y')
               )
             ) : (
               <span>Pick a date</span>
@@ -57,14 +53,16 @@ export function DatePickerWithRange({
         <PopoverContent className="w-auto p-0" align="end">
           <Calendar
             showOutsideDays={false}
-            fromDate={new Date()}
+            startMonth={new Date()}
             today={null}
             mode="range"
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={setDate}
+            defaultMonth={dates?.from}
+            selected={dates}
+            onSelect={setDates}
+            min={min}
             numberOfMonths={2}
             disabled={disabled}
+            excludeDisabled={true}
             modifiers={{
               booked: disabled,
             }}

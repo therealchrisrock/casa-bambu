@@ -1,3 +1,4 @@
+import { useFormFields } from 'payload/components/forms'
 import type { RowLabelArgs } from 'payload/dist/admin/components/forms/RowLabel/types'
 import type { CollectionConfig } from 'payload/types'
 
@@ -14,7 +15,9 @@ import { checkUserPurchases } from './access/checkUserPurchases'
 import { beforeProductChange } from './hooks/beforeChange'
 import { deleteProductFromCarts } from './hooks/deleteProductFromCarts'
 import { revalidateProduct } from './hooks/revalidateProduct'
+import { PriceSelect } from './ui/PriceSelect'
 import { ProductSelect } from './ui/ProductSelect'
+import { CouponSelect } from './ui/CouponSelect'
 
 const Products: CollectionConfig = {
   slug: 'products',
@@ -79,37 +82,38 @@ const Products: CollectionConfig = {
       defaultValue: 'true',
       label: 'Available for Booking Requests',
     },
-    {
-      name: 'gallery', // required
-      type: 'array', // required
-      label: 'Product Images',
-      minRows: 5,
-      labels: {
-        singular: 'Image',
-        plural: 'Images',
-      },
-      fields: [
-        {
-          name: 'media', // required
-          type: 'upload', // required
-          relationTo: 'media', // required
-          required: true,
-        },
-      ],
-      admin: {
-        components: {
-          RowLabel: ({ data, index }: RowLabelArgs) => {
-            return data?.title || `Image ${String(index).padStart(2, '0')}`
-          },
-        },
-      },
-    },
+
     {
       type: 'tabs',
       tabs: [
         {
           label: 'Content',
           fields: [
+            {
+              name: 'gallery', // required
+              type: 'array', // required
+              label: 'Product Images',
+              minRows: 5,
+              labels: {
+                singular: 'Image',
+                plural: 'Images',
+              },
+              fields: [
+                {
+                  name: 'media', // required
+                  type: 'upload', // required
+                  relationTo: 'media', // required
+                  required: true,
+                },
+              ],
+              admin: {
+                components: {
+                  RowLabel: ({ data, index }: RowLabelArgs) => {
+                    return data?.title || `Image ${String(index).padStart(2, '0')}`
+                  },
+                },
+              },
+            },
             richText({ name: 'productDescription' }),
             {
               name: 'amenities',
@@ -134,16 +138,6 @@ const Products: CollectionConfig = {
           label: 'Product Details',
           fields: [
             {
-              name: 'stripeProductID',
-              label: 'Stripe Product (Default)',
-              type: 'text',
-              admin: {
-                components: {
-                  Field: ProductSelect,
-                },
-              },
-            },
-            {
               name: 'bedroomQuantity',
               type: 'number',
               label: 'Number of Bedrooms',
@@ -165,72 +159,7 @@ const Products: CollectionConfig = {
               name: 'baseGuestQuantity',
               type: 'number',
               label: 'Number of Allowable Guests Without Incurring Guest Fees',
-              required: true
-            },
-            {
-              name: 'stripeGuestFeeID',
-              type: 'text',
-              admin: {
-                components: {
-                  Field: ProductSelect,
-                },
-              },
-            },
-            {
-              name: 'guestFeePriceJSON',
-              label: 'Guest Fee Price JSON',
-              type: 'textarea',
-              admin: {
-                readOnly: true,
-                hidden: true,
-                rows: 10,
-              },
-            },
-            {
-              name: 'variants',
-              label: 'Seasonal Prices',
-              type: 'array',
-              fields: [
-                {
-                  name: 'stripeVariantProductID',
-                  label: 'Stripe Product',
-                  type: 'text',
-                  required: true,
-                  admin: {
-                    components: {
-                      Field: ProductSelect,
-                    },
-                  },
-                },
-                {
-                  name: 'priceJSON',
-                  label: 'Price JSON',
-                  type: 'textarea',
-                  admin: {
-                    readOnly: true,
-                    hidden: true,
-                    rows: 10,
-                  },
-                },
-                {
-                  name: 'seasonStart',
-                  label: 'Season (start date)',
-                  type: 'date',
-                  required: true,
-                  hooks: {
-                    beforeChange: [validateSeasonalPricing],
-                  },
-                },
-                {
-                  name: 'seasonEnd',
-                  label: 'Season (end date)',
-                  type: 'date',
-                  required: true,
-                  hooks: {
-                    beforeChange: [validateSeasonalPricing],
-                  },
-                },
-              ],
+              required: true,
             },
             {
               name: 'priceJSON',
@@ -255,6 +184,145 @@ const Products: CollectionConfig = {
                 read: checkUserPurchases,
               },
               blocks: [CallToAction, Content, MediaBlock, Archive],
+            },
+          ],
+        },
+        {
+          label: 'Pricing',
+          fields: [
+            {
+              name: 'stripeProductID',
+              label: 'Stripe Product (Default)',
+              type: 'text',
+              admin: {
+                components: {
+                  Field: ProductSelect,
+                },
+              },
+            },
+            {
+              name: 'stripeGuestFeeID',
+              label: 'Stripe Extra Guest Fee',
+              type: 'text',
+              admin: {
+                components: {
+                  Field: ProductSelect,
+                },
+              },
+            },
+            {
+              name: 'guestFeePriceJSON',
+              label: 'Guest Fee Price JSON',
+              type: 'textarea',
+              admin: {
+                readOnly: true,
+                hidden: true,
+                rows: 10,
+              },
+            },
+            {
+              name: 'coupons',
+              type: 'array',
+              label: 'Coupons (Volume Pricing)',
+              admin: {
+                components: {
+                  RowLabel: ({ data, index }: RowLabelArgs) => {
+                    return data?.nickname
+                  },
+                },
+              },
+              fields: [
+                {
+                  name: 'nickname',
+                  type: 'text',
+                },
+                {
+                  name: 'quantity',
+                  label: 'By Nights',
+                  type: 'number',
+                  required: true,
+                  unique: true
+                },
+                {
+                  name: 'stripeCoupon',
+                  type: 'text',
+                  required: true,
+                  admin: {
+                    components: {
+                      Field: CouponSelect
+                    }
+                  }
+                },
+                {
+                  name: 'stripeCouponJSON',
+                  label: 'Guest Fee Price JSON',
+                  type: 'textarea',
+                  admin: {
+                    readOnly: true,
+                    hidden: true,
+                    rows: 10,
+                  },
+                },
+              ]
+            },
+            {
+              name: 'variants',
+              label: 'Seasonal Prices',
+              type: 'array',
+              admin: {
+                components: {
+                  RowLabel: ({ data, index }: RowLabelArgs) => {
+                    const v = useFormFields(([fields]) => fields)
+                    const priceJSON = v.priceJSON?.value as string | null | undefined
+                    const variantPriceID = data?.priceID
+                    let label = ''
+                    const p = JSON.parse(priceJSON)?.data
+                    if (p && variantPriceID) {
+                      const name = p.find(t => t.id === variantPriceID)?.nickname
+                      if (name) label = `${name} `
+                    }
+                    const formatDate = (s: string): string =>
+                      new Date(s).toLocaleDateString('en-US')
+                    const dateLabel =
+                      data?.seasonStart && data?.seasonEnd
+                        ? `(${formatDate(data?.seasonStart)} — ${formatDate(data?.seasonEnd)})`
+                        : ''
+                    label += dateLabel
+                    return label
+                  },
+                },
+              },
+              fields: [
+                {
+                  name: 'priceID',
+                  label: 'Stripe Price',
+                  type: 'text',
+                  required: true,
+                  admin: {
+                    components: {
+                      Field: PriceSelect,
+                    },
+                  },
+                },
+                {
+                  name: 'seasonStart',
+                  label: 'Season (start date)',
+                  type: 'date',
+                  required: true,
+                  hooks: {
+                    beforeChange: [validateSeasonalPricing],
+                  },
+                },
+                {
+                  name: 'seasonEnd',
+                  label: 'Season (end date)',
+                  type: 'date',
+                  required: true,
+                  hooks: {
+                    beforeChange: [validateSeasonalPricing],
+                  },
+                },
+              ],
             },
           ],
         },

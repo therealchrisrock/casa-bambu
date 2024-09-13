@@ -18,7 +18,6 @@ export default async function CreateAccount() {
 
   return (
     <Gutter className={classes.createAccount}>
-      <h1>Create Account</h1>
       <RenderParams />
       <CreateAccountForm />
     </Gutter>

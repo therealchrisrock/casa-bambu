@@ -1,9 +1,11 @@
 import React from 'react'
+import { MoveRightIcon } from 'lucide-react'
 
 import { Page } from '../../../payload/payload-types'
+import RichText from '../../_components/RichText'
+
 import { CMSLink } from '@/_components/Link'
 import { Media } from '@/_components/Media'
-import RichText from '../../_components/RichText'
 
 import classes from './index.module.scss'
 
@@ -19,7 +21,9 @@ export const MediumImpactHero: React.FC<Page['hero']> = props => {
             {links.map(({ link }, i) => {
               return (
                 <li key={i}>
-                  <CMSLink className={classes.link} {...link} invert={link.appearance === 'link'} />
+                  <CMSLink className={classes.link} {...link}>
+                    {link.appearance === 'link' && (<MoveRightIcon className={'ml-2'} strokeWidth={1} />)}
+                  </CMSLink>
                 </li>
               )
             })}

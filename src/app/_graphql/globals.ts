@@ -33,6 +33,10 @@ export const SETTINGS = `
     productsPage {
       slug
     }
+    minBooking
+    maxBooking
+    advancedBookingLimit
+    stripeCleaningFeeJSON
   }
 `
 

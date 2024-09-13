@@ -13,11 +13,9 @@ export default async function Login() {
   await getMeUser({
     validUserRedirect: `/account?warning=${encodeURIComponent('You are already logged in.')}`,
   })
-
   return (
-    <Gutter className={classes.login}>
+    <Gutter className={'pt-8 lg:pt-10 xl:pt-12'}>
       <RenderParams className={classes.params} />
-      <h1>Log in</h1>
       <LoginForm />
     </Gutter>
   )

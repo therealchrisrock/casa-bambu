@@ -1,57 +1,60 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { DateRange } from 'react-day-picker'
 import { useRouter } from 'next/navigation'
 
-import { Product } from '../../../payload/payload-types'
+import { Product, Settings } from '../../../payload/payload-types'
 import { Button, Props } from '../Button'
 
+import { priceFromJSON } from '@/_components/Price'
 import { useCart } from '@/_providers/Cart'
+import { BookingDetails } from '@/_utilities/bookingCalculations'
+import { getSettings } from '@/(pages)/products/utils'
 
 import classes from './index.module.scss'
 
 export const AddToCartButton: React.FC<{
-  product: Product
-  quantity?: number
-  className?: string
-  appearance?: Props['appearance']
+  bookingDetails: BookingDetails
+  settings: Settings
 }> = props => {
-  const { product, quantity = 1, className, appearance = 'primary' } = props
-
   const { cart, addItemToCart, isProductInCart, hasInitializedCart } = useCart()
 
   const [isInCart, setIsInCart] = useState<boolean>()
   const router = useRouter()
-
-  useEffect(() => {
-    setIsInCart(isProductInCart(product))
-  }, [isProductInCart, product, cart])
-
+  const addToCart = () => {
+    if (!isValidBooking) return // @TODO handle error message
+    props.bookingDetails.items.map(p => {
+      addItemToCart({
+        priceID: p.priceID,
+        product: p.product,
+        quantity: p.quantity,
+        from: p.from,
+        to: p.to,
+        guestsQuantity: p.guestsQuantity,
+      })
+    })
+    setIsInCart(true)
+  }
+  const s = getSettings(props.settings)
+  const isValidBooking = useMemo(() => {
+    return props?.bookingDetails?.duration >= s.minBooking && props.bookingDetails?.guestCount > 0
+  }, [props])
   return (
     <Button
       href={isInCart ? '/cart' : undefined}
       type={!isInCart ? 'button' : undefined}
-      label={isInCart ? `✓ View in cart` : `Add to cart`}
+      label={isInCart ? `✓ View in cart` : `Reserve`}
       el={isInCart ? 'link' : undefined}
-      appearance={appearance}
-      className={[
-        className,
-        classes.addToCartButton,
-        appearance === 'default' && isInCart && classes.green,
-        !hasInitializedCart && classes.hidden,
-      ]
+      appearance={'primary'}
+      disabled={!isValidBooking}
+      className={[isInCart && classes.green, !hasInitializedCart && classes.hidden, 'w-full']
         .filter(Boolean)
         .join(' ')}
       onClick={
         !isInCart
           ? () => {
-              addItemToCart({
-                product,
-                quantity,
-                startDate: '2022-01-06T05:00:00.000Z',
-                endDate: '2022-01-10T05:00:00.000Z',
-              })
-
+              addToCart()
               router.push('/cart')
             }
           : undefined

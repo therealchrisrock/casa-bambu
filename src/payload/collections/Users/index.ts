@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import { admins } from '../../access/admins'
 import { anyone } from '../../access/anyone'
+import { ProductSelect } from '../Products/ui/ProductSelect'
 import adminsAndUser from './access/adminsAndUser'
 import { checkRole } from './checkRole'
 import { customerProxy } from './endpoints/customer'
@@ -10,14 +11,14 @@ import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
 import { loginAfterCreate } from './hooks/loginAfterCreate'
 import { resolveDuplicatePurchases } from './hooks/resolveDuplicatePurchases'
 import { CustomerSelect } from './ui/CustomerSelect'
+import { PriceSelect } from '../Products/ui/PriceSelect'
 
 const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     group: 'Ecommerce Data',
     useAsTitle: 'name',
-    defaultColumns: ['name', 'email']
-
+    defaultColumns: ['name', 'email'],
   },
   access: {
     read: adminsAndUser,
@@ -100,9 +101,6 @@ const Users: CollectionConfig = {
       label: 'Cart',
       name: 'cart',
       type: 'group',
-      admin: {
-        hidden: true
-      },
       fields: [
         {
           name: 'items',
@@ -116,6 +114,33 @@ const Users: CollectionConfig = {
               relationTo: 'products',
             },
             {
+              name: 'stripeProductID',
+              label: 'Stripe Product (Default)',
+              type: 'text',
+              admin: {
+                components: {
+                  Field: ProductSelect,
+                },
+              },
+            },
+            {
+              name: 'priceID',
+              label: 'Stripe Product',
+              type: 'text',
+              required: true,
+              admin: {
+                components: {
+                  Field: PriceSelect,
+                },
+              },
+            },
+            {
+              name: 'guestsQuantity',
+              label: 'Number of Guests',
+              type: 'number',
+              min: 1,
+            },
+            {
               name: 'quantity',
               type: 'number',
               min: 0,
@@ -124,7 +149,7 @@ const Users: CollectionConfig = {
               },
             },
             {
-              name: 'startDate',
+              name: 'from',
               label: 'Start Date',
               type: 'date',
               admin: {
@@ -133,7 +158,7 @@ const Users: CollectionConfig = {
               required: true,
             },
             {
-              name: 'endDate',
+              name: 'to',
               label: 'End Date',
               type: 'date',
               admin: {

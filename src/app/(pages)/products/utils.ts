@@ -1,27 +1,42 @@
+import type { DateRange } from 'react-day-picker'
+import type { DateAfter, DateBefore, Matcher } from 'react-day-picker/src'
 import { addDays, differenceInDays } from 'date-fns'
 
-import type { Booking } from '../../../payload/payload-types'
+import type { Booking, Settings } from '../../../payload/payload-types'
 
-export const MIN_DAYS = 4
+export const DEFAULT_MIN_DAYS = 5
+export const DEFAULT_LAST_BOOKING_DATE = 365 // Bookings must be made within 1 year of the present day
+export function getSettings(settings: Settings): Settings {
+  if (!settings?.advancedBookingLimit) settings.advancedBookingLimit = DEFAULT_LAST_BOOKING_DATE;
+  if (!settings?.minBooking) settings.minBooking = DEFAULT_MIN_DAYS
+  return settings
+}
 export function findFirstAvailableDateRange(
   bookings: Booking[],
-  minDays = MIN_DAYS,
-): { startDate: Date; endDate: Date } | null {
+  minDays = DEFAULT_MIN_DAYS,
+  lastAvailableBookingDate: number = DEFAULT_LAST_BOOKING_DATE,
+): DateRange | null {
   // Sort bookings by startDate
   const sortedBookings = bookings
     .filter(b => new Date(b.endDate) >= new Date()) // Ignore bookings that are entirely in the past
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
 
-  const today = new Date()
+  const today = addDays(new Date(), 1)
+  const maxBookingDate = addDays(today, lastAvailableBookingDate)
 
   // Check for the gap before the first booking
   if (
     sortedBookings.length === 0 ||
     differenceInDays(new Date(sortedBookings[0].startDate), today) >= minDays
   ) {
-    return {
-      startDate: today,
-      endDate: addDays(today, minDays - 1),
+    const potentialEndDate = addDays(today, minDays - 1)
+    if (potentialEndDate <= maxBookingDate) {
+      return {
+        from: today,
+        to: potentialEndDate,
+      }
+    } else {
+      return null // No valid dates found within the specified range
     }
   }
 
@@ -32,36 +47,55 @@ export function findFirstAvailableDateRange(
 
     const gap = differenceInDays(nextStartDate, currentEndDate)
     if (gap >= minDays - 1) {
-      // Allow a new booking to start on the same day as currentEndDate
-      return {
-        startDate: currentEndDate,
-        endDate: addDays(currentEndDate, minDays - 1),
+      const potentialEndDate = addDays(currentEndDate, minDays - 1)
+      if (potentialEndDate <= maxBookingDate) {
+        return {
+          from: currentEndDate,
+          to: potentialEndDate,
+        }
       }
     }
   }
 
   // Check for the gap after the last booking
   const lastBookingEndDate = new Date(sortedBookings[sortedBookings.length - 1].endDate)
-  return {
-    startDate: lastBookingEndDate,
-    endDate: addDays(lastBookingEndDate, minDays - 1),
+  const potentialEndDate = addDays(lastBookingEndDate, minDays - 1)
+  if (potentialEndDate <= maxBookingDate) {
+    return {
+      from: lastBookingEndDate,
+      to: potentialEndDate,
+    }
   }
+
+  return null // No valid dates found within the specified range
 }
-export function getUnavailableDates(bookings: Booking[]): Date[] {
-  const unavailableDates: Date[] = []
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Ensure today has no time component
+
+export function getUnavailableDates(bookings: Booking[], settings: Settings): Matcher[] {
+  const unavailableDates: Matcher[] = []
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // Ensure today has no time component
 
   bookings.forEach(booking => {
     const startDate = new Date(booking.startDate)
     const endDate = new Date(booking.endDate)
 
     for (let date = startDate; date < endDate; date = addDays(date, 1)) {
-      if (date >= today) { // Exclude dates before today
+      if (date >= addDays(today, 1)) {
+        // Exclude dates before today
         unavailableDates.push(new Date(date))
       }
     }
   })
-
+  // Exclude today's date
+  const outerBounds: [DateBefore, DateAfter] = [
+    { before: addDays(today, 1) },
+    {
+      after: addDays(
+        today,
+        settings?.advancedBookingLimit ? settings.advancedBookingLimit : DEFAULT_LAST_BOOKING_DATE,
+      ),
+    },
+  ]
+  unavailableDates.push(...outerBounds)
   return unavailableDates
 }

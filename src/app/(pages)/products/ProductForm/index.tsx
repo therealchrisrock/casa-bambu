@@ -1,30 +1,30 @@
 'use client'
 
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useMemo, useState } from 'react'
 import { DateRange } from 'react-day-picker'
 import { BathIcon, BedSingleIcon, MapPin, UsersIcon } from 'lucide-react'
 
-import { Booking, Product } from '../../../../payload/payload-types'
+import { Booking, Product, Settings } from '../../../../payload/payload-types'
 
-import { CreateReservationButton } from '@/_components/CreateReservationButton'
-import { DatePickerWithRange } from '@/_components/DateSelector'
-import { priceFromJSON } from '@/_components/Price'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/_components/ui/select'
-import {
-  findFirstAvailableDateRange,
-  getUnavailableDates,
-  MIN_DAYS,
-} from '@/(pages)/products/utils'
 import { AddToCartButton } from '@/_components/AddToCartButton'
+import { DatePickerWithRange } from '@/_components/DateSelector'
+import { getAvgPrice } from '@/_components/Price'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/_components/ui/select'
+import { calculateBookingDetails } from '@/_utilities/bookingCalculations'
+import { DEFAULT_MIN_DAYS, findFirstAvailableDateRange, getUnavailableDates } from '@/(pages)/products/utils'
+import { PriceBreakdown } from '@/_components/BookingDetails/PriceBreakdown'
 
-export function ProductDetails({ product, bookings }: { bookings: Booking[]; product: Product }) {
+export function ProductDetails({
+  product,
+  bookings,
+  settings,
+}: {
+  settings: Settings
+  bookings: Booking[]
+  product: Product
+}) {
   const padding = 'px-4 pt-4 pb-8'
+  const initDates = findFirstAvailableDateRange(bookings)
   return (
     <div className={'rounded-lg border shadow-lg'}>
       <div
@@ -56,50 +56,82 @@ export function ProductDetails({ product, bookings }: { bookings: Booking[]; pro
         </div>
       </div>
       <div className={` space-y-6 ${padding}`}>
-        <div>
-          <h3 className={'flex gap-2 items-baseline'}>
-            <span className={'text-2xl text-tertiary font-semibold'}>
-              {priceFromJSON(product.priceJSON, 1)}
-            </span>
-            <span className={'text-sm'}>night</span>
-          </h3>
-          <h5 className={'text-xs'}>(min. {MIN_DAYS} nights)</h5>
-        </div>
-        <ProductForm product={product} bookings={bookings} />
+        {initDates ? (
+          <ProductForm
+            initDates={initDates}
+            product={product}
+            bookings={bookings}
+            settings={settings}
+          />
+        ) : (
+          <div>SOLD OUT</div>
+        )}
       </div>
     </div>
   )
 }
-function ProductForm({ product, bookings }: { bookings: Booking[]; product: Product }) {
-  const initDates = findFirstAvailableDateRange(bookings)
-  const unavailableDates = getUnavailableDates(bookings)
-  const [dates, setDates] = useState<DateRange>({
-    from: initDates.startDate,
-    to: initDates.endDate,
-  })
+export function ProductForm({
+  product,
+  bookings,
+  settings,
+  initDates,
+}: {
+  settings: Settings
+  bookings: Booking[]
+  product: Product
+  initDates: DateRange
+}) {
+  const unavailableDates = getUnavailableDates(bookings, settings)
+  const [dates, setDates] = useState<DateRange>(initDates)
+  const [guestsQuantity, setGuestsQuantity] = useState(String(product.baseGuestQuantity))
+  const bookingDetails = useMemo(() => {
+    return calculateBookingDetails(product, dates, parseInt(guestsQuantity), settings)
+  }, [product, dates, guestsQuantity])
 
   return (
-    <div className={'space-y-2'}>
-      <DatePickerWithRange disabled={unavailableDates} dates={dates} setDates={setDates} />
-      <Select>
-        <SelectTrigger className="">
-          <SelectValue placeholder="Number of Guests" />
-        </SelectTrigger>
-        <SelectContent>
-          {Array.from({ length: product.maxGuestQuantity }, (_, i) => i + 1).map(num => (
-            <SelectItem key={num} value={String(num)}>
-              {num} Guest{num > 1 ? 's' : ''}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <AddToCartButton product={product} />
-      {/*<CreateReservationButton*/}
-      {/*  dates={dates}*/}
-      {/*  headProduct={product.id}*/}
-      {/*  items={[{ product, quantity: calculateNights(dates) }]}*/}
-      {/*/>*/}
-    </div>
+    <>
+      <div>
+        <h3 className={'flex gap-1 items-baseline'}>
+          <span className={'text-2xl text-tertiary font-semibold'}>
+            {getAvgPrice(product, bookingDetails)}
+          </span>
+          <span className={'text-sm'}>night</span>
+        </h3>
+        <h5 className={'text-xs'}>(min. {settings.minBooking ?? DEFAULT_MIN_DAYS} nights)</h5>
+      </div>
+      <div className={'space-y-6'}>
+        <div className={'space-y-2'}>
+          <DatePickerWithRange disabled={unavailableDates} dates={dates} setDates={setDates} />
+          <Select
+            value={guestsQuantity}
+            defaultValue={guestsQuantity}
+            onValueChange={setGuestsQuantity}
+          >
+            <SelectTrigger className="">
+              <SelectValue placeholder="Number of Guests" />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: product.maxGuestQuantity }, (_, i) => i + 1).map(num => (
+                <SelectItem key={num} value={String(num)}>
+                  {num} Guest{num > 1 ? 's' : ''}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <AddToCartButton settings={settings} bookingDetails={bookingDetails} />
+
+          {/*{CART_MODE === 'invoice' ? (*/}
+          {/*  <CreateReservationButton*/}
+          {/*    dates={dates}*/}
+          {/*    headProduct={product.id}*/}
+          {/*    items={[{ product, quantity: calculateNights(dates) }]}*/}
+          {/*  />*/}
+          {/*) : (*/}
+          {/*)}*/}
+        </div>
+        {bookingDetails && <PriceBreakdown booking={bookingDetails} />}
+      </div>
+    </>
   )
 }
 
@@ -122,6 +154,7 @@ function ProductFeature({
     </div>
   )
 }
+
 const calculateNights = (dates: DateRange) => {
   if (dates.from && dates.to) {
     const timeDiff = dates.to.getTime() - dates.from.getTime()

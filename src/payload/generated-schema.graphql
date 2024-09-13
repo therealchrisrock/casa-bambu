@@ -716,17 +716,18 @@ type Product {
   productDescription(depth: Int): JSON
   amenities: [Product_Amenities!]
   layout: [Product_Layout!]!
-  stripeProductID: String
   bedroomQuantity: Float
   bathQuantity: Float
   maxGuestQuantity: Float
   baseGuestQuantity: Float
-  stripeGuestFeeID: String
-  guestFeePriceJSON: String
-  variants: [Product_Variants!]
   priceJSON: String
   enablePaywall: Boolean
   paywall: [Product_Paywall!]
+  stripeProductID: String
+  stripeGuestFeeID: String
+  guestFeePriceJSON: String
+  coupons: [Product_Coupons!]
+  variants: [Product_Variants!]
   categories: [Category!]
   relatedProducts(draft: Boolean): [Product!]
   slug: String
@@ -946,15 +947,22 @@ type Amenity {
 
 union Product_Layout = Cta | Content | MediaBlock | Archive
 
+union Product_Paywall = Cta | Content | MediaBlock | Archive
+
+type Product_Coupons {
+  nickname: String
+  quantity: Float
+  stripeCoupon: String
+  stripeCouponJSON: String
+  id: String
+}
+
 type Product_Variants {
-  stripeVariantProductID: String
-  priceJSON: String
+  priceID: String
   seasonStart: DateTime
   seasonEnd: DateTime
   id: String
 }
-
-union Product_Paywall = Cta | Content | MediaBlock | Archive
 
 type Product_Meta {
   title: String
@@ -1214,15 +1222,17 @@ enum User_roles {
 }
 
 type User_Cart {
-  headProduct(draft: Boolean): Product
-  startDate: DateTime
-  endDate: DateTime
   items: [CartItems!]
 }
 
 type CartItems {
   product(draft: Boolean): Product
+  stripeProductID: String
+  priceID: String
+  guestsQuantity: Float
   quantity: Float
+  from: DateTime
+  to: DateTime
   id: String
 }
 
@@ -3390,20 +3400,24 @@ input Product_where {
   productDescription: Product_productDescription_operator
   amenities__amenity: Product_amenities__amenity_operator
   amenities__id: Product_amenities__id_operator
-  stripeProductID: Product_stripeProductID_operator
   bedroomQuantity: Product_bedroomQuantity_operator
   bathQuantity: Product_bathQuantity_operator
   maxGuestQuantity: Product_maxGuestQuantity_operator
   baseGuestQuantity: Product_baseGuestQuantity_operator
+  priceJSON: Product_priceJSON_operator
+  enablePaywall: Product_enablePaywall_operator
+  stripeProductID: Product_stripeProductID_operator
   stripeGuestFeeID: Product_stripeGuestFeeID_operator
   guestFeePriceJSON: Product_guestFeePriceJSON_operator
-  variants__stripeVariantProductID: Product_variants__stripeVariantProductID_operator
-  variants__priceJSON: Product_variants__priceJSON_operator
+  coupons__nickname: Product_coupons__nickname_operator
+  coupons__quantity: Product_coupons__quantity_operator
+  coupons__stripeCoupon: Product_coupons__stripeCoupon_operator
+  coupons__stripeCouponJSON: Product_coupons__stripeCouponJSON_operator
+  coupons__id: Product_coupons__id_operator
+  variants__priceID: Product_variants__priceID_operator
   variants__seasonStart: Product_variants__seasonStart_operator
   variants__seasonEnd: Product_variants__seasonEnd_operator
   variants__id: Product_variants__id_operator
-  priceJSON: Product_priceJSON_operator
-  enablePaywall: Product_enablePaywall_operator
   categories: Product_categories_operator
   relatedProducts: Product_relatedProducts_operator
   slug: Product_slug_operator
@@ -3489,17 +3503,6 @@ input Product_amenities__id_operator {
   exists: Boolean
 }
 
-input Product_stripeProductID_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
-}
-
 input Product_bedroomQuantity_operator {
   equals: Float
   not_equals: Float
@@ -3536,6 +3539,31 @@ input Product_baseGuestQuantity_operator {
   less_than: Float
 }
 
+input Product_priceJSON_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
+}
+
+input Product_enablePaywall_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
+input Product_stripeProductID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input Product_stripeGuestFeeID_operator {
   equals: String
   not_equals: String
@@ -3555,7 +3583,27 @@ input Product_guestFeePriceJSON_operator {
   exists: Boolean
 }
 
-input Product_variants__stripeVariantProductID_operator {
+input Product_coupons__nickname_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Product_coupons__quantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+}
+
+input Product_coupons__stripeCoupon_operator {
   equals: String
   not_equals: String
   like: String
@@ -3565,12 +3613,33 @@ input Product_variants__stripeVariantProductID_operator {
   all: [String]
 }
 
-input Product_variants__priceJSON_operator {
+input Product_coupons__stripeCouponJSON_operator {
   equals: String
   not_equals: String
   like: String
   contains: String
   exists: Boolean
+}
+
+input Product_coupons__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Product_variants__priceID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
 }
 
 input Product_variants__seasonStart_operator {
@@ -3601,20 +3670,6 @@ input Product_variants__id_operator {
   in: [String]
   not_in: [String]
   all: [String]
-  exists: Boolean
-}
-
-input Product_priceJSON_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  exists: Boolean
-}
-
-input Product_enablePaywall_operator {
-  equals: Boolean
-  not_equals: Boolean
   exists: Boolean
 }
 
@@ -3734,20 +3789,24 @@ input Product_where_and {
   productDescription: Product_productDescription_operator
   amenities__amenity: Product_amenities__amenity_operator
   amenities__id: Product_amenities__id_operator
-  stripeProductID: Product_stripeProductID_operator
   bedroomQuantity: Product_bedroomQuantity_operator
   bathQuantity: Product_bathQuantity_operator
   maxGuestQuantity: Product_maxGuestQuantity_operator
   baseGuestQuantity: Product_baseGuestQuantity_operator
+  priceJSON: Product_priceJSON_operator
+  enablePaywall: Product_enablePaywall_operator
+  stripeProductID: Product_stripeProductID_operator
   stripeGuestFeeID: Product_stripeGuestFeeID_operator
   guestFeePriceJSON: Product_guestFeePriceJSON_operator
-  variants__stripeVariantProductID: Product_variants__stripeVariantProductID_operator
-  variants__priceJSON: Product_variants__priceJSON_operator
+  coupons__nickname: Product_coupons__nickname_operator
+  coupons__quantity: Product_coupons__quantity_operator
+  coupons__stripeCoupon: Product_coupons__stripeCoupon_operator
+  coupons__stripeCouponJSON: Product_coupons__stripeCouponJSON_operator
+  coupons__id: Product_coupons__id_operator
+  variants__priceID: Product_variants__priceID_operator
   variants__seasonStart: Product_variants__seasonStart_operator
   variants__seasonEnd: Product_variants__seasonEnd_operator
   variants__id: Product_variants__id_operator
-  priceJSON: Product_priceJSON_operator
-  enablePaywall: Product_enablePaywall_operator
   categories: Product_categories_operator
   relatedProducts: Product_relatedProducts_operator
   slug: Product_slug_operator
@@ -3772,20 +3831,24 @@ input Product_where_or {
   productDescription: Product_productDescription_operator
   amenities__amenity: Product_amenities__amenity_operator
   amenities__id: Product_amenities__id_operator
-  stripeProductID: Product_stripeProductID_operator
   bedroomQuantity: Product_bedroomQuantity_operator
   bathQuantity: Product_bathQuantity_operator
   maxGuestQuantity: Product_maxGuestQuantity_operator
   baseGuestQuantity: Product_baseGuestQuantity_operator
+  priceJSON: Product_priceJSON_operator
+  enablePaywall: Product_enablePaywall_operator
+  stripeProductID: Product_stripeProductID_operator
   stripeGuestFeeID: Product_stripeGuestFeeID_operator
   guestFeePriceJSON: Product_guestFeePriceJSON_operator
-  variants__stripeVariantProductID: Product_variants__stripeVariantProductID_operator
-  variants__priceJSON: Product_variants__priceJSON_operator
+  coupons__nickname: Product_coupons__nickname_operator
+  coupons__quantity: Product_coupons__quantity_operator
+  coupons__stripeCoupon: Product_coupons__stripeCoupon_operator
+  coupons__stripeCouponJSON: Product_coupons__stripeCouponJSON_operator
+  coupons__id: Product_coupons__id_operator
+  variants__priceID: Product_variants__priceID_operator
   variants__seasonStart: Product_variants__seasonStart_operator
   variants__seasonEnd: Product_variants__seasonEnd_operator
   variants__id: Product_variants__id_operator
-  priceJSON: Product_priceJSON_operator
-  enablePaywall: Product_enablePaywall_operator
   categories: Product_categories_operator
   relatedProducts: Product_relatedProducts_operator
   slug: Product_slug_operator
@@ -3822,17 +3885,18 @@ type ProductsDocAccessFields {
   productDescription: ProductsDocAccessFields_productDescription
   amenities: ProductsDocAccessFields_amenities
   layout: ProductsDocAccessFields_layout
-  stripeProductID: ProductsDocAccessFields_stripeProductID
   bedroomQuantity: ProductsDocAccessFields_bedroomQuantity
   bathQuantity: ProductsDocAccessFields_bathQuantity
   maxGuestQuantity: ProductsDocAccessFields_maxGuestQuantity
   baseGuestQuantity: ProductsDocAccessFields_baseGuestQuantity
-  stripeGuestFeeID: ProductsDocAccessFields_stripeGuestFeeID
-  guestFeePriceJSON: ProductsDocAccessFields_guestFeePriceJSON
-  variants: ProductsDocAccessFields_variants
   priceJSON: ProductsDocAccessFields_priceJSON
   enablePaywall: ProductsDocAccessFields_enablePaywall
   paywall: ProductsDocAccessFields_paywall
+  stripeProductID: ProductsDocAccessFields_stripeProductID
+  stripeGuestFeeID: ProductsDocAccessFields_stripeGuestFeeID
+  guestFeePriceJSON: ProductsDocAccessFields_guestFeePriceJSON
+  coupons: ProductsDocAccessFields_coupons
+  variants: ProductsDocAccessFields_variants
   categories: ProductsDocAccessFields_categories
   relatedProducts: ProductsDocAccessFields_relatedProducts
   slug: ProductsDocAccessFields_slug
@@ -4108,29 +4172,6 @@ type ProductsDocAccessFields_layout_Delete {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_stripeProductID {
-  create: ProductsDocAccessFields_stripeProductID_Create
-  read: ProductsDocAccessFields_stripeProductID_Read
-  update: ProductsDocAccessFields_stripeProductID_Update
-  delete: ProductsDocAccessFields_stripeProductID_Delete
-}
-
-type ProductsDocAccessFields_stripeProductID_Create {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_stripeProductID_Read {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_stripeProductID_Update {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_stripeProductID_Delete {
-  permission: Boolean!
-}
-
 type ProductsDocAccessFields_bedroomQuantity {
   create: ProductsDocAccessFields_bedroomQuantity_Create
   read: ProductsDocAccessFields_bedroomQuantity_Read
@@ -4223,6 +4264,98 @@ type ProductsDocAccessFields_baseGuestQuantity_Delete {
   permission: Boolean!
 }
 
+type ProductsDocAccessFields_priceJSON {
+  create: ProductsDocAccessFields_priceJSON_Create
+  read: ProductsDocAccessFields_priceJSON_Read
+  update: ProductsDocAccessFields_priceJSON_Update
+  delete: ProductsDocAccessFields_priceJSON_Delete
+}
+
+type ProductsDocAccessFields_priceJSON_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_priceJSON_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_priceJSON_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_priceJSON_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_enablePaywall {
+  create: ProductsDocAccessFields_enablePaywall_Create
+  read: ProductsDocAccessFields_enablePaywall_Read
+  update: ProductsDocAccessFields_enablePaywall_Update
+  delete: ProductsDocAccessFields_enablePaywall_Delete
+}
+
+type ProductsDocAccessFields_enablePaywall_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_enablePaywall_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_enablePaywall_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_enablePaywall_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_paywall {
+  create: ProductsDocAccessFields_paywall_Create
+  read: ProductsDocAccessFields_paywall_Read
+  update: ProductsDocAccessFields_paywall_Update
+  delete: ProductsDocAccessFields_paywall_Delete
+}
+
+type ProductsDocAccessFields_paywall_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_paywall_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_paywall_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_paywall_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_stripeProductID {
+  create: ProductsDocAccessFields_stripeProductID_Create
+  read: ProductsDocAccessFields_stripeProductID_Read
+  update: ProductsDocAccessFields_stripeProductID_Update
+  delete: ProductsDocAccessFields_stripeProductID_Delete
+}
+
+type ProductsDocAccessFields_stripeProductID_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_stripeProductID_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_stripeProductID_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_stripeProductID_Delete {
+  permission: Boolean!
+}
+
 type ProductsDocAccessFields_stripeGuestFeeID {
   create: ProductsDocAccessFields_stripeGuestFeeID_Create
   read: ProductsDocAccessFields_stripeGuestFeeID_Read
@@ -4269,6 +4402,153 @@ type ProductsDocAccessFields_guestFeePriceJSON_Delete {
   permission: Boolean!
 }
 
+type ProductsDocAccessFields_coupons {
+  create: ProductsDocAccessFields_coupons_Create
+  read: ProductsDocAccessFields_coupons_Read
+  update: ProductsDocAccessFields_coupons_Update
+  delete: ProductsDocAccessFields_coupons_Delete
+  fields: ProductsDocAccessFields_coupons_Fields
+}
+
+type ProductsDocAccessFields_coupons_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_Fields {
+  nickname: ProductsDocAccessFields_coupons_nickname
+  quantity: ProductsDocAccessFields_coupons_quantity
+  stripeCoupon: ProductsDocAccessFields_coupons_stripeCoupon
+  stripeCouponJSON: ProductsDocAccessFields_coupons_stripeCouponJSON
+  id: ProductsDocAccessFields_coupons_id
+}
+
+type ProductsDocAccessFields_coupons_nickname {
+  create: ProductsDocAccessFields_coupons_nickname_Create
+  read: ProductsDocAccessFields_coupons_nickname_Read
+  update: ProductsDocAccessFields_coupons_nickname_Update
+  delete: ProductsDocAccessFields_coupons_nickname_Delete
+}
+
+type ProductsDocAccessFields_coupons_nickname_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_nickname_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_nickname_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_nickname_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_quantity {
+  create: ProductsDocAccessFields_coupons_quantity_Create
+  read: ProductsDocAccessFields_coupons_quantity_Read
+  update: ProductsDocAccessFields_coupons_quantity_Update
+  delete: ProductsDocAccessFields_coupons_quantity_Delete
+}
+
+type ProductsDocAccessFields_coupons_quantity_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_quantity_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_quantity_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_quantity_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_stripeCoupon {
+  create: ProductsDocAccessFields_coupons_stripeCoupon_Create
+  read: ProductsDocAccessFields_coupons_stripeCoupon_Read
+  update: ProductsDocAccessFields_coupons_stripeCoupon_Update
+  delete: ProductsDocAccessFields_coupons_stripeCoupon_Delete
+}
+
+type ProductsDocAccessFields_coupons_stripeCoupon_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_stripeCoupon_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_stripeCoupon_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_stripeCoupon_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_stripeCouponJSON {
+  create: ProductsDocAccessFields_coupons_stripeCouponJSON_Create
+  read: ProductsDocAccessFields_coupons_stripeCouponJSON_Read
+  update: ProductsDocAccessFields_coupons_stripeCouponJSON_Update
+  delete: ProductsDocAccessFields_coupons_stripeCouponJSON_Delete
+}
+
+type ProductsDocAccessFields_coupons_stripeCouponJSON_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_stripeCouponJSON_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_stripeCouponJSON_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_stripeCouponJSON_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_id {
+  create: ProductsDocAccessFields_coupons_id_Create
+  read: ProductsDocAccessFields_coupons_id_Read
+  update: ProductsDocAccessFields_coupons_id_Update
+  delete: ProductsDocAccessFields_coupons_id_Delete
+}
+
+type ProductsDocAccessFields_coupons_id_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_id_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_id_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_coupons_id_Delete {
+  permission: Boolean!
+}
+
 type ProductsDocAccessFields_variants {
   create: ProductsDocAccessFields_variants_Create
   read: ProductsDocAccessFields_variants_Read
@@ -4294,56 +4574,32 @@ type ProductsDocAccessFields_variants_Delete {
 }
 
 type ProductsDocAccessFields_variants_Fields {
-  stripeVariantProductID: ProductsDocAccessFields_variants_stripeVariantProductID
-  priceJSON: ProductsDocAccessFields_variants_priceJSON
+  priceID: ProductsDocAccessFields_variants_priceID
   seasonStart: ProductsDocAccessFields_variants_seasonStart
   seasonEnd: ProductsDocAccessFields_variants_seasonEnd
   id: ProductsDocAccessFields_variants_id
 }
 
-type ProductsDocAccessFields_variants_stripeVariantProductID {
-  create: ProductsDocAccessFields_variants_stripeVariantProductID_Create
-  read: ProductsDocAccessFields_variants_stripeVariantProductID_Read
-  update: ProductsDocAccessFields_variants_stripeVariantProductID_Update
-  delete: ProductsDocAccessFields_variants_stripeVariantProductID_Delete
+type ProductsDocAccessFields_variants_priceID {
+  create: ProductsDocAccessFields_variants_priceID_Create
+  read: ProductsDocAccessFields_variants_priceID_Read
+  update: ProductsDocAccessFields_variants_priceID_Update
+  delete: ProductsDocAccessFields_variants_priceID_Delete
 }
 
-type ProductsDocAccessFields_variants_stripeVariantProductID_Create {
+type ProductsDocAccessFields_variants_priceID_Create {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_variants_stripeVariantProductID_Read {
+type ProductsDocAccessFields_variants_priceID_Read {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_variants_stripeVariantProductID_Update {
+type ProductsDocAccessFields_variants_priceID_Update {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_variants_stripeVariantProductID_Delete {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_variants_priceJSON {
-  create: ProductsDocAccessFields_variants_priceJSON_Create
-  read: ProductsDocAccessFields_variants_priceJSON_Read
-  update: ProductsDocAccessFields_variants_priceJSON_Update
-  delete: ProductsDocAccessFields_variants_priceJSON_Delete
-}
-
-type ProductsDocAccessFields_variants_priceJSON_Create {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_variants_priceJSON_Read {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_variants_priceJSON_Update {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_variants_priceJSON_Delete {
+type ProductsDocAccessFields_variants_priceID_Delete {
   permission: Boolean!
 }
 
@@ -4413,75 +4669,6 @@ type ProductsDocAccessFields_variants_id_Update {
 }
 
 type ProductsDocAccessFields_variants_id_Delete {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_priceJSON {
-  create: ProductsDocAccessFields_priceJSON_Create
-  read: ProductsDocAccessFields_priceJSON_Read
-  update: ProductsDocAccessFields_priceJSON_Update
-  delete: ProductsDocAccessFields_priceJSON_Delete
-}
-
-type ProductsDocAccessFields_priceJSON_Create {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_priceJSON_Read {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_priceJSON_Update {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_priceJSON_Delete {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_enablePaywall {
-  create: ProductsDocAccessFields_enablePaywall_Create
-  read: ProductsDocAccessFields_enablePaywall_Read
-  update: ProductsDocAccessFields_enablePaywall_Update
-  delete: ProductsDocAccessFields_enablePaywall_Delete
-}
-
-type ProductsDocAccessFields_enablePaywall_Create {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_enablePaywall_Read {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_enablePaywall_Update {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_enablePaywall_Delete {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_paywall {
-  create: ProductsDocAccessFields_paywall_Create
-  read: ProductsDocAccessFields_paywall_Read
-  update: ProductsDocAccessFields_paywall_Update
-  delete: ProductsDocAccessFields_paywall_Delete
-}
-
-type ProductsDocAccessFields_paywall_Create {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_paywall_Read {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_paywall_Update {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_paywall_Delete {
   permission: Boolean!
 }
 
@@ -4787,17 +4974,18 @@ type ProductVersion_Version {
   productDescription(depth: Int): JSON
   amenities: [ProductVersion_Version_Amenities!]
   layout: [ProductVersion_Version_Layout!]!
-  stripeProductID: String
   bedroomQuantity: Float
   bathQuantity: Float
   maxGuestQuantity: Float
   baseGuestQuantity: Float
-  stripeGuestFeeID: String
-  guestFeePriceJSON: String
-  variants: [ProductVersion_Version_Variants!]
   priceJSON: String
   enablePaywall: Boolean
   paywall: [ProductVersion_Version_Paywall!]
+  stripeProductID: String
+  stripeGuestFeeID: String
+  guestFeePriceJSON: String
+  coupons: [ProductVersion_Version_Coupons!]
+  variants: [ProductVersion_Version_Variants!]
   categories: [Category!]
   relatedProducts(draft: Boolean): [Product!]
   slug: String
@@ -5009,15 +5197,22 @@ type ProductVersion_Version_Amenities {
 
 union ProductVersion_Version_Layout = Cta | Content | MediaBlock | Archive
 
+union ProductVersion_Version_Paywall = Cta | Content | MediaBlock | Archive
+
+type ProductVersion_Version_Coupons {
+  nickname: String
+  quantity: Float
+  stripeCoupon: String
+  stripeCouponJSON: String
+  id: String
+}
+
 type ProductVersion_Version_Variants {
-  stripeVariantProductID: String
-  priceJSON: String
+  priceID: String
   seasonStart: DateTime
   seasonEnd: DateTime
   id: String
 }
-
-union ProductVersion_Version_Paywall = Cta | Content | MediaBlock | Archive
 
 type ProductVersion_Version_Meta {
   title: String
@@ -5243,20 +5438,24 @@ input versionsProduct_where {
   version__productDescription: versionsProduct_version__productDescription_operator
   version__amenities__amenity: versionsProduct_version__amenities__amenity_operator
   version__amenities__id: versionsProduct_version__amenities__id_operator
-  version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__bedroomQuantity: versionsProduct_version__bedroomQuantity_operator
   version__bathQuantity: versionsProduct_version__bathQuantity_operator
   version__maxGuestQuantity: versionsProduct_version__maxGuestQuantity_operator
   version__baseGuestQuantity: versionsProduct_version__baseGuestQuantity_operator
+  version__priceJSON: versionsProduct_version__priceJSON_operator
+  version__enablePaywall: versionsProduct_version__enablePaywall_operator
+  version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
   version__guestFeePriceJSON: versionsProduct_version__guestFeePriceJSON_operator
-  version__variants__stripeVariantProductID: versionsProduct_version__variants__stripeVariantProductID_operator
-  version__variants__priceJSON: versionsProduct_version__variants__priceJSON_operator
+  version__coupons__nickname: versionsProduct_version__coupons__nickname_operator
+  version__coupons__quantity: versionsProduct_version__coupons__quantity_operator
+  version__coupons__stripeCoupon: versionsProduct_version__coupons__stripeCoupon_operator
+  version__coupons__stripeCouponJSON: versionsProduct_version__coupons__stripeCouponJSON_operator
+  version__coupons__id: versionsProduct_version__coupons__id_operator
+  version__variants__priceID: versionsProduct_version__variants__priceID_operator
   version__variants__seasonStart: versionsProduct_version__variants__seasonStart_operator
   version__variants__seasonEnd: versionsProduct_version__variants__seasonEnd_operator
   version__variants__id: versionsProduct_version__variants__id_operator
-  version__priceJSON: versionsProduct_version__priceJSON_operator
-  version__enablePaywall: versionsProduct_version__enablePaywall_operator
   version__categories: versionsProduct_version__categories_operator
   version__relatedProducts: versionsProduct_version__relatedProducts_operator
   version__slug: versionsProduct_version__slug_operator
@@ -5354,17 +5553,6 @@ input versionsProduct_version__amenities__id_operator {
   exists: Boolean
 }
 
-input versionsProduct_version__stripeProductID_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
-}
-
 input versionsProduct_version__bedroomQuantity_operator {
   equals: Float
   not_equals: Float
@@ -5401,6 +5589,31 @@ input versionsProduct_version__baseGuestQuantity_operator {
   less_than: Float
 }
 
+input versionsProduct_version__priceJSON_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
+}
+
+input versionsProduct_version__enablePaywall_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
+input versionsProduct_version__stripeProductID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input versionsProduct_version__stripeGuestFeeID_operator {
   equals: String
   not_equals: String
@@ -5420,7 +5633,27 @@ input versionsProduct_version__guestFeePriceJSON_operator {
   exists: Boolean
 }
 
-input versionsProduct_version__variants__stripeVariantProductID_operator {
+input versionsProduct_version__coupons__nickname_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsProduct_version__coupons__quantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+}
+
+input versionsProduct_version__coupons__stripeCoupon_operator {
   equals: String
   not_equals: String
   like: String
@@ -5430,12 +5663,33 @@ input versionsProduct_version__variants__stripeVariantProductID_operator {
   all: [String]
 }
 
-input versionsProduct_version__variants__priceJSON_operator {
+input versionsProduct_version__coupons__stripeCouponJSON_operator {
   equals: String
   not_equals: String
   like: String
   contains: String
   exists: Boolean
+}
+
+input versionsProduct_version__coupons__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsProduct_version__variants__priceID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
 }
 
 input versionsProduct_version__variants__seasonStart_operator {
@@ -5466,20 +5720,6 @@ input versionsProduct_version__variants__id_operator {
   in: [String]
   not_in: [String]
   all: [String]
-  exists: Boolean
-}
-
-input versionsProduct_version__priceJSON_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  exists: Boolean
-}
-
-input versionsProduct_version__enablePaywall_operator {
-  equals: Boolean
-  not_equals: Boolean
   exists: Boolean
 }
 
@@ -5628,20 +5868,24 @@ input versionsProduct_where_and {
   version__productDescription: versionsProduct_version__productDescription_operator
   version__amenities__amenity: versionsProduct_version__amenities__amenity_operator
   version__amenities__id: versionsProduct_version__amenities__id_operator
-  version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__bedroomQuantity: versionsProduct_version__bedroomQuantity_operator
   version__bathQuantity: versionsProduct_version__bathQuantity_operator
   version__maxGuestQuantity: versionsProduct_version__maxGuestQuantity_operator
   version__baseGuestQuantity: versionsProduct_version__baseGuestQuantity_operator
+  version__priceJSON: versionsProduct_version__priceJSON_operator
+  version__enablePaywall: versionsProduct_version__enablePaywall_operator
+  version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
   version__guestFeePriceJSON: versionsProduct_version__guestFeePriceJSON_operator
-  version__variants__stripeVariantProductID: versionsProduct_version__variants__stripeVariantProductID_operator
-  version__variants__priceJSON: versionsProduct_version__variants__priceJSON_operator
+  version__coupons__nickname: versionsProduct_version__coupons__nickname_operator
+  version__coupons__quantity: versionsProduct_version__coupons__quantity_operator
+  version__coupons__stripeCoupon: versionsProduct_version__coupons__stripeCoupon_operator
+  version__coupons__stripeCouponJSON: versionsProduct_version__coupons__stripeCouponJSON_operator
+  version__coupons__id: versionsProduct_version__coupons__id_operator
+  version__variants__priceID: versionsProduct_version__variants__priceID_operator
   version__variants__seasonStart: versionsProduct_version__variants__seasonStart_operator
   version__variants__seasonEnd: versionsProduct_version__variants__seasonEnd_operator
   version__variants__id: versionsProduct_version__variants__id_operator
-  version__priceJSON: versionsProduct_version__priceJSON_operator
-  version__enablePaywall: versionsProduct_version__enablePaywall_operator
   version__categories: versionsProduct_version__categories_operator
   version__relatedProducts: versionsProduct_version__relatedProducts_operator
   version__slug: versionsProduct_version__slug_operator
@@ -5670,20 +5914,24 @@ input versionsProduct_where_or {
   version__productDescription: versionsProduct_version__productDescription_operator
   version__amenities__amenity: versionsProduct_version__amenities__amenity_operator
   version__amenities__id: versionsProduct_version__amenities__id_operator
-  version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__bedroomQuantity: versionsProduct_version__bedroomQuantity_operator
   version__bathQuantity: versionsProduct_version__bathQuantity_operator
   version__maxGuestQuantity: versionsProduct_version__maxGuestQuantity_operator
   version__baseGuestQuantity: versionsProduct_version__baseGuestQuantity_operator
+  version__priceJSON: versionsProduct_version__priceJSON_operator
+  version__enablePaywall: versionsProduct_version__enablePaywall_operator
+  version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
   version__guestFeePriceJSON: versionsProduct_version__guestFeePriceJSON_operator
-  version__variants__stripeVariantProductID: versionsProduct_version__variants__stripeVariantProductID_operator
-  version__variants__priceJSON: versionsProduct_version__variants__priceJSON_operator
+  version__coupons__nickname: versionsProduct_version__coupons__nickname_operator
+  version__coupons__quantity: versionsProduct_version__coupons__quantity_operator
+  version__coupons__stripeCoupon: versionsProduct_version__coupons__stripeCoupon_operator
+  version__coupons__stripeCouponJSON: versionsProduct_version__coupons__stripeCouponJSON_operator
+  version__coupons__id: versionsProduct_version__coupons__id_operator
+  version__variants__priceID: versionsProduct_version__variants__priceID_operator
   version__variants__seasonStart: versionsProduct_version__variants__seasonStart_operator
   version__variants__seasonEnd: versionsProduct_version__variants__seasonEnd_operator
   version__variants__id: versionsProduct_version__variants__id_operator
-  version__priceJSON: versionsProduct_version__priceJSON_operator
-  version__enablePaywall: versionsProduct_version__enablePaywall_operator
   version__categories: versionsProduct_version__categories_operator
   version__relatedProducts: versionsProduct_version__relatedProducts_operator
   version__slug: versionsProduct_version__slug_operator
@@ -7187,11 +7435,13 @@ input User_where {
   roles: User_roles_operator
   purchases: User_purchases_operator
   stripeCustomerID: User_stripeCustomerID_operator
-  cart__headProduct: User_cart__headProduct_operator
-  cart__startDate: User_cart__startDate_operator
-  cart__endDate: User_cart__endDate_operator
   cart__items__product: User_cart__items__product_operator
+  cart__items__stripeProductID: User_cart__items__stripeProductID_operator
+  cart__items__priceID: User_cart__items__priceID_operator
+  cart__items__guestsQuantity: User_cart__items__guestsQuantity_operator
   cart__items__quantity: User_cart__items__quantity_operator
+  cart__items__from: User_cart__items__from_operator
+  cart__items__to: User_cart__items__to_operator
   cart__items__id: User_cart__items__id_operator
   skipSync: User_skipSync_operator
   updatedAt: User_updatedAt_operator
@@ -7247,43 +7497,43 @@ input User_stripeCustomerID_operator {
   exists: Boolean
 }
 
-input User_cart__headProduct_operator {
-  equals: JSON
-  not_equals: JSON
-  in: [JSON]
-  not_in: [JSON]
-  all: [JSON]
-  exists: Boolean
-}
-
-input User_cart__startDate_operator {
-  equals: DateTime
-  not_equals: DateTime
-  greater_than_equal: DateTime
-  greater_than: DateTime
-  less_than_equal: DateTime
-  less_than: DateTime
-  like: DateTime
-  exists: Boolean
-}
-
-input User_cart__endDate_operator {
-  equals: DateTime
-  not_equals: DateTime
-  greater_than_equal: DateTime
-  greater_than: DateTime
-  less_than_equal: DateTime
-  less_than: DateTime
-  like: DateTime
-  exists: Boolean
-}
-
 input User_cart__items__product_operator {
   equals: JSON
   not_equals: JSON
   in: [JSON]
   not_in: [JSON]
   all: [JSON]
+  exists: Boolean
+}
+
+input User_cart__items__stripeProductID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input User_cart__items__priceID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input User_cart__items__guestsQuantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
   exists: Boolean
 }
 
@@ -7295,6 +7545,26 @@ input User_cart__items__quantity_operator {
   less_than_equal: Float
   less_than: Float
   exists: Boolean
+}
+
+input User_cart__items__from_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+}
+
+input User_cart__items__to_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
 }
 
 input User_cart__items__id_operator {
@@ -7362,11 +7632,13 @@ input User_where_and {
   roles: User_roles_operator
   purchases: User_purchases_operator
   stripeCustomerID: User_stripeCustomerID_operator
-  cart__headProduct: User_cart__headProduct_operator
-  cart__startDate: User_cart__startDate_operator
-  cart__endDate: User_cart__endDate_operator
   cart__items__product: User_cart__items__product_operator
+  cart__items__stripeProductID: User_cart__items__stripeProductID_operator
+  cart__items__priceID: User_cart__items__priceID_operator
+  cart__items__guestsQuantity: User_cart__items__guestsQuantity_operator
   cart__items__quantity: User_cart__items__quantity_operator
+  cart__items__from: User_cart__items__from_operator
+  cart__items__to: User_cart__items__to_operator
   cart__items__id: User_cart__items__id_operator
   skipSync: User_skipSync_operator
   updatedAt: User_updatedAt_operator
@@ -7382,11 +7654,13 @@ input User_where_or {
   roles: User_roles_operator
   purchases: User_purchases_operator
   stripeCustomerID: User_stripeCustomerID_operator
-  cart__headProduct: User_cart__headProduct_operator
-  cart__startDate: User_cart__startDate_operator
-  cart__endDate: User_cart__endDate_operator
   cart__items__product: User_cart__items__product_operator
+  cart__items__stripeProductID: User_cart__items__stripeProductID_operator
+  cart__items__priceID: User_cart__items__priceID_operator
+  cart__items__guestsQuantity: User_cart__items__guestsQuantity_operator
   cart__items__quantity: User_cart__items__quantity_operator
+  cart__items__from: User_cart__items__from_operator
+  cart__items__to: User_cart__items__to_operator
   cart__items__id: User_cart__items__id_operator
   skipSync: User_skipSync_operator
   updatedAt: User_updatedAt_operator
@@ -7540,79 +7814,7 @@ type UsersDocAccessFields_cart_Delete {
 }
 
 type UsersDocAccessFields_cart_Fields {
-  headProduct: UsersDocAccessFields_cart_headProduct
-  startDate: UsersDocAccessFields_cart_startDate
-  endDate: UsersDocAccessFields_cart_endDate
   items: UsersDocAccessFields_cart_items
-}
-
-type UsersDocAccessFields_cart_headProduct {
-  create: UsersDocAccessFields_cart_headProduct_Create
-  read: UsersDocAccessFields_cart_headProduct_Read
-  update: UsersDocAccessFields_cart_headProduct_Update
-  delete: UsersDocAccessFields_cart_headProduct_Delete
-}
-
-type UsersDocAccessFields_cart_headProduct_Create {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_headProduct_Read {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_headProduct_Update {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_headProduct_Delete {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_startDate {
-  create: UsersDocAccessFields_cart_startDate_Create
-  read: UsersDocAccessFields_cart_startDate_Read
-  update: UsersDocAccessFields_cart_startDate_Update
-  delete: UsersDocAccessFields_cart_startDate_Delete
-}
-
-type UsersDocAccessFields_cart_startDate_Create {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_startDate_Read {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_startDate_Update {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_startDate_Delete {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_endDate {
-  create: UsersDocAccessFields_cart_endDate_Create
-  read: UsersDocAccessFields_cart_endDate_Read
-  update: UsersDocAccessFields_cart_endDate_Update
-  delete: UsersDocAccessFields_cart_endDate_Delete
-}
-
-type UsersDocAccessFields_cart_endDate_Create {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_endDate_Read {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_endDate_Update {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_endDate_Delete {
-  permission: Boolean!
 }
 
 type UsersDocAccessFields_cart_items {
@@ -7641,7 +7843,12 @@ type UsersDocAccessFields_cart_items_Delete {
 
 type UsersDocAccessFields_cart_items_Fields {
   product: UsersDocAccessFields_cart_items_product
+  stripeProductID: UsersDocAccessFields_cart_items_stripeProductID
+  priceID: UsersDocAccessFields_cart_items_priceID
+  guestsQuantity: UsersDocAccessFields_cart_items_guestsQuantity
   quantity: UsersDocAccessFields_cart_items_quantity
+  from: UsersDocAccessFields_cart_items_from
+  to: UsersDocAccessFields_cart_items_to
   id: UsersDocAccessFields_cart_items_id
 }
 
@@ -7668,6 +7875,75 @@ type UsersDocAccessFields_cart_items_product_Delete {
   permission: Boolean!
 }
 
+type UsersDocAccessFields_cart_items_stripeProductID {
+  create: UsersDocAccessFields_cart_items_stripeProductID_Create
+  read: UsersDocAccessFields_cart_items_stripeProductID_Read
+  update: UsersDocAccessFields_cart_items_stripeProductID_Update
+  delete: UsersDocAccessFields_cart_items_stripeProductID_Delete
+}
+
+type UsersDocAccessFields_cart_items_stripeProductID_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_stripeProductID_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_stripeProductID_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_stripeProductID_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_priceID {
+  create: UsersDocAccessFields_cart_items_priceID_Create
+  read: UsersDocAccessFields_cart_items_priceID_Read
+  update: UsersDocAccessFields_cart_items_priceID_Update
+  delete: UsersDocAccessFields_cart_items_priceID_Delete
+}
+
+type UsersDocAccessFields_cart_items_priceID_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_priceID_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_priceID_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_priceID_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_guestsQuantity {
+  create: UsersDocAccessFields_cart_items_guestsQuantity_Create
+  read: UsersDocAccessFields_cart_items_guestsQuantity_Read
+  update: UsersDocAccessFields_cart_items_guestsQuantity_Update
+  delete: UsersDocAccessFields_cart_items_guestsQuantity_Delete
+}
+
+type UsersDocAccessFields_cart_items_guestsQuantity_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_guestsQuantity_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_guestsQuantity_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_guestsQuantity_Delete {
+  permission: Boolean!
+}
+
 type UsersDocAccessFields_cart_items_quantity {
   create: UsersDocAccessFields_cart_items_quantity_Create
   read: UsersDocAccessFields_cart_items_quantity_Read
@@ -7688,6 +7964,52 @@ type UsersDocAccessFields_cart_items_quantity_Update {
 }
 
 type UsersDocAccessFields_cart_items_quantity_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_from {
+  create: UsersDocAccessFields_cart_items_from_Create
+  read: UsersDocAccessFields_cart_items_from_Read
+  update: UsersDocAccessFields_cart_items_from_Update
+  delete: UsersDocAccessFields_cart_items_from_Delete
+}
+
+type UsersDocAccessFields_cart_items_from_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_from_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_from_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_from_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_to {
+  create: UsersDocAccessFields_cart_items_to_Create
+  read: UsersDocAccessFields_cart_items_to_Read
+  update: UsersDocAccessFields_cart_items_to_Update
+  delete: UsersDocAccessFields_cart_items_to_Delete
+}
+
+type UsersDocAccessFields_cart_items_to_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_to_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_to_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_items_to_Delete {
   permission: Boolean!
 }
 
@@ -10988,6 +11310,13 @@ type PayloadPreferencesDeleteDocAccess {
 
 type Settings {
   productsPage(draft: Boolean): Page
+  minBooking: Float
+  maxBooking: Float
+  advancedBookingLimit: Float
+  stripeCleaningFee: String
+  stripeCleaningFeeJSON: String
+  skipSync: Boolean
+  tax: Float
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -11000,6 +11329,13 @@ type settingsDocAccess {
 
 type SettingsDocAccessFields {
   productsPage: SettingsDocAccessFields_productsPage
+  minBooking: SettingsDocAccessFields_minBooking
+  maxBooking: SettingsDocAccessFields_maxBooking
+  advancedBookingLimit: SettingsDocAccessFields_advancedBookingLimit
+  stripeCleaningFee: SettingsDocAccessFields_stripeCleaningFee
+  stripeCleaningFeeJSON: SettingsDocAccessFields_stripeCleaningFeeJSON
+  skipSync: SettingsDocAccessFields_skipSync
+  tax: SettingsDocAccessFields_tax
   updatedAt: SettingsDocAccessFields_updatedAt
   createdAt: SettingsDocAccessFields_createdAt
 }
@@ -11024,6 +11360,167 @@ type SettingsDocAccessFields_productsPage_Update {
 }
 
 type SettingsDocAccessFields_productsPage_Delete {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_minBooking {
+  create: SettingsDocAccessFields_minBooking_Create
+  read: SettingsDocAccessFields_minBooking_Read
+  update: SettingsDocAccessFields_minBooking_Update
+  delete: SettingsDocAccessFields_minBooking_Delete
+}
+
+type SettingsDocAccessFields_minBooking_Create {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_minBooking_Read {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_minBooking_Update {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_minBooking_Delete {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_maxBooking {
+  create: SettingsDocAccessFields_maxBooking_Create
+  read: SettingsDocAccessFields_maxBooking_Read
+  update: SettingsDocAccessFields_maxBooking_Update
+  delete: SettingsDocAccessFields_maxBooking_Delete
+}
+
+type SettingsDocAccessFields_maxBooking_Create {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_maxBooking_Read {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_maxBooking_Update {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_maxBooking_Delete {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_advancedBookingLimit {
+  create: SettingsDocAccessFields_advancedBookingLimit_Create
+  read: SettingsDocAccessFields_advancedBookingLimit_Read
+  update: SettingsDocAccessFields_advancedBookingLimit_Update
+  delete: SettingsDocAccessFields_advancedBookingLimit_Delete
+}
+
+type SettingsDocAccessFields_advancedBookingLimit_Create {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_advancedBookingLimit_Read {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_advancedBookingLimit_Update {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_advancedBookingLimit_Delete {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_stripeCleaningFee {
+  create: SettingsDocAccessFields_stripeCleaningFee_Create
+  read: SettingsDocAccessFields_stripeCleaningFee_Read
+  update: SettingsDocAccessFields_stripeCleaningFee_Update
+  delete: SettingsDocAccessFields_stripeCleaningFee_Delete
+}
+
+type SettingsDocAccessFields_stripeCleaningFee_Create {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_stripeCleaningFee_Read {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_stripeCleaningFee_Update {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_stripeCleaningFee_Delete {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_stripeCleaningFeeJSON {
+  create: SettingsDocAccessFields_stripeCleaningFeeJSON_Create
+  read: SettingsDocAccessFields_stripeCleaningFeeJSON_Read
+  update: SettingsDocAccessFields_stripeCleaningFeeJSON_Update
+  delete: SettingsDocAccessFields_stripeCleaningFeeJSON_Delete
+}
+
+type SettingsDocAccessFields_stripeCleaningFeeJSON_Create {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_stripeCleaningFeeJSON_Read {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_stripeCleaningFeeJSON_Update {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_stripeCleaningFeeJSON_Delete {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_skipSync {
+  create: SettingsDocAccessFields_skipSync_Create
+  read: SettingsDocAccessFields_skipSync_Read
+  update: SettingsDocAccessFields_skipSync_Update
+  delete: SettingsDocAccessFields_skipSync_Delete
+}
+
+type SettingsDocAccessFields_skipSync_Create {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_skipSync_Read {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_skipSync_Update {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_skipSync_Delete {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_tax {
+  create: SettingsDocAccessFields_tax_Create
+  read: SettingsDocAccessFields_tax_Read
+  update: SettingsDocAccessFields_tax_Update
+  delete: SettingsDocAccessFields_tax_Delete
+}
+
+type SettingsDocAccessFields_tax_Create {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_tax_Read {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_tax_Update {
+  permission: Boolean!
+}
+
+type SettingsDocAccessFields_tax_Delete {
   permission: Boolean!
 }
 
@@ -12353,17 +12850,18 @@ type ProductsFields {
   productDescription: ProductsFields_productDescription
   amenities: ProductsFields_amenities
   layout: ProductsFields_layout
-  stripeProductID: ProductsFields_stripeProductID
   bedroomQuantity: ProductsFields_bedroomQuantity
   bathQuantity: ProductsFields_bathQuantity
   maxGuestQuantity: ProductsFields_maxGuestQuantity
   baseGuestQuantity: ProductsFields_baseGuestQuantity
-  stripeGuestFeeID: ProductsFields_stripeGuestFeeID
-  guestFeePriceJSON: ProductsFields_guestFeePriceJSON
-  variants: ProductsFields_variants
   priceJSON: ProductsFields_priceJSON
   enablePaywall: ProductsFields_enablePaywall
   paywall: ProductsFields_paywall
+  stripeProductID: ProductsFields_stripeProductID
+  stripeGuestFeeID: ProductsFields_stripeGuestFeeID
+  guestFeePriceJSON: ProductsFields_guestFeePriceJSON
+  coupons: ProductsFields_coupons
+  variants: ProductsFields_variants
   categories: ProductsFields_categories
   relatedProducts: ProductsFields_relatedProducts
   slug: ProductsFields_slug
@@ -12639,29 +13137,6 @@ type ProductsFields_layout_Delete {
   permission: Boolean!
 }
 
-type ProductsFields_stripeProductID {
-  create: ProductsFields_stripeProductID_Create
-  read: ProductsFields_stripeProductID_Read
-  update: ProductsFields_stripeProductID_Update
-  delete: ProductsFields_stripeProductID_Delete
-}
-
-type ProductsFields_stripeProductID_Create {
-  permission: Boolean!
-}
-
-type ProductsFields_stripeProductID_Read {
-  permission: Boolean!
-}
-
-type ProductsFields_stripeProductID_Update {
-  permission: Boolean!
-}
-
-type ProductsFields_stripeProductID_Delete {
-  permission: Boolean!
-}
-
 type ProductsFields_bedroomQuantity {
   create: ProductsFields_bedroomQuantity_Create
   read: ProductsFields_bedroomQuantity_Read
@@ -12754,6 +13229,98 @@ type ProductsFields_baseGuestQuantity_Delete {
   permission: Boolean!
 }
 
+type ProductsFields_priceJSON {
+  create: ProductsFields_priceJSON_Create
+  read: ProductsFields_priceJSON_Read
+  update: ProductsFields_priceJSON_Update
+  delete: ProductsFields_priceJSON_Delete
+}
+
+type ProductsFields_priceJSON_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_priceJSON_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_priceJSON_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_priceJSON_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_enablePaywall {
+  create: ProductsFields_enablePaywall_Create
+  read: ProductsFields_enablePaywall_Read
+  update: ProductsFields_enablePaywall_Update
+  delete: ProductsFields_enablePaywall_Delete
+}
+
+type ProductsFields_enablePaywall_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_enablePaywall_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_enablePaywall_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_enablePaywall_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_paywall {
+  create: ProductsFields_paywall_Create
+  read: ProductsFields_paywall_Read
+  update: ProductsFields_paywall_Update
+  delete: ProductsFields_paywall_Delete
+}
+
+type ProductsFields_paywall_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_paywall_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_paywall_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_paywall_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_stripeProductID {
+  create: ProductsFields_stripeProductID_Create
+  read: ProductsFields_stripeProductID_Read
+  update: ProductsFields_stripeProductID_Update
+  delete: ProductsFields_stripeProductID_Delete
+}
+
+type ProductsFields_stripeProductID_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_stripeProductID_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_stripeProductID_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_stripeProductID_Delete {
+  permission: Boolean!
+}
+
 type ProductsFields_stripeGuestFeeID {
   create: ProductsFields_stripeGuestFeeID_Create
   read: ProductsFields_stripeGuestFeeID_Read
@@ -12800,6 +13367,153 @@ type ProductsFields_guestFeePriceJSON_Delete {
   permission: Boolean!
 }
 
+type ProductsFields_coupons {
+  create: ProductsFields_coupons_Create
+  read: ProductsFields_coupons_Read
+  update: ProductsFields_coupons_Update
+  delete: ProductsFields_coupons_Delete
+  fields: ProductsFields_coupons_Fields
+}
+
+type ProductsFields_coupons_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_Fields {
+  nickname: ProductsFields_coupons_nickname
+  quantity: ProductsFields_coupons_quantity
+  stripeCoupon: ProductsFields_coupons_stripeCoupon
+  stripeCouponJSON: ProductsFields_coupons_stripeCouponJSON
+  id: ProductsFields_coupons_id
+}
+
+type ProductsFields_coupons_nickname {
+  create: ProductsFields_coupons_nickname_Create
+  read: ProductsFields_coupons_nickname_Read
+  update: ProductsFields_coupons_nickname_Update
+  delete: ProductsFields_coupons_nickname_Delete
+}
+
+type ProductsFields_coupons_nickname_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_nickname_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_nickname_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_nickname_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_quantity {
+  create: ProductsFields_coupons_quantity_Create
+  read: ProductsFields_coupons_quantity_Read
+  update: ProductsFields_coupons_quantity_Update
+  delete: ProductsFields_coupons_quantity_Delete
+}
+
+type ProductsFields_coupons_quantity_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_quantity_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_quantity_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_quantity_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_stripeCoupon {
+  create: ProductsFields_coupons_stripeCoupon_Create
+  read: ProductsFields_coupons_stripeCoupon_Read
+  update: ProductsFields_coupons_stripeCoupon_Update
+  delete: ProductsFields_coupons_stripeCoupon_Delete
+}
+
+type ProductsFields_coupons_stripeCoupon_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_stripeCoupon_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_stripeCoupon_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_stripeCoupon_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_stripeCouponJSON {
+  create: ProductsFields_coupons_stripeCouponJSON_Create
+  read: ProductsFields_coupons_stripeCouponJSON_Read
+  update: ProductsFields_coupons_stripeCouponJSON_Update
+  delete: ProductsFields_coupons_stripeCouponJSON_Delete
+}
+
+type ProductsFields_coupons_stripeCouponJSON_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_stripeCouponJSON_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_stripeCouponJSON_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_stripeCouponJSON_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_id {
+  create: ProductsFields_coupons_id_Create
+  read: ProductsFields_coupons_id_Read
+  update: ProductsFields_coupons_id_Update
+  delete: ProductsFields_coupons_id_Delete
+}
+
+type ProductsFields_coupons_id_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_id_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_id_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_coupons_id_Delete {
+  permission: Boolean!
+}
+
 type ProductsFields_variants {
   create: ProductsFields_variants_Create
   read: ProductsFields_variants_Read
@@ -12825,56 +13539,32 @@ type ProductsFields_variants_Delete {
 }
 
 type ProductsFields_variants_Fields {
-  stripeVariantProductID: ProductsFields_variants_stripeVariantProductID
-  priceJSON: ProductsFields_variants_priceJSON
+  priceID: ProductsFields_variants_priceID
   seasonStart: ProductsFields_variants_seasonStart
   seasonEnd: ProductsFields_variants_seasonEnd
   id: ProductsFields_variants_id
 }
 
-type ProductsFields_variants_stripeVariantProductID {
-  create: ProductsFields_variants_stripeVariantProductID_Create
-  read: ProductsFields_variants_stripeVariantProductID_Read
-  update: ProductsFields_variants_stripeVariantProductID_Update
-  delete: ProductsFields_variants_stripeVariantProductID_Delete
+type ProductsFields_variants_priceID {
+  create: ProductsFields_variants_priceID_Create
+  read: ProductsFields_variants_priceID_Read
+  update: ProductsFields_variants_priceID_Update
+  delete: ProductsFields_variants_priceID_Delete
 }
 
-type ProductsFields_variants_stripeVariantProductID_Create {
+type ProductsFields_variants_priceID_Create {
   permission: Boolean!
 }
 
-type ProductsFields_variants_stripeVariantProductID_Read {
+type ProductsFields_variants_priceID_Read {
   permission: Boolean!
 }
 
-type ProductsFields_variants_stripeVariantProductID_Update {
+type ProductsFields_variants_priceID_Update {
   permission: Boolean!
 }
 
-type ProductsFields_variants_stripeVariantProductID_Delete {
-  permission: Boolean!
-}
-
-type ProductsFields_variants_priceJSON {
-  create: ProductsFields_variants_priceJSON_Create
-  read: ProductsFields_variants_priceJSON_Read
-  update: ProductsFields_variants_priceJSON_Update
-  delete: ProductsFields_variants_priceJSON_Delete
-}
-
-type ProductsFields_variants_priceJSON_Create {
-  permission: Boolean!
-}
-
-type ProductsFields_variants_priceJSON_Read {
-  permission: Boolean!
-}
-
-type ProductsFields_variants_priceJSON_Update {
-  permission: Boolean!
-}
-
-type ProductsFields_variants_priceJSON_Delete {
+type ProductsFields_variants_priceID_Delete {
   permission: Boolean!
 }
 
@@ -12944,75 +13634,6 @@ type ProductsFields_variants_id_Update {
 }
 
 type ProductsFields_variants_id_Delete {
-  permission: Boolean!
-}
-
-type ProductsFields_priceJSON {
-  create: ProductsFields_priceJSON_Create
-  read: ProductsFields_priceJSON_Read
-  update: ProductsFields_priceJSON_Update
-  delete: ProductsFields_priceJSON_Delete
-}
-
-type ProductsFields_priceJSON_Create {
-  permission: Boolean!
-}
-
-type ProductsFields_priceJSON_Read {
-  permission: Boolean!
-}
-
-type ProductsFields_priceJSON_Update {
-  permission: Boolean!
-}
-
-type ProductsFields_priceJSON_Delete {
-  permission: Boolean!
-}
-
-type ProductsFields_enablePaywall {
-  create: ProductsFields_enablePaywall_Create
-  read: ProductsFields_enablePaywall_Read
-  update: ProductsFields_enablePaywall_Update
-  delete: ProductsFields_enablePaywall_Delete
-}
-
-type ProductsFields_enablePaywall_Create {
-  permission: Boolean!
-}
-
-type ProductsFields_enablePaywall_Read {
-  permission: Boolean!
-}
-
-type ProductsFields_enablePaywall_Update {
-  permission: Boolean!
-}
-
-type ProductsFields_enablePaywall_Delete {
-  permission: Boolean!
-}
-
-type ProductsFields_paywall {
-  create: ProductsFields_paywall_Create
-  read: ProductsFields_paywall_Read
-  update: ProductsFields_paywall_Update
-  delete: ProductsFields_paywall_Delete
-}
-
-type ProductsFields_paywall_Create {
-  permission: Boolean!
-}
-
-type ProductsFields_paywall_Read {
-  permission: Boolean!
-}
-
-type ProductsFields_paywall_Update {
-  permission: Boolean!
-}
-
-type ProductsFields_paywall_Delete {
   permission: Boolean!
 }
 
@@ -14333,79 +14954,7 @@ type UsersFields_cart_Delete {
 }
 
 type UsersFields_cart_Fields {
-  headProduct: UsersFields_cart_headProduct
-  startDate: UsersFields_cart_startDate
-  endDate: UsersFields_cart_endDate
   items: UsersFields_cart_items
-}
-
-type UsersFields_cart_headProduct {
-  create: UsersFields_cart_headProduct_Create
-  read: UsersFields_cart_headProduct_Read
-  update: UsersFields_cart_headProduct_Update
-  delete: UsersFields_cart_headProduct_Delete
-}
-
-type UsersFields_cart_headProduct_Create {
-  permission: Boolean!
-}
-
-type UsersFields_cart_headProduct_Read {
-  permission: Boolean!
-}
-
-type UsersFields_cart_headProduct_Update {
-  permission: Boolean!
-}
-
-type UsersFields_cart_headProduct_Delete {
-  permission: Boolean!
-}
-
-type UsersFields_cart_startDate {
-  create: UsersFields_cart_startDate_Create
-  read: UsersFields_cart_startDate_Read
-  update: UsersFields_cart_startDate_Update
-  delete: UsersFields_cart_startDate_Delete
-}
-
-type UsersFields_cart_startDate_Create {
-  permission: Boolean!
-}
-
-type UsersFields_cart_startDate_Read {
-  permission: Boolean!
-}
-
-type UsersFields_cart_startDate_Update {
-  permission: Boolean!
-}
-
-type UsersFields_cart_startDate_Delete {
-  permission: Boolean!
-}
-
-type UsersFields_cart_endDate {
-  create: UsersFields_cart_endDate_Create
-  read: UsersFields_cart_endDate_Read
-  update: UsersFields_cart_endDate_Update
-  delete: UsersFields_cart_endDate_Delete
-}
-
-type UsersFields_cart_endDate_Create {
-  permission: Boolean!
-}
-
-type UsersFields_cart_endDate_Read {
-  permission: Boolean!
-}
-
-type UsersFields_cart_endDate_Update {
-  permission: Boolean!
-}
-
-type UsersFields_cart_endDate_Delete {
-  permission: Boolean!
 }
 
 type UsersFields_cart_items {
@@ -14434,7 +14983,12 @@ type UsersFields_cart_items_Delete {
 
 type UsersFields_cart_items_Fields {
   product: UsersFields_cart_items_product
+  stripeProductID: UsersFields_cart_items_stripeProductID
+  priceID: UsersFields_cart_items_priceID
+  guestsQuantity: UsersFields_cart_items_guestsQuantity
   quantity: UsersFields_cart_items_quantity
+  from: UsersFields_cart_items_from
+  to: UsersFields_cart_items_to
   id: UsersFields_cart_items_id
 }
 
@@ -14461,6 +15015,75 @@ type UsersFields_cart_items_product_Delete {
   permission: Boolean!
 }
 
+type UsersFields_cart_items_stripeProductID {
+  create: UsersFields_cart_items_stripeProductID_Create
+  read: UsersFields_cart_items_stripeProductID_Read
+  update: UsersFields_cart_items_stripeProductID_Update
+  delete: UsersFields_cart_items_stripeProductID_Delete
+}
+
+type UsersFields_cart_items_stripeProductID_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_stripeProductID_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_stripeProductID_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_stripeProductID_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_priceID {
+  create: UsersFields_cart_items_priceID_Create
+  read: UsersFields_cart_items_priceID_Read
+  update: UsersFields_cart_items_priceID_Update
+  delete: UsersFields_cart_items_priceID_Delete
+}
+
+type UsersFields_cart_items_priceID_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_priceID_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_priceID_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_priceID_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_guestsQuantity {
+  create: UsersFields_cart_items_guestsQuantity_Create
+  read: UsersFields_cart_items_guestsQuantity_Read
+  update: UsersFields_cart_items_guestsQuantity_Update
+  delete: UsersFields_cart_items_guestsQuantity_Delete
+}
+
+type UsersFields_cart_items_guestsQuantity_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_guestsQuantity_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_guestsQuantity_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_guestsQuantity_Delete {
+  permission: Boolean!
+}
+
 type UsersFields_cart_items_quantity {
   create: UsersFields_cart_items_quantity_Create
   read: UsersFields_cart_items_quantity_Read
@@ -14481,6 +15104,52 @@ type UsersFields_cart_items_quantity_Update {
 }
 
 type UsersFields_cart_items_quantity_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_from {
+  create: UsersFields_cart_items_from_Create
+  read: UsersFields_cart_items_from_Read
+  update: UsersFields_cart_items_from_Update
+  delete: UsersFields_cart_items_from_Delete
+}
+
+type UsersFields_cart_items_from_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_from_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_from_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_from_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_to {
+  create: UsersFields_cart_items_to_Create
+  read: UsersFields_cart_items_to_Read
+  update: UsersFields_cart_items_to_Update
+  delete: UsersFields_cart_items_to_Delete
+}
+
+type UsersFields_cart_items_to_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_to_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_to_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_items_to_Delete {
   permission: Boolean!
 }
 
@@ -16286,6 +16955,13 @@ type settingsAccess {
 
 type SettingsFields {
   productsPage: SettingsFields_productsPage
+  minBooking: SettingsFields_minBooking
+  maxBooking: SettingsFields_maxBooking
+  advancedBookingLimit: SettingsFields_advancedBookingLimit
+  stripeCleaningFee: SettingsFields_stripeCleaningFee
+  stripeCleaningFeeJSON: SettingsFields_stripeCleaningFeeJSON
+  skipSync: SettingsFields_skipSync
+  tax: SettingsFields_tax
   updatedAt: SettingsFields_updatedAt
   createdAt: SettingsFields_createdAt
 }
@@ -16310,6 +16986,167 @@ type SettingsFields_productsPage_Update {
 }
 
 type SettingsFields_productsPage_Delete {
+  permission: Boolean!
+}
+
+type SettingsFields_minBooking {
+  create: SettingsFields_minBooking_Create
+  read: SettingsFields_minBooking_Read
+  update: SettingsFields_minBooking_Update
+  delete: SettingsFields_minBooking_Delete
+}
+
+type SettingsFields_minBooking_Create {
+  permission: Boolean!
+}
+
+type SettingsFields_minBooking_Read {
+  permission: Boolean!
+}
+
+type SettingsFields_minBooking_Update {
+  permission: Boolean!
+}
+
+type SettingsFields_minBooking_Delete {
+  permission: Boolean!
+}
+
+type SettingsFields_maxBooking {
+  create: SettingsFields_maxBooking_Create
+  read: SettingsFields_maxBooking_Read
+  update: SettingsFields_maxBooking_Update
+  delete: SettingsFields_maxBooking_Delete
+}
+
+type SettingsFields_maxBooking_Create {
+  permission: Boolean!
+}
+
+type SettingsFields_maxBooking_Read {
+  permission: Boolean!
+}
+
+type SettingsFields_maxBooking_Update {
+  permission: Boolean!
+}
+
+type SettingsFields_maxBooking_Delete {
+  permission: Boolean!
+}
+
+type SettingsFields_advancedBookingLimit {
+  create: SettingsFields_advancedBookingLimit_Create
+  read: SettingsFields_advancedBookingLimit_Read
+  update: SettingsFields_advancedBookingLimit_Update
+  delete: SettingsFields_advancedBookingLimit_Delete
+}
+
+type SettingsFields_advancedBookingLimit_Create {
+  permission: Boolean!
+}
+
+type SettingsFields_advancedBookingLimit_Read {
+  permission: Boolean!
+}
+
+type SettingsFields_advancedBookingLimit_Update {
+  permission: Boolean!
+}
+
+type SettingsFields_advancedBookingLimit_Delete {
+  permission: Boolean!
+}
+
+type SettingsFields_stripeCleaningFee {
+  create: SettingsFields_stripeCleaningFee_Create
+  read: SettingsFields_stripeCleaningFee_Read
+  update: SettingsFields_stripeCleaningFee_Update
+  delete: SettingsFields_stripeCleaningFee_Delete
+}
+
+type SettingsFields_stripeCleaningFee_Create {
+  permission: Boolean!
+}
+
+type SettingsFields_stripeCleaningFee_Read {
+  permission: Boolean!
+}
+
+type SettingsFields_stripeCleaningFee_Update {
+  permission: Boolean!
+}
+
+type SettingsFields_stripeCleaningFee_Delete {
+  permission: Boolean!
+}
+
+type SettingsFields_stripeCleaningFeeJSON {
+  create: SettingsFields_stripeCleaningFeeJSON_Create
+  read: SettingsFields_stripeCleaningFeeJSON_Read
+  update: SettingsFields_stripeCleaningFeeJSON_Update
+  delete: SettingsFields_stripeCleaningFeeJSON_Delete
+}
+
+type SettingsFields_stripeCleaningFeeJSON_Create {
+  permission: Boolean!
+}
+
+type SettingsFields_stripeCleaningFeeJSON_Read {
+  permission: Boolean!
+}
+
+type SettingsFields_stripeCleaningFeeJSON_Update {
+  permission: Boolean!
+}
+
+type SettingsFields_stripeCleaningFeeJSON_Delete {
+  permission: Boolean!
+}
+
+type SettingsFields_skipSync {
+  create: SettingsFields_skipSync_Create
+  read: SettingsFields_skipSync_Read
+  update: SettingsFields_skipSync_Update
+  delete: SettingsFields_skipSync_Delete
+}
+
+type SettingsFields_skipSync_Create {
+  permission: Boolean!
+}
+
+type SettingsFields_skipSync_Read {
+  permission: Boolean!
+}
+
+type SettingsFields_skipSync_Update {
+  permission: Boolean!
+}
+
+type SettingsFields_skipSync_Delete {
+  permission: Boolean!
+}
+
+type SettingsFields_tax {
+  create: SettingsFields_tax_Create
+  read: SettingsFields_tax_Read
+  update: SettingsFields_tax_Update
+  delete: SettingsFields_tax_Delete
+}
+
+type SettingsFields_tax_Create {
+  permission: Boolean!
+}
+
+type SettingsFields_tax_Read {
+  permission: Boolean!
+}
+
+type SettingsFields_tax_Update {
+  permission: Boolean!
+}
+
+type SettingsFields_tax_Delete {
   permission: Boolean!
 }
 
@@ -17100,17 +17937,18 @@ input mutationProductInput {
   productDescription: JSON!
   amenities: [mutationProduct_AmenitiesInput]
   layout: JSON
-  stripeProductID: String
   bedroomQuantity: Float!
   bathQuantity: Float!
   maxGuestQuantity: Float!
   baseGuestQuantity: Float!
-  stripeGuestFeeID: String
-  guestFeePriceJSON: String
-  variants: [mutationProduct_VariantsInput]
   priceJSON: String
   enablePaywall: Boolean
   paywall: JSON
+  stripeProductID: String
+  stripeGuestFeeID: String
+  guestFeePriceJSON: String
+  coupons: [mutationProduct_CouponsInput]
+  variants: [mutationProduct_VariantsInput]
   categories: [String]
   relatedProducts: [String]
   slug: String
@@ -17131,9 +17969,16 @@ input mutationProduct_AmenitiesInput {
   id: String
 }
 
+input mutationProduct_CouponsInput {
+  nickname: String
+  quantity: Float!
+  stripeCoupon: String!
+  stripeCouponJSON: String
+  id: String
+}
+
 input mutationProduct_VariantsInput {
-  stripeVariantProductID: String!
-  priceJSON: String
+  priceID: String!
   seasonStart: String!
   seasonEnd: String!
   id: String
@@ -17158,17 +18003,18 @@ input mutationProductUpdateInput {
   productDescription: JSON
   amenities: [mutationProductUpdate_AmenitiesInput]
   layout: JSON
-  stripeProductID: String
   bedroomQuantity: Float
   bathQuantity: Float
   maxGuestQuantity: Float
   baseGuestQuantity: Float
-  stripeGuestFeeID: String
-  guestFeePriceJSON: String
-  variants: [mutationProductUpdate_VariantsInput]
   priceJSON: String
   enablePaywall: Boolean
   paywall: JSON
+  stripeProductID: String
+  stripeGuestFeeID: String
+  guestFeePriceJSON: String
+  coupons: [mutationProductUpdate_CouponsInput]
+  variants: [mutationProductUpdate_VariantsInput]
   categories: [String]
   relatedProducts: [String]
   slug: String
@@ -17189,9 +18035,16 @@ input mutationProductUpdate_AmenitiesInput {
   id: String
 }
 
+input mutationProductUpdate_CouponsInput {
+  nickname: String
+  quantity: Float!
+  stripeCoupon: String!
+  stripeCouponJSON: String
+  id: String
+}
+
 input mutationProductUpdate_VariantsInput {
-  stripeVariantProductID: String!
-  priceJSON: String
+  priceID: String!
   seasonStart: String!
   seasonEnd: String!
   id: String
@@ -17329,15 +18182,17 @@ enum User_roles_MutationInput {
 }
 
 input mutationUser_CartInput {
-  headProduct: String
-  startDate: String
-  endDate: String
   items: [mutationUser_Cart_ItemsInput]
 }
 
 input mutationUser_Cart_ItemsInput {
   product: String
+  stripeProductID: String
+  priceID: String!
+  guestsQuantity: Float
   quantity: Float
+  from: String!
+  to: String!
   id: String
 }
 
@@ -17366,15 +18221,17 @@ enum UserUpdate_roles_MutationInput {
 }
 
 input mutationUserUpdate_CartInput {
-  headProduct: String
-  startDate: String
-  endDate: String
   items: [mutationUserUpdate_Cart_ItemsInput]
 }
 
 input mutationUserUpdate_Cart_ItemsInput {
   product: String
+  stripeProductID: String
+  priceID: String!
+  guestsQuantity: Float
   quantity: Float
+  from: String!
+  to: String!
   id: String
 }
 
@@ -17643,6 +18500,13 @@ enum PayloadPreferenceUpdate_UserRelationshipInputRelationTo {
 
 input mutationSettingsInput {
   productsPage: String
+  minBooking: Float
+  maxBooking: Float
+  advancedBookingLimit: Float
+  stripeCleaningFee: String
+  stripeCleaningFeeJSON: String
+  skipSync: Boolean
+  tax: Float
   updatedAt: String
   createdAt: String
 }

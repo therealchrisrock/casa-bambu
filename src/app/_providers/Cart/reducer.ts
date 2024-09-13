@@ -85,7 +85,7 @@ export const cartReducer = (cart: CartType, action: CartAction): CartType => {
           quantity: (incomingItem.quantity || 0) > 0 ? incomingItem.quantity : undefined,
         }
       }
-
+      console.log('reducer.ts incomingItem',incomingItem )
       return {
         ...cart,
         items: withAddedItem,

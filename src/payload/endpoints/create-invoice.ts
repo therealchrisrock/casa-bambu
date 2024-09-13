@@ -1,3 +1,4 @@
+import { format } from 'date-fns'
 import type { PayloadHandler } from 'payload/config'
 import Stripe from 'stripe'
 
@@ -57,11 +58,11 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
     if (!hasItems) {
       throw new Error('No items in cart')
     }
-
+    let bookingDates: { from: string; to: string }
     // for each item in cart, lookup the product in Stripe and add its price to the total
     await Promise.all(
       fullUser?.cart?.items?.map(async (item: CartItems[0]): Promise<null> => {
-        const { product, quantity } = item
+        const { product, quantity, from, to } = item
 
         if (!quantity) {
           return null
@@ -70,7 +71,11 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
         if (typeof product === 'string' || !product?.stripeProductID) {
           throw new Error('No Stripe Product ID')
         }
-
+        if (item.from && item.to)
+          bookingDates = {
+            from: formatDateToDayMonthYear(new Date(item.from)),
+            to: formatDateToDayMonthYear(new Date(item.to)),
+          }
         const prices = await stripe.prices.list({
           product: product.stripeProductID,
           limit: 100,
@@ -93,23 +98,40 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
       throw new Error('There is nothing to pay for, add some items to your cart and try again.')
     }
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      customer: stripeCustomerID,
-      amount: total,
-      currency: 'usd',
-      payment_method_types: ['card'],
-    })
-
     const invoice = await stripe.invoices.create({
       customer: stripeCustomerID,
       collection_method: 'send_invoice',
       currency: 'cad',
-      days_until_due: 30,
-    });
-    res.send({ client_secret: paymentIntent.client_secret })
+      description: '',
+      custom_fields: [
+        {
+          name: 'check-in date',
+          value: bookingDates.from,
+        },
+        {
+          name: 'check-out date',
+          value: bookingDates.to,
+        },
+      ],
+    })
+    await Promise.all(
+      fullUser?.cart?.items?.map(async (item: CartItems[0]) => {
+        const invoiceItem = await stripe.invoiceItems.create({
+          customer: stripeCustomerID,
+          price: item.priceID,
+          quantity: item.quantity,
+          currency: 'cad',
+          invoice: invoice.id,
+        })
+      }),
+    )
+    // res.send({ client_secret: invoice.client_secret })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     payload.logger.error(message)
     res.json({ error: message })
   }
+}
+function formatDateToDayMonthYear(date: Date): string {
+  return format(date, 'd MMM, yyyy')
 }

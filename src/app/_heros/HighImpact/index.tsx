@@ -7,6 +7,7 @@ import { Media } from '../../_components/Media'
 import RichText from '../../_components/RichText'
 
 import classes from './index.module.scss'
+import { MoveRightIcon } from 'lucide-react'
 
 export const HighImpactHero: React.FC<Page['hero']> = ({ richText, media, links }) => {
   return (
@@ -18,7 +19,7 @@ export const HighImpactHero: React.FC<Page['hero']> = ({ richText, media, links 
             {links.map(({ link }, i) => {
               return (
                 <li key={i}>
-                  <CMSLink {...link} />
+                  <CMSLink {...link} className={'text-foreground'} appearance={'link'} invert={false}><MoveRightIcon strokeWidth={1} /></CMSLink>
                 </li>
               )
             })}

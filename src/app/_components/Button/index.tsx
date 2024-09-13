@@ -1,10 +1,11 @@
 'use client'
 
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { ArrowRightIcon, MoveRightIcon } from 'lucide-react'
 import Link from 'next/link'
 
 import { Button as ShadButton } from '@/_components/ui/button'
+import { cn } from '@/_lib/utils'
 
 import classes from './index.module.scss'
 
@@ -19,15 +20,17 @@ export type Props = {
   type?: 'submit' | 'button'
   disabled?: boolean
   invert?: boolean
+  children?: ReactNode
 }
 
 export const Button: React.FC<Props> = ({
   el: elFromProps = 'link',
+  children,
   label,
   newTab,
   href,
   appearance = 'secondary',
-  className: classNameFromProps,
+  className,
   onClick,
   type = 'button',
   disabled,
@@ -37,18 +40,18 @@ export const Button: React.FC<Props> = ({
 
   const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
 
-  const className = [classes.button, classNameFromProps].filter(Boolean).join(' ')
   let variant: 'default' | 'secondary' | 'link' | 'ghost' | 'destructive' | 'outline' =
     appearance === 'primary' ? 'default' : appearance === 'none' ? 'ghost' : appearance
   const content = (
     <>
       <ShadButton
         variant={variant}
-        className={invert ? 'invert' : ''}
+        className={cn([invert ? 'invert' : '', className])}
         disabled={disabled}
         onClick={onClick}
       >
-        {label}&nbsp;{variant === 'link' && <MoveRightIcon strokeWidth={1} />}
+        {label}
+        {children}
       </ShadButton>
     </>
   )
@@ -62,16 +65,7 @@ export const Button: React.FC<Props> = ({
       </Link>
     )
   }
-  return (
-    <ShadButton
-      className={invert ? 'invert' : ''}
-      disabled={disabled}
-      variant={'default'}
-      onClick={onClick}
-    >
-      {label}
-    </ShadButton>
-  )
+  return content
 
   //
   // const Element: ElementType = el

@@ -28,44 +28,34 @@ export const beforeProductChange: BeforeChangeHook = async ({ req, data }) => {
   }
 
   if (logs) payload.logger.info(`Looking up product from Stripe...`)
-  const basePrice = await fetchStripePrice({ req, data, pid: data.stripeProductID })
+  const basePrice = await fetchStripePrice({ req, pid: data.stripeProductID })
   newDoc.priceJSON = JSON.stringify(basePrice)
-
-  if (!data.variants.length) {
-    if (logs)
-      payload.logger.info(
-        `No Stripe product variants assigned to this document, skipping product variant 'beforeChange' hook`,
-      )
-  } else {
-    for (let i = 0; i < data.variants.length; i++) {
-      const p = data.variants[i]
-      if (!p.stripeVariantProductID) {
-        if (logs)
-          payload.logger.info(
-            `No Stripe product assigned to this document, skipping product 'beforeChange' hook`,
-          )
-        continue
-      }
-      const vPrice = await fetchStripePrice({ req, data, pid: p.stripeVariantProductID })
-      newDoc.variants[i].priceJSON = JSON.stringify(vPrice)
-    }
-  }
-
   if (!data.stripeGuestFeeID) {
     if (logs) payload.logger.info(`No Guest Fee is Applicable. Skipping...`)
   } else {
-    const guestFee = await fetchStripePrice({ req, data, pid: data.stripeGuestFeeID })
+    const guestFee = await fetchStripePrice({ req, pid: data.stripeGuestFeeID })
     newDoc.guestFeePriceJSON = JSON.stringify(guestFee)
+  }
+  if (!data.coupons) {
+    if (logs)
+      payload.logger.info(
+        `No Stripe product assigned to this document, skipping product 'beforeChange' hook`,
+      )
+  } else {
+    const { data: stripeCoupons } = await stripe.coupons.list({ limit: 100 })
+    for (let i = 0; i < data.coupons.length; i++) {
+      const c = data.coupons[i].stripeCoupon
+      const d = stripeCoupons.find(x => x.id == c)
+      if (d) newDoc.coupons[i].stripeCouponJSON = JSON.stringify(d)
+    }
   }
   return newDoc
 }
-const fetchStripePrice = async ({
+export const fetchStripePrice = async ({
   req,
-  data,
   pid,
 }: {
   req: PayloadRequest
-  data: Partial<any>
   pid: string
 }): Promise<Stripe.Response<Stripe.ApiList<Stripe.Price>>> => {
   const { payload } = req
@@ -85,7 +75,7 @@ const fetchStripePrice = async ({
   if (logs) payload.logger.info(`Looking up price from Stripe...`)
   try {
     const allprices = await stripe.prices.list({
-      product: data.stripeProductID,
+      product: pid,
       limit: 100,
     })
     return allprices

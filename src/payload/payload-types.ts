@@ -13,7 +13,12 @@
 export type CartItems =
   | {
       product?: (string | null) | Product;
+      stripeProductID?: string | null;
+      priceID: string;
+      guestsQuantity?: number | null;
       quantity?: number | null;
+      from: string;
+      to: string;
       id?: string | null;
     }[]
   | null;
@@ -335,22 +340,10 @@ export interface Product {
         blockType: 'archive';
       }
   )[];
-  stripeProductID?: string | null;
   bedroomQuantity: number;
   bathQuantity: number;
   maxGuestQuantity: number;
   baseGuestQuantity: number;
-  stripeGuestFeeID?: string | null;
-  guestFeePriceJSON?: string | null;
-  variants?:
-    | {
-        stripeVariantProductID: string;
-        priceJSON?: string | null;
-        seasonStart: string;
-        seasonEnd: string;
-        id?: string | null;
-      }[]
-    | null;
   priceJSON?: string | null;
   enablePaywall?: boolean | null;
   paywall?:
@@ -443,6 +436,26 @@ export interface Product {
           }
       )[]
     | null;
+  stripeProductID?: string | null;
+  stripeGuestFeeID?: string | null;
+  guestFeePriceJSON?: string | null;
+  coupons?:
+    | {
+        nickname?: string | null;
+        quantity: number;
+        stripeCoupon: string;
+        stripeCouponJSON?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  variants?:
+    | {
+        priceID: string;
+        seasonStart: string;
+        seasonEnd: string;
+        id?: string | null;
+      }[]
+    | null;
   categories?: (string | Category)[] | null;
   relatedProducts?: (string | Product)[] | null;
   slug?: string | null;
@@ -494,9 +507,6 @@ export interface User {
   purchases?: (string | Product)[] | null;
   stripeCustomerID?: string | null;
   cart?: {
-    headProduct?: (string | null) | Product;
-    startDate?: string | null;
-    endDate?: string | null;
     items?: CartItems;
   };
   skipSync?: boolean | null;
@@ -763,6 +773,13 @@ export interface PayloadMigration {
 export interface Settings {
   id: string;
   productsPage?: (string | null) | Page;
+  minBooking?: number | null;
+  maxBooking?: number | null;
+  advancedBookingLimit?: number | null;
+  stripeCleaningFee?: string | null;
+  stripeCleaningFeeJSON?: string | null;
+  skipSync?: boolean | null;
+  tax?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }

@@ -114,12 +114,12 @@ export const Card: React.FC<{
               {description && <p className={classes.description}>{sanitizedDescription}</p>}
             </div>
           )}
-          <div className={'mt-4 flex gap-2'}>
+          <div className={'mt-4 flex gap-3 items-center'}>
             <Button>Book Now</Button>
-            <Button variant={'link'}>
+            <button className={'flex'}>
               Learn More &nbsp;
               <MoveRightIcon strokeWidth={1} />
-            </Button>
+            </button>
           </div>
         </div>
       </Link>

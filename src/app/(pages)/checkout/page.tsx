@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react'
 import { Metadata } from 'next'
 
-import { Settings } from '../../../payload/payload-types'
+import { Page, Settings } from '../../../payload/payload-types'
 import { fetchSettings } from '../../_api/fetchGlobals'
 import { Gutter } from '../../_components/Gutter'
 import { Message } from '../../_components/Message'
@@ -11,6 +11,9 @@ import { mergeOpenGraph } from '../../_utilities/mergeOpenGraph'
 import { CheckoutPage } from './CheckoutPage'
 
 import classes from './index.module.scss'
+import { fetchDoc } from '@/_api/fetchDoc'
+import { Hero } from '@/_components/Hero'
+import { BookingCheckoutPage } from '@/(pages)/checkout/BookingCheckoutPage'
 
 export default async function Checkout() {
   await getMeUser({
@@ -20,9 +23,14 @@ export default async function Checkout() {
   })
 
   let settings: Settings | null = null
+  let page: Page | null = null
 
   try {
     settings = await fetchSettings()
+    page = await fetchDoc<Page>({
+      collection: 'pages',
+      slug: 'cart',
+    })
   } catch (error) {
     // no need to redirect to 404 here, just simply render the page with fallback data where necessary
     console.error(error) // eslint-disable-line no-console
@@ -58,49 +66,9 @@ export default async function Checkout() {
           />
         </Gutter>
       )}
-      <LowImpactHero
-        type="lowImpact"
-        media={null}
-        richText={[
-          {
-            type: 'h1',
-            children: [
-              {
-                text: 'Checkout',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            children: [
-              {
-                text: `This is a self-hosted, secure checkout using Stripe's Payment Element component. To create a mock purchase, use a `,
-              },
-              {
-                type: 'link',
-                url: 'https://stripe.com/docs/testing#cards',
-                children: [
-                  {
-                    text: 'test credit card',
-                  },
-                ],
-              },
-              {
-                text: ' like ',
-              },
-              {
-                text: '4242 4242 4242 4242',
-                bold: true,
-              },
-              {
-                text: ' with any future date and CVC. An order will be generated in Stripe and will appear in your account. In production, this checkout form will require a real card with sufficient funds.',
-              },
-            ],
-          },
-        ]}
-      />
+      <Hero {...page?.hero} />
       <Gutter className={classes.checkoutPage}>
-        <CheckoutPage settings={settings} />
+        <BookingCheckoutPage settings={settings} />
       </Gutter>
     </Fragment>
   )

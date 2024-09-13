@@ -74,13 +74,13 @@
 }
 
 %body {
-  font-size: 18px;
+  font-size: 16px;
   line-height: 32px;
 
-  @include mid-break {
-    font-size: 15px;
-    line-height: 24px;
-  }
+  //@include mid-break {
+  //  font-size: 15px;
+  //  line-height: 24px;
+  //}
 }
 
 %large-body {

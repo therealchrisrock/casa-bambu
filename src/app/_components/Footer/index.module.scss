@@ -3,7 +3,7 @@
 .footer {
   padding: calc(var(--base) * 4) 0;
   @include small-break {
-    padding: calc(var(--base) * 2) 0;
+    padding: calc(var(--base) ) 0;
   }
 }
 
@@ -26,6 +26,7 @@
 }
 
 .nav {
+  justify-content: space-between;
   display: flex;
   gap: 0rem;
   align-items: center;

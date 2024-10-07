@@ -9,15 +9,19 @@ import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 import stripePlugin from '@payloadcms/plugin-stripe'
 import { slateEditor } from '@payloadcms/richtext-slate'
 import dotenv from 'dotenv'
+// import NodePolyfillPlugin from 'node-polyfill-webpack-plugin'
 import path from 'path'
 import { buildConfig } from 'payload/config'
 
+// import email from '../email/transport'
 import { Amenities } from './collections/Amenities'
 import { Bookings } from './collections/Bookings'
 import Categories from './collections/Categories'
+import { FAQs } from './collections/FAQs'
 import { Media } from './collections/Media'
 import { Orders } from './collections/Orders'
 import { Pages } from './collections/Pages'
+import { Policies } from './collections/Policies'
 import Products from './collections/Products'
 import { Reviews } from './collections/Reviews'
 import Users from './collections/Users'
@@ -25,10 +29,15 @@ import BeforeDashboard from './components/BeforeDashboard'
 import BeforeLogin from './components/BeforeLogin'
 import BeforeNavLinks from './components/BeforeNavLinks'
 import { Calendar } from './components/Calendar'
+import { Icon } from './components/Icon'
+import { Logo } from './components/Logo'
+import { couponsProxy } from './endpoints/coupons'
 import { createInvoice } from './endpoints/create-invoice'
 import { createPaymentIntent } from './endpoints/create-payment-intent'
 import { customersProxy } from './endpoints/customers'
 import { getAvailability } from './endpoints/get-availability'
+import { invoicesProxy } from './endpoints/invoices'
+import { pricesProxy } from './endpoints/prices'
 import { productsProxy } from './endpoints/products'
 import { seed } from './endpoints/seed'
 import { Footer } from './globals/Footer'
@@ -36,8 +45,6 @@ import { Header } from './globals/Header'
 import { Settings } from './globals/Settings'
 import { priceUpdated } from './stripe/webhooks/priceUpdated'
 import { productUpdated } from './stripe/webhooks/productUpdated'
-import { pricesProxy } from './endpoints/prices'
-import { couponsProxy } from './endpoints/coupons'
 
 const generateTitle: GenerateTitle = () => {
   return 'My Store'
@@ -50,15 +57,20 @@ dotenv.config({
 })
 
 export default buildConfig({
+  // email,
   admin: {
     user: Users.slug,
     bundler: webpackBundler(),
     meta: {
-      titleSuffix: '- Custom Title',
-      favicon: '/assets/favicon.svg',
+      titleSuffix: '- Casa Bambu',
+      favicon: '/media/favicon.svg',
       ogImage: '/media/large-logo.png',
     },
     components: {
+      graphics: {
+        Logo,
+        Icon,
+      },
       beforeNavLinks: [BeforeNavLinks],
       views: {
         Calendar: {
@@ -76,9 +88,33 @@ export default buildConfig({
     webpack: config => {
       return {
         ...config,
+        // plugins: [new NodePolyfillPlugin()],
         resolve: {
+          // fallback: {
+          //   assert: require.resolve('assert/'),
+          //   url: require.resolve('url/'),
+          //   os: false,
+          //   fs: false
+          //   // { "assert": require.resolve("assert/") }
+          // },
+          // fallback: {
+          //   tls: false,
+          //   net: false,
+          //   child_process: false,
+          //   dns: false,
+          //   // fs: false,
+          //   // path: false,
+          //   // zlib: false,
+          //   // http: false,
+          //   // https: false,
+          //   // crypto: false,
+          //   // stream: require.resolve('stream-browserify'),
+          // },
           ...config.resolve,
           alias: {
+            'fs': mockModulePath,
+            'handlebars': mockModulePath,
+            'inline-css': mockModulePath,
             ...config.resolve?.alias,
             dotenv: path.resolve(__dirname, './dotenv.js'),
             [path.resolve(__dirname, 'collections/Products/hooks/beforeChange')]: mockModulePath,
@@ -87,6 +123,7 @@ export default buildConfig({
             [path.resolve(__dirname, 'collections/Users/endpoints/customer')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/create-payment-intent')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/create-invoice')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/invoices')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/customers')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/products')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/coupons')]: mockModulePath,
@@ -105,7 +142,19 @@ export default buildConfig({
     url: process.env.DATABASE_URI,
   }),
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
-  collections: [Pages, Products, Orders, Media, Categories, Users, Reviews, Bookings, Amenities],
+  collections: [
+    Pages,
+    Products,
+    Policies,
+    Orders,
+    Media,
+    Categories,
+    Users,
+    Reviews,
+    Bookings,
+    Amenities,
+    FAQs,
+  ],
   upload: {
     limits: {
       fileSize: 10 * 1000000, // 10MB
@@ -159,6 +208,11 @@ export default buildConfig({
       handler: couponsProxy,
     },
     {
+      path: '/stripe/invoices/:uid',
+      method: 'get',
+      handler: invoicesProxy,
+    },
+    {
       path: '/stripe/products',
       method: 'get',
       handler: productsProxy,
@@ -175,7 +229,7 @@ export default buildConfig({
     formBuilder({
       formSubmissionOverrides: {
         admin: {
-          group: 'Ecommerce Data',
+          group: 'Business Data',
         },
       },
       formOverrides: {
@@ -211,8 +265,8 @@ export default buildConfig({
     redirects({
       overrides: {
         admin: {
-          group: 'Website Content'
-        }
+          group: 'Website Content',
+        },
       },
       collections: ['pages', 'products'],
     }),

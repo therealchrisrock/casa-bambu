@@ -6,6 +6,8 @@ import { AuthProvider } from '../_providers/Auth'
 import { CartProvider } from '../_providers/Cart'
 import { ThemeProvider } from './Theme'
 
+import { BookingProvider } from '@/_providers/Booking'
+
 export const Providers: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {

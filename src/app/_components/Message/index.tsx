@@ -1,6 +1,6 @@
-import React from 'react'
-
-import classes from './index.module.scss'
+'use client'
+import React, { useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 
 export const Message: React.FC<{
   message?: React.ReactNode
@@ -10,24 +10,22 @@ export const Message: React.FC<{
   className?: string
 }> = ({ message, error, success, warning, className }) => {
   const messageToRender = message || error || success || warning
-
-  if (messageToRender) {
-    return (
-      <div
-        className={[
-          classes.message,
-          className,
-          success && classes.success,
-          warning && classes.warning,
-          !error && !success && !warning && classes.default,
-          'text-destructive-foreground bg-destructive rounded-lg',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {messageToRender}
-      </div>
-    )
-  }
-  return null
+  const effectWasExecuted = useRef(false)
+  useEffect(() => {
+    if (!messageToRender || effectWasExecuted.current) return
+    effectWasExecuted.current = true
+    if (error) {
+      toast.error(error)
+    }
+    if (warning) {
+      toast.warning(warning)
+    }
+    if (success) {
+      toast.success(success)
+    }
+    if (!error && !warning && !success) {
+      toast(message)
+    }
+  }, [])
+  return <></>
 }

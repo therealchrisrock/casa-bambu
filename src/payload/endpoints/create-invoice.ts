@@ -1,8 +1,13 @@
-import { format } from 'date-fns'
+import type { DateRange } from 'react-day-picker'
+import { UTCDate } from '@date-fns/utc'
+import { differenceInDays, endOfDay, format, isAfter, isBefore, startOfDay } from 'date-fns'
 import type { PayloadHandler } from 'payload/config'
 import Stripe from 'stripe'
 
-import type { CartItems } from '../payload-types'
+import type { Product, Settings } from '../payload-types'
+
+import type { CartItem } from '@/_providers/Cart/reducer'
+import type { BookingDetails } from '@/_utilities/bookingCalculations'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2022-08-01',
@@ -13,7 +18,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 // we then add the price of the product to the total
 // once completed, we pass the `client_secret` of the `PaymentIntent` back to the client which can process the payment
 export const createInvoice: PayloadHandler = async (req, res): Promise<void> => {
-  const { user, payload } = req
+  const { user, payload, body } = req
 
   if (!user) {
     res.status(401).send('Unauthorized')
@@ -25,6 +30,23 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
     id: user?.id,
   })
 
+  const settings = await payload.findGlobal({
+    slug: 'settings',
+    depth: 2,
+  })
+  const product = await payload.findByID({
+    collection: 'products',
+    id: body.pid,
+  })
+
+  if (!settings) {
+    res.status(404).json({ error: 'Settings not found' })
+    return
+  }
+  if (!product) {
+    res.status(404).json({ error: 'Product Details not found' })
+    return
+  }
   if (!fullUser) {
     res.status(404).json({ error: 'User not found' })
     return
@@ -37,7 +59,7 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
     if (!stripeCustomerID) {
       const customer = await stripe.customers.create({
         email: fullUser?.email,
-        name: fullUser?.name,
+        name: `${fullUser?.firstName} ${fullUser?.lastName}`,
       })
 
       stripeCustomerID = customer.id
@@ -51,87 +73,253 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
       })
     }
 
-    let total = 0
-
-    const hasItems = fullUser?.cart?.items?.length > 0
-
-    if (!hasItems) {
-      throw new Error('No items in cart')
+    if (!body.from || !body.to) {
+      throw new Error(`No booking Dates Provided for ${body.from} — ${body.to}`)
+      res.status(400).json({ error: 'Invalid Booking Dates' })
+      return
     }
-    let bookingDates: { from: string; to: string }
-    // for each item in cart, lookup the product in Stripe and add its price to the total
-    await Promise.all(
-      fullUser?.cart?.items?.map(async (item: CartItems[0]): Promise<null> => {
-        const { product, quantity, from, to } = item
-
-        if (!quantity) {
-          return null
-        }
-
-        if (typeof product === 'string' || !product?.stripeProductID) {
-          throw new Error('No Stripe Product ID')
-        }
-        if (item.from && item.to)
-          bookingDates = {
-            from: formatDateToDayMonthYear(new Date(item.from)),
-            to: formatDateToDayMonthYear(new Date(item.to)),
-          }
-        const prices = await stripe.prices.list({
-          product: product.stripeProductID,
-          limit: 100,
-          expand: ['data.product'],
-        })
-
-        if (prices.data.length === 0) {
-          res.status(404).json({ error: 'There are no items in your cart to checkout with' })
-          return null
-        }
-
-        const price = prices.data[0]
-        total += price.unit_amount * quantity
-
-        return null
-      }),
+    const bookingDetails = calculateBookingDetails(
+      product,
+      {
+        from: new UTCDate(body.from),
+        to: new UTCDate(body.to),
+      },
+      body.guests,
+      settings,
     )
-
-    if (total === 0) {
-      throw new Error('There is nothing to pay for, add some items to your cart and try again.')
+    if (!bookingDetails) {
+      res.status(500).json({ error: 'An unknown error has occurred. Please try again later.' })
+      return
     }
-
+    const booking = await payload.create({
+      collection: 'bookings',
+      data: {
+        type: 'reservation',
+        bookingStatus: 'pending',
+        product: product.id,
+        introduction: body.message,
+        user: user.id,
+        startDate: body.from,
+        endDate: body.to,
+      },
+    })
+    if (!booking) {
+      res.status(500).json({
+        error: 'An unknown error has occurred creating the booking. Please try again later.',
+      })
+      return
+    } else {
+      payload.logger.info(`New Booking Successfully created — ${booking.id}`)
+    }
     const invoice = await stripe.invoices.create({
       customer: stripeCustomerID,
       collection_method: 'send_invoice',
+      days_until_due: 4,
       currency: 'cad',
       description: '',
       custom_fields: [
         {
           name: 'check-in date',
-          value: bookingDates.from,
+          value: formatDateToDayMonthYear(new UTCDate(body.from)),
         },
         {
           name: 'check-out date',
-          value: bookingDates.to,
+          value: formatDateToDayMonthYear(new UTCDate(body.to)),
         },
       ],
-    })
-    await Promise.all(
-      fullUser?.cart?.items?.map(async (item: CartItems[0]) => {
-        const invoiceItem = await stripe.invoiceItems.create({
-          customer: stripeCustomerID,
-          price: item.priceID,
-          quantity: item.quantity,
-          currency: 'cad',
-          invoice: invoice.id,
-        })
+      ...(bookingDetails.coupons && {
+        discounts: bookingDetails.coupons.map(d => ({ coupon: d.couponID })),
       }),
-    )
-    // res.send({ client_secret: invoice.client_secret })
-  } catch (error: unknown) {
+    })
+    if (!invoice) {
+      res.status(500).json({
+        error: 'An unknown error has occurred creating the invoice. Please try again later.',
+      })
+      return
+    } else {
+      payload.logger.info(`New Invoice Successfully created — ${invoice.id}`)
+    }
+    const invoiceAdded = await payload.update({
+      collection: 'bookings',
+      id: booking.id,
+      data: {
+        invoice: invoice.id,
+      },
+    })
+    for (const item of bookingDetails.items) {
+      await stripe.invoiceItems.create({
+        customer: stripeCustomerID,
+        price: item.priceID,
+        quantity: item.quantity,
+        currency: 'cad',
+        invoice: invoice.id,
+      })
+    }
+    for (const f of bookingDetails.additionalFees) {
+      await stripe.invoiceItems.create({
+        customer: stripeCustomerID,
+        price: f.priceID,
+        quantity: f.quantity,
+        currency: 'cad',
+        invoice: invoice.id,
+        discountable: false
+      })
+    }
+    payload.logger.info('Invoice Items have been added to invoice')
+    res.status(200).json({})
+    return
+  } catch (error: any) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     payload.logger.error(message)
+    // if (error?.status === 409)
+    //   res.status(409).json({
+    //     status: 'booked',
+    //     error: 'The selected dates are no longer available',
+    //     message: 'The selected dates are no longer available',
+    //   })
     res.json({ error: message })
+    return
   }
 }
 function formatDateToDayMonthYear(date: Date): string {
   return format(date, 'd MMM, yyyy')
+}
+
+export const calculateBookingDetails = (
+  product: Product,
+  dates: DateRange,
+  guestsQuantity: number,
+  settings: Settings,
+): BookingDetails | null => {
+  if (!dates?.from || !dates?.to) return null
+  const variants = product.variants
+  const prices = JSON.parse(product.priceJSON).data
+  const items: Array<CartItem & { nickname: string }> = []
+  const additionalFees = []
+  let subtotal = 0
+  let totalNights = 0
+
+  // Ensure dates are handled in UTC without local timezone conversion
+  const bookingStart = new Date(dates.from.toISOString().split('T')[0])
+  const bookingEnd = new Date(dates.to.toISOString().split('T')[0])
+
+  let coveredNights = 0
+  variants.forEach(variant => {
+    const seasonStart = startOfDay(new Date(variant.seasonStart))
+    const seasonEnd = endOfDay(new Date(variant.seasonEnd))
+
+    if (isAfter(bookingEnd, seasonStart) && isBefore(bookingStart, seasonEnd)) {
+      const priceDetails = prices.find(price => price.id === variant.priceID)
+      if (!priceDetails) return
+      const rangeStart = isBefore(bookingStart, seasonStart) ? seasonStart : bookingStart
+      let rangeEnd = isAfter(bookingEnd, seasonEnd) ? seasonEnd : bookingEnd
+
+      const daysInRange = rangeStart < rangeEnd ? differenceInDays(rangeEnd, rangeStart) : 0
+      subtotal += daysInRange * priceDetails.unit_amount
+      totalNights += daysInRange
+      coveredNights += daysInRange
+      items.push({
+        stripeProductID: product.stripeProductID,
+        product: product,
+        priceID: variant.priceID,
+        quantity: daysInRange,
+        nickname: priceDetails.nickname,
+      })
+    }
+  })
+
+  const defaultPrice = prices[0]
+  const uncoveredNights = differenceInDays(bookingEnd, bookingStart) - coveredNights
+  if (uncoveredNights > 0) {
+    subtotal += uncoveredNights * defaultPrice.unit_amount
+    totalNights += uncoveredNights
+
+    items.push({
+      stripeProductID: product.stripeProductID,
+      product: product,
+      priceID: defaultPrice.priceID,
+      quantity: uncoveredNights,
+      nickname: 'Default (Fallback) Price',
+    })
+  }
+  if (totalNights === 0) return null
+  const averageRate = Math.ceil(subtotal / totalNights / 100)
+  const basePrice = Math.ceil(subtotal / 100)
+  const extraGuests = guestsQuantity - product.baseGuestQuantity
+  const guestFeeJSON = JSON.parse(product.guestFeePriceJSON)
+  let guestFee
+  if (extraGuests > 0 && guestFeeJSON?.data) {
+    const guestP = guestFeeJSON.data[0]
+    const u = guestP?.unit_amount ?? 0
+    const t = u * extraGuests * totalNights
+    guestFee = {
+      extraGuests,
+      priceID: guestP.id,
+      total: Math.ceil(t / 100),
+    }
+    additionalFees.push({
+      priceID: guestP.id,
+      unitAmount: Math.ceil(u / 100),
+      quantity: extraGuests * totalNights,
+      total: Math.ceil(t / 100),
+      label: 'Extra Guest Fee',
+    })
+    subtotal += t
+  }
+  if (settings.stripeCleaningFeeJSON) {
+    const c = JSON.parse(settings.stripeCleaningFeeJSON)?.data[0]
+    if (c) {
+      additionalFees.push({
+        label: 'Cleaning Fee',
+        quantity: 1,
+        unitAmount: Math.ceil((c?.unit_amount ?? 0) / 100),
+        total: Math.ceil((c?.unit_amount ?? 0) / 100),
+        priceID: c.id,
+      })
+      subtotal += c.unit_amount
+    }
+  }
+
+  const coupons = []
+  const applicableCoupon = product.coupons
+    .sort((a, b) => a.quantity - b.quantity)
+    .reverse()
+    .find(x => x.quantity <= totalNights)
+  if (applicableCoupon) {
+    const c = JSON.parse(applicableCoupon.stripeCouponJSON)
+    let amt = 0
+    if (c?.amount_off) {
+      const p = c.amount_off
+      amt += p
+    }
+    if (c?.percent_off) {
+      const p = (subtotal * c.percent_off) / 100
+      amt += p
+    }
+    subtotal -= amt
+    coupons.push({
+      label: applicableCoupon.nickname,
+      total: Math.ceil(amt / 100),
+      couponID: applicableCoupon.stripeCoupon,
+    })
+  }
+
+  return {
+    listing: product.title,
+    productID: product.id,
+    dates,
+    items,
+    averageRate,
+    basePrice,
+    duration: totalNights,
+    from: bookingStart.toISOString().split('T')[0],
+    to: bookingEnd.toISOString().split('T')[0],
+    subtotal: Math.ceil(subtotal / 100),
+    guestFee,
+    total: Math.ceil(subtotal / 100),
+    guestCount: guestsQuantity,
+    currency: 'cad',
+    additionalFees,
+    coupons,
+  }
 }

@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { Message } from '../Message'
 
 import classes from './index.module.scss'
+import { useToast } from '@/hooks/use-toast'
 
 export type Props = {
   params?: string[]
@@ -21,6 +22,7 @@ export const RenderParamsComponent: React.FC<Props> = ({
 }) => {
   const searchParams = useSearchParams()
   const paramValues = params.map(param => searchParams?.get(param))
+  const { toast } = useToast()
 
   useEffect(() => {
     if (paramValues.length && onParams) {
@@ -33,7 +35,9 @@ export const RenderParamsComponent: React.FC<Props> = ({
       <div className={className}>
         {paramValues.map((paramValue, index) => {
           if (!paramValue) return null
-
+          // toast({
+          //   description: 'hello'
+          // })
           return (
             <Message
               className={classes.renderParams}

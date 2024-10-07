@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import { admins } from '../../access/admins'
 import { anyone } from '../../access/anyone'
+import { PriceSelect } from '../Products/ui/PriceSelect'
 import { ProductSelect } from '../Products/ui/ProductSelect'
 import adminsAndUser from './access/adminsAndUser'
 import { checkRole } from './checkRole'
@@ -11,12 +12,12 @@ import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
 import { loginAfterCreate } from './hooks/loginAfterCreate'
 import { resolveDuplicatePurchases } from './hooks/resolveDuplicatePurchases'
 import { CustomerSelect } from './ui/CustomerSelect'
-import { PriceSelect } from '../Products/ui/PriceSelect'
+import generateForgotPasswordEmail from '../../email/generateForgotPasswordEmail'
 
 const Users: CollectionConfig = {
   slug: 'users',
   admin: {
-    group: 'Ecommerce Data',
+    group: 'Business Data',
     useAsTitle: 'name',
     defaultColumns: ['name', 'email'],
   },
@@ -31,7 +32,13 @@ const Users: CollectionConfig = {
     beforeChange: [createStripeCustomer],
     afterChange: [loginAfterCreate],
   },
-  auth: true,
+  // auth: true,
+  auth: {
+    forgotPassword: {
+      generateEmailSubject: () => 'Reset your password',
+      generateEmailHTML: generateForgotPasswordEmail,
+    },
+  },
   endpoints: [
     {
       path: '/:teamID/customer',
@@ -46,7 +53,19 @@ const Users: CollectionConfig = {
   ],
   fields: [
     {
-      name: 'name',
+      name: 'firstName',
+      type: 'text',
+    },
+    {
+      name: 'lastName',
+      type: 'text',
+    },
+    {
+      name: 'email',
+      type: 'email',
+    },
+    {
+      name: 'phone',
       type: 'text',
     },
     {
@@ -99,9 +118,98 @@ const Users: CollectionConfig = {
     },
     {
       label: 'Cart',
+      admin: {
+        hidden: true
+      },
       name: 'cart',
       type: 'group',
       fields: [
+        {
+          name: 'coupons',
+          label: 'Coupons',
+          type: 'array',
+          interfaceName: 'CouponItems',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+            },
+            {
+              name: 'couponID',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'amount',
+              type: 'number',
+            },
+          ],
+        },
+        {
+          name: 'from',
+          label: 'Start Date',
+          type: 'date',
+          admin: {
+            position: 'sidebar',
+          },
+        },
+        {
+          name: 'to',
+          label: 'End Date',
+          type: 'date',
+          admin: {
+            position: 'sidebar',
+          },
+        },
+        {
+          name: 'basePrice',
+          type: 'number',
+        },
+        {
+          name: 'duration',
+          type: 'number',
+        },
+        {
+          name: 'product',
+          type: 'relationship',
+          relationTo: 'products',
+        },
+        {
+          name: 'listing',
+          type: 'text',
+        },
+        {
+          name: 'guestsQuantity',
+          label: 'Number of Guests',
+          type: 'number',
+          min: 1,
+        },
+        {
+          name: 'subtotal',
+          type: 'number',
+        },
+        {
+          name: 'total',
+          type: 'number',
+        },
+        {
+          name: 'fees',
+          type: 'array',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+            },
+            {
+              name: 'priceID',
+              type: 'text',
+            },
+            {
+              name: 'total',
+              type: 'number',
+            },
+          ],
+        },
         {
           name: 'items',
           label: 'Items',
@@ -125,7 +233,7 @@ const Users: CollectionConfig = {
             },
             {
               name: 'priceID',
-              label: 'Stripe Product',
+              label: 'Stripe Price',
               type: 'text',
               required: true,
               admin: {
@@ -135,36 +243,12 @@ const Users: CollectionConfig = {
               },
             },
             {
-              name: 'guestsQuantity',
-              label: 'Number of Guests',
-              type: 'number',
-              min: 1,
-            },
-            {
               name: 'quantity',
               type: 'number',
               min: 0,
               admin: {
                 step: 1,
               },
-            },
-            {
-              name: 'from',
-              label: 'Start Date',
-              type: 'date',
-              admin: {
-                position: 'sidebar',
-              },
-              required: true,
-            },
-            {
-              name: 'to',
-              label: 'End Date',
-              type: 'date',
-              admin: {
-                position: 'sidebar',
-              },
-              required: true,
             },
           ],
         },

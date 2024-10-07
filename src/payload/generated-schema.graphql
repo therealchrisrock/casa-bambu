@@ -11,6 +11,12 @@ type Query {
   docAccessProduct(id: String!): productsDocAccess
   versionProduct(id: String): ProductVersion
   versionsProducts(where: versionsProduct_where, limit: Int, page: Int, sort: String): versionsProducts
+  Policy(id: String!, draft: Boolean): Policy
+  Policies(draft: Boolean, where: Policy_where, limit: Int, page: Int, sort: String): Policies
+  countPolicies(draft: Boolean, where: Policy_where): countPolicies
+  docAccessPolicy(id: String!): policiesDocAccess
+  versionPolicy(id: String): PolicyVersion
+  versionsPolicies(where: versionsPolicy_where, limit: Int, page: Int, sort: String): versionsPolicies
   Order(id: String!): Order
   Orders(where: Order_where, limit: Int, page: Int, sort: String): Orders
   countOrders(where: Order_where): countOrders
@@ -43,6 +49,10 @@ type Query {
   Amenities(where: Amenity_where, limit: Int, page: Int, sort: String): Amenities
   countAmenities(where: Amenity_where): countAmenities
   docAccessAmenity(id: String!): amenitiesDocAccess
+  Faq(id: String!): Faq
+  Faqs(where: Faq_where, limit: Int, page: Int, sort: String): Faqs
+  countFaqs(where: Faq_where): countFaqs
+  docAccessFaq(id: String!): faqsDocAccess
   Form(id: String!): Form
   Forms(where: Form_where, limit: Int, page: Int, sort: String): Forms
   countForms(where: Form_where): countForms
@@ -714,13 +724,13 @@ type Product {
   available: Boolean
   gallery: [Product_Gallery!]
   productDescription(depth: Int): JSON
-  amenities: [Product_Amenities!]
-  layout: [Product_Layout!]!
+  layout: [Product_Layout!]
   bedroomQuantity: Float
   bathQuantity: Float
   maxGuestQuantity: Float
   baseGuestQuantity: Float
   priceJSON: String
+  features: [Amenity!]
   enablePaywall: Boolean
   paywall: [Product_Paywall!]
   stripeProductID: String
@@ -932,20 +942,17 @@ input Product_Gallery_Media_where_or {
   OR: [Product_Gallery_Media_where_or]
 }
 
-type Product_Amenities {
-  amenity: Amenity
-  id: String
-}
+union Product_Layout = Cta | Content | MediaBlock | Archive
 
 type Amenity {
   id: String
   title: String!
+  description: String
   media: Media!
+  category: [Category!]
   updatedAt: DateTime
   createdAt: DateTime
 }
-
-union Product_Layout = Cta | Content | MediaBlock | Archive
 
 union Product_Paywall = Cta | Content | MediaBlock | Archive
 
@@ -1185,12 +1192,12 @@ type ReviewBlock {
 
 type Review {
   id: String
-  title: String
+  name: String
+  relatedListing(draft: Boolean): Product
   publishedOn: DateTime
   rating: Float
   statement: String
   user: User
-  slug: String
   updatedAt: DateTime
   createdAt: DateTime
   _status: Review__status
@@ -1198,7 +1205,9 @@ type Review {
 
 type User {
   id: String
-  name: String
+  firstName: String
+  lastName: String
+  phone: String
   roles: [User_roles!]
   purchases(draft: Boolean): [Product!]
   stripeCustomerID: String
@@ -1222,17 +1231,39 @@ enum User_roles {
 }
 
 type User_Cart {
+  coupons: [CouponItems!]
+  from: DateTime
+  to: DateTime
+  basePrice: Float
+  duration: Float
+  product(draft: Boolean): Product
+  listing: String
+  guestsQuantity: Float
+  subtotal: Float
+  total: Float
+  fees: [User_Cart_Fees!]
   items: [CartItems!]
+}
+
+type CouponItems {
+  label: String
+  couponID: String
+  amount: Float
+  id: String
+}
+
+type User_Cart_Fees {
+  label: String
+  priceID: String
+  total: Float
+  id: String
 }
 
 type CartItems {
   product(draft: Boolean): Product
   stripeProductID: String
   priceID: String
-  guestsQuantity: Float
   quantity: Float
-  from: DateTime
-  to: DateTime
   id: String
 }
 
@@ -3398,13 +3429,12 @@ input Product_where {
   gallery__media: Product_gallery__media_operator
   gallery__id: Product_gallery__id_operator
   productDescription: Product_productDescription_operator
-  amenities__amenity: Product_amenities__amenity_operator
-  amenities__id: Product_amenities__id_operator
   bedroomQuantity: Product_bedroomQuantity_operator
   bathQuantity: Product_bathQuantity_operator
   maxGuestQuantity: Product_maxGuestQuantity_operator
   baseGuestQuantity: Product_baseGuestQuantity_operator
   priceJSON: Product_priceJSON_operator
+  features: Product_features_operator
   enablePaywall: Product_enablePaywall_operator
   stripeProductID: Product_stripeProductID_operator
   stripeGuestFeeID: Product_stripeGuestFeeID_operator
@@ -3483,26 +3513,6 @@ input Product_productDescription_operator {
   contains: JSON
 }
 
-input Product_amenities__amenity_operator {
-  equals: JSON
-  not_equals: JSON
-  in: [JSON]
-  not_in: [JSON]
-  all: [JSON]
-  exists: Boolean
-}
-
-input Product_amenities__id_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
-}
-
 input Product_bedroomQuantity_operator {
   equals: Float
   not_equals: Float
@@ -3544,6 +3554,15 @@ input Product_priceJSON_operator {
   not_equals: String
   like: String
   contains: String
+  exists: Boolean
+}
+
+input Product_features_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
   exists: Boolean
 }
 
@@ -3787,13 +3806,12 @@ input Product_where_and {
   gallery__media: Product_gallery__media_operator
   gallery__id: Product_gallery__id_operator
   productDescription: Product_productDescription_operator
-  amenities__amenity: Product_amenities__amenity_operator
-  amenities__id: Product_amenities__id_operator
   bedroomQuantity: Product_bedroomQuantity_operator
   bathQuantity: Product_bathQuantity_operator
   maxGuestQuantity: Product_maxGuestQuantity_operator
   baseGuestQuantity: Product_baseGuestQuantity_operator
   priceJSON: Product_priceJSON_operator
+  features: Product_features_operator
   enablePaywall: Product_enablePaywall_operator
   stripeProductID: Product_stripeProductID_operator
   stripeGuestFeeID: Product_stripeGuestFeeID_operator
@@ -3829,13 +3847,12 @@ input Product_where_or {
   gallery__media: Product_gallery__media_operator
   gallery__id: Product_gallery__id_operator
   productDescription: Product_productDescription_operator
-  amenities__amenity: Product_amenities__amenity_operator
-  amenities__id: Product_amenities__id_operator
   bedroomQuantity: Product_bedroomQuantity_operator
   bathQuantity: Product_bathQuantity_operator
   maxGuestQuantity: Product_maxGuestQuantity_operator
   baseGuestQuantity: Product_baseGuestQuantity_operator
   priceJSON: Product_priceJSON_operator
+  features: Product_features_operator
   enablePaywall: Product_enablePaywall_operator
   stripeProductID: Product_stripeProductID_operator
   stripeGuestFeeID: Product_stripeGuestFeeID_operator
@@ -3883,13 +3900,13 @@ type ProductsDocAccessFields {
   available: ProductsDocAccessFields_available
   gallery: ProductsDocAccessFields_gallery
   productDescription: ProductsDocAccessFields_productDescription
-  amenities: ProductsDocAccessFields_amenities
   layout: ProductsDocAccessFields_layout
   bedroomQuantity: ProductsDocAccessFields_bedroomQuantity
   bathQuantity: ProductsDocAccessFields_bathQuantity
   maxGuestQuantity: ProductsDocAccessFields_maxGuestQuantity
   baseGuestQuantity: ProductsDocAccessFields_baseGuestQuantity
   priceJSON: ProductsDocAccessFields_priceJSON
+  features: ProductsDocAccessFields_features
   enablePaywall: ProductsDocAccessFields_enablePaywall
   paywall: ProductsDocAccessFields_paywall
   stripeProductID: ProductsDocAccessFields_stripeProductID
@@ -4074,81 +4091,6 @@ type ProductsDocAccessFields_productDescription_Delete {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_amenities {
-  create: ProductsDocAccessFields_amenities_Create
-  read: ProductsDocAccessFields_amenities_Read
-  update: ProductsDocAccessFields_amenities_Update
-  delete: ProductsDocAccessFields_amenities_Delete
-  fields: ProductsDocAccessFields_amenities_Fields
-}
-
-type ProductsDocAccessFields_amenities_Create {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_amenities_Read {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_amenities_Update {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_amenities_Delete {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_amenities_Fields {
-  amenity: ProductsDocAccessFields_amenities_amenity
-  id: ProductsDocAccessFields_amenities_id
-}
-
-type ProductsDocAccessFields_amenities_amenity {
-  create: ProductsDocAccessFields_amenities_amenity_Create
-  read: ProductsDocAccessFields_amenities_amenity_Read
-  update: ProductsDocAccessFields_amenities_amenity_Update
-  delete: ProductsDocAccessFields_amenities_amenity_Delete
-}
-
-type ProductsDocAccessFields_amenities_amenity_Create {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_amenities_amenity_Read {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_amenities_amenity_Update {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_amenities_amenity_Delete {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_amenities_id {
-  create: ProductsDocAccessFields_amenities_id_Create
-  read: ProductsDocAccessFields_amenities_id_Read
-  update: ProductsDocAccessFields_amenities_id_Update
-  delete: ProductsDocAccessFields_amenities_id_Delete
-}
-
-type ProductsDocAccessFields_amenities_id_Create {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_amenities_id_Read {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_amenities_id_Update {
-  permission: Boolean!
-}
-
-type ProductsDocAccessFields_amenities_id_Delete {
-  permission: Boolean!
-}
-
 type ProductsDocAccessFields_layout {
   create: ProductsDocAccessFields_layout_Create
   read: ProductsDocAccessFields_layout_Read
@@ -4284,6 +4226,29 @@ type ProductsDocAccessFields_priceJSON_Update {
 }
 
 type ProductsDocAccessFields_priceJSON_Delete {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_features {
+  create: ProductsDocAccessFields_features_Create
+  read: ProductsDocAccessFields_features_Read
+  update: ProductsDocAccessFields_features_Update
+  delete: ProductsDocAccessFields_features_Delete
+}
+
+type ProductsDocAccessFields_features_Create {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_features_Read {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_features_Update {
+  permission: Boolean!
+}
+
+type ProductsDocAccessFields_features_Delete {
   permission: Boolean!
 }
 
@@ -4972,13 +4937,13 @@ type ProductVersion_Version {
   available: Boolean
   gallery: [ProductVersion_Version_Gallery!]
   productDescription(depth: Int): JSON
-  amenities: [ProductVersion_Version_Amenities!]
-  layout: [ProductVersion_Version_Layout!]!
+  layout: [ProductVersion_Version_Layout!]
   bedroomQuantity: Float
   bathQuantity: Float
   maxGuestQuantity: Float
   baseGuestQuantity: Float
   priceJSON: String
+  features: [Amenity!]
   enablePaywall: Boolean
   paywall: [ProductVersion_Version_Paywall!]
   stripeProductID: String
@@ -5188,11 +5153,6 @@ input ProductVersion_Version_Gallery_Media_where_or {
   id: ProductVersion_Version_Gallery_Media_id_operator
   AND: [ProductVersion_Version_Gallery_Media_where_and]
   OR: [ProductVersion_Version_Gallery_Media_where_or]
-}
-
-type ProductVersion_Version_Amenities {
-  amenity: Amenity
-  id: String
 }
 
 union ProductVersion_Version_Layout = Cta | Content | MediaBlock | Archive
@@ -5436,13 +5396,12 @@ input versionsProduct_where {
   version__gallery__media: versionsProduct_version__gallery__media_operator
   version__gallery__id: versionsProduct_version__gallery__id_operator
   version__productDescription: versionsProduct_version__productDescription_operator
-  version__amenities__amenity: versionsProduct_version__amenities__amenity_operator
-  version__amenities__id: versionsProduct_version__amenities__id_operator
   version__bedroomQuantity: versionsProduct_version__bedroomQuantity_operator
   version__bathQuantity: versionsProduct_version__bathQuantity_operator
   version__maxGuestQuantity: versionsProduct_version__maxGuestQuantity_operator
   version__baseGuestQuantity: versionsProduct_version__baseGuestQuantity_operator
   version__priceJSON: versionsProduct_version__priceJSON_operator
+  version__features: versionsProduct_version__features_operator
   version__enablePaywall: versionsProduct_version__enablePaywall_operator
   version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
@@ -5533,26 +5492,6 @@ input versionsProduct_version__productDescription_operator {
   contains: JSON
 }
 
-input versionsProduct_version__amenities__amenity_operator {
-  equals: JSON
-  not_equals: JSON
-  in: [JSON]
-  not_in: [JSON]
-  all: [JSON]
-  exists: Boolean
-}
-
-input versionsProduct_version__amenities__id_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
-  exists: Boolean
-}
-
 input versionsProduct_version__bedroomQuantity_operator {
   equals: Float
   not_equals: Float
@@ -5594,6 +5533,15 @@ input versionsProduct_version__priceJSON_operator {
   not_equals: String
   like: String
   contains: String
+  exists: Boolean
+}
+
+input versionsProduct_version__features_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
   exists: Boolean
 }
 
@@ -5866,13 +5814,12 @@ input versionsProduct_where_and {
   version__gallery__media: versionsProduct_version__gallery__media_operator
   version__gallery__id: versionsProduct_version__gallery__id_operator
   version__productDescription: versionsProduct_version__productDescription_operator
-  version__amenities__amenity: versionsProduct_version__amenities__amenity_operator
-  version__amenities__id: versionsProduct_version__amenities__id_operator
   version__bedroomQuantity: versionsProduct_version__bedroomQuantity_operator
   version__bathQuantity: versionsProduct_version__bathQuantity_operator
   version__maxGuestQuantity: versionsProduct_version__maxGuestQuantity_operator
   version__baseGuestQuantity: versionsProduct_version__baseGuestQuantity_operator
   version__priceJSON: versionsProduct_version__priceJSON_operator
+  version__features: versionsProduct_version__features_operator
   version__enablePaywall: versionsProduct_version__enablePaywall_operator
   version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
@@ -5912,13 +5859,12 @@ input versionsProduct_where_or {
   version__gallery__media: versionsProduct_version__gallery__media_operator
   version__gallery__id: versionsProduct_version__gallery__id_operator
   version__productDescription: versionsProduct_version__productDescription_operator
-  version__amenities__amenity: versionsProduct_version__amenities__amenity_operator
-  version__amenities__id: versionsProduct_version__amenities__id_operator
   version__bedroomQuantity: versionsProduct_version__bedroomQuantity_operator
   version__bathQuantity: versionsProduct_version__bathQuantity_operator
   version__maxGuestQuantity: versionsProduct_version__maxGuestQuantity_operator
   version__baseGuestQuantity: versionsProduct_version__baseGuestQuantity_operator
   version__priceJSON: versionsProduct_version__priceJSON_operator
+  version__features: versionsProduct_version__features_operator
   version__enablePaywall: versionsProduct_version__enablePaywall_operator
   version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
@@ -5948,6 +5894,580 @@ input versionsProduct_where_or {
   id: versionsProduct_id_operator
   AND: [versionsProduct_where_and]
   OR: [versionsProduct_where_or]
+}
+
+type Policy {
+  id: String
+  title: String
+  attachment: Media
+  slug: String
+  body(depth: Int): JSON
+  updatedAt: DateTime
+  createdAt: DateTime
+  _status: Policy__status
+}
+
+enum Policy__status {
+  draft
+  published
+}
+
+type Policies {
+  docs: [Policy]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input Policy_where {
+  title: Policy_title_operator
+  attachment: Policy_attachment_operator
+  slug: Policy_slug_operator
+  body: Policy_body_operator
+  updatedAt: Policy_updatedAt_operator
+  createdAt: Policy_createdAt_operator
+  _status: Policy__status_operator
+  id: Policy_id_operator
+  AND: [Policy_where_and]
+  OR: [Policy_where_or]
+}
+
+input Policy_title_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input Policy_attachment_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input Policy_slug_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Policy_body_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  exists: Boolean
+}
+
+input Policy_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Policy_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Policy__status_operator {
+  equals: Policy__status_Input
+  not_equals: Policy__status_Input
+  in: [Policy__status_Input]
+  not_in: [Policy__status_Input]
+  all: [Policy__status_Input]
+  exists: Boolean
+}
+
+enum Policy__status_Input {
+  draft
+  published
+}
+
+input Policy_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Policy_where_and {
+  title: Policy_title_operator
+  attachment: Policy_attachment_operator
+  slug: Policy_slug_operator
+  body: Policy_body_operator
+  updatedAt: Policy_updatedAt_operator
+  createdAt: Policy_createdAt_operator
+  _status: Policy__status_operator
+  id: Policy_id_operator
+  AND: [Policy_where_and]
+  OR: [Policy_where_or]
+}
+
+input Policy_where_or {
+  title: Policy_title_operator
+  attachment: Policy_attachment_operator
+  slug: Policy_slug_operator
+  body: Policy_body_operator
+  updatedAt: Policy_updatedAt_operator
+  createdAt: Policy_createdAt_operator
+  _status: Policy__status_operator
+  id: Policy_id_operator
+  AND: [Policy_where_and]
+  OR: [Policy_where_or]
+}
+
+type countPolicies {
+  totalDocs: Int
+}
+
+type policiesDocAccess {
+  fields: PoliciesDocAccessFields
+  create: PoliciesCreateDocAccess
+  read: PoliciesReadDocAccess
+  update: PoliciesUpdateDocAccess
+  delete: PoliciesDeleteDocAccess
+  readVersions: PoliciesReadVersionsDocAccess
+}
+
+type PoliciesDocAccessFields {
+  title: PoliciesDocAccessFields_title
+  attachment: PoliciesDocAccessFields_attachment
+  slug: PoliciesDocAccessFields_slug
+  body: PoliciesDocAccessFields_body
+  updatedAt: PoliciesDocAccessFields_updatedAt
+  createdAt: PoliciesDocAccessFields_createdAt
+  _status: PoliciesDocAccessFields__status
+}
+
+type PoliciesDocAccessFields_title {
+  create: PoliciesDocAccessFields_title_Create
+  read: PoliciesDocAccessFields_title_Read
+  update: PoliciesDocAccessFields_title_Update
+  delete: PoliciesDocAccessFields_title_Delete
+}
+
+type PoliciesDocAccessFields_title_Create {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_title_Read {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_title_Update {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_title_Delete {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_attachment {
+  create: PoliciesDocAccessFields_attachment_Create
+  read: PoliciesDocAccessFields_attachment_Read
+  update: PoliciesDocAccessFields_attachment_Update
+  delete: PoliciesDocAccessFields_attachment_Delete
+}
+
+type PoliciesDocAccessFields_attachment_Create {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_attachment_Read {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_attachment_Update {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_attachment_Delete {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_slug {
+  create: PoliciesDocAccessFields_slug_Create
+  read: PoliciesDocAccessFields_slug_Read
+  update: PoliciesDocAccessFields_slug_Update
+  delete: PoliciesDocAccessFields_slug_Delete
+}
+
+type PoliciesDocAccessFields_slug_Create {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_slug_Read {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_slug_Update {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_slug_Delete {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_body {
+  create: PoliciesDocAccessFields_body_Create
+  read: PoliciesDocAccessFields_body_Read
+  update: PoliciesDocAccessFields_body_Update
+  delete: PoliciesDocAccessFields_body_Delete
+}
+
+type PoliciesDocAccessFields_body_Create {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_body_Read {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_body_Update {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_body_Delete {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_updatedAt {
+  create: PoliciesDocAccessFields_updatedAt_Create
+  read: PoliciesDocAccessFields_updatedAt_Read
+  update: PoliciesDocAccessFields_updatedAt_Update
+  delete: PoliciesDocAccessFields_updatedAt_Delete
+}
+
+type PoliciesDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_createdAt {
+  create: PoliciesDocAccessFields_createdAt_Create
+  read: PoliciesDocAccessFields_createdAt_Read
+  update: PoliciesDocAccessFields_createdAt_Update
+  delete: PoliciesDocAccessFields_createdAt_Delete
+}
+
+type PoliciesDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields__status {
+  create: PoliciesDocAccessFields__status_Create
+  read: PoliciesDocAccessFields__status_Read
+  update: PoliciesDocAccessFields__status_Update
+  delete: PoliciesDocAccessFields__status_Delete
+}
+
+type PoliciesDocAccessFields__status_Create {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields__status_Read {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields__status_Update {
+  permission: Boolean!
+}
+
+type PoliciesDocAccessFields__status_Delete {
+  permission: Boolean!
+}
+
+type PoliciesCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PoliciesReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PoliciesUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PoliciesDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PoliciesReadVersionsDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PolicyVersion {
+  parent(draft: Boolean): Policy
+  version: PolicyVersion_Version
+  createdAt: DateTime
+  updatedAt: DateTime
+  latest: Boolean
+  id: String
+}
+
+type PolicyVersion_Version {
+  title: String
+  attachment: Media
+  slug: String
+  body(depth: Int): JSON
+  updatedAt: DateTime
+  createdAt: DateTime
+  _status: PolicyVersion_Version__status
+}
+
+enum PolicyVersion_Version__status {
+  draft
+  published
+}
+
+type versionsPolicies {
+  docs: [PolicyVersion]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input versionsPolicy_where {
+  parent: versionsPolicy_parent_operator
+  version__title: versionsPolicy_version__title_operator
+  version__attachment: versionsPolicy_version__attachment_operator
+  version__slug: versionsPolicy_version__slug_operator
+  version__body: versionsPolicy_version__body_operator
+  version__updatedAt: versionsPolicy_version__updatedAt_operator
+  version__createdAt: versionsPolicy_version__createdAt_operator
+  version___status: versionsPolicy_version___status_operator
+  createdAt: versionsPolicy_createdAt_operator
+  updatedAt: versionsPolicy_updatedAt_operator
+  latest: versionsPolicy_latest_operator
+  id: versionsPolicy_id_operator
+  AND: [versionsPolicy_where_and]
+  OR: [versionsPolicy_where_or]
+}
+
+input versionsPolicy_parent_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input versionsPolicy_version__title_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input versionsPolicy_version__attachment_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input versionsPolicy_version__slug_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsPolicy_version__body_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  exists: Boolean
+}
+
+input versionsPolicy_version__updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsPolicy_version__createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsPolicy_version___status_operator {
+  equals: versionsPolicy_version___status_Input
+  not_equals: versionsPolicy_version___status_Input
+  in: [versionsPolicy_version___status_Input]
+  not_in: [versionsPolicy_version___status_Input]
+  all: [versionsPolicy_version___status_Input]
+  exists: Boolean
+}
+
+enum versionsPolicy_version___status_Input {
+  draft
+  published
+}
+
+input versionsPolicy_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsPolicy_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsPolicy_latest_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
+input versionsPolicy_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsPolicy_where_and {
+  parent: versionsPolicy_parent_operator
+  version__title: versionsPolicy_version__title_operator
+  version__attachment: versionsPolicy_version__attachment_operator
+  version__slug: versionsPolicy_version__slug_operator
+  version__body: versionsPolicy_version__body_operator
+  version__updatedAt: versionsPolicy_version__updatedAt_operator
+  version__createdAt: versionsPolicy_version__createdAt_operator
+  version___status: versionsPolicy_version___status_operator
+  createdAt: versionsPolicy_createdAt_operator
+  updatedAt: versionsPolicy_updatedAt_operator
+  latest: versionsPolicy_latest_operator
+  id: versionsPolicy_id_operator
+  AND: [versionsPolicy_where_and]
+  OR: [versionsPolicy_where_or]
+}
+
+input versionsPolicy_where_or {
+  parent: versionsPolicy_parent_operator
+  version__title: versionsPolicy_version__title_operator
+  version__attachment: versionsPolicy_version__attachment_operator
+  version__slug: versionsPolicy_version__slug_operator
+  version__body: versionsPolicy_version__body_operator
+  version__updatedAt: versionsPolicy_version__updatedAt_operator
+  version__createdAt: versionsPolicy_version__createdAt_operator
+  version___status: versionsPolicy_version___status_operator
+  createdAt: versionsPolicy_createdAt_operator
+  updatedAt: versionsPolicy_updatedAt_operator
+  latest: versionsPolicy_latest_operator
+  id: versionsPolicy_id_operator
+  AND: [versionsPolicy_where_and]
+  OR: [versionsPolicy_where_or]
 }
 
 type Order {
@@ -7431,17 +7951,33 @@ type Users {
 }
 
 input User_where {
-  name: User_name_operator
+  firstName: User_firstName_operator
+  lastName: User_lastName_operator
+  phone: User_phone_operator
   roles: User_roles_operator
   purchases: User_purchases_operator
   stripeCustomerID: User_stripeCustomerID_operator
+  cart__coupons__label: User_cart__coupons__label_operator
+  cart__coupons__couponID: User_cart__coupons__couponID_operator
+  cart__coupons__amount: User_cart__coupons__amount_operator
+  cart__coupons__id: User_cart__coupons__id_operator
+  cart__from: User_cart__from_operator
+  cart__to: User_cart__to_operator
+  cart__basePrice: User_cart__basePrice_operator
+  cart__duration: User_cart__duration_operator
+  cart__product: User_cart__product_operator
+  cart__listing: User_cart__listing_operator
+  cart__guestsQuantity: User_cart__guestsQuantity_operator
+  cart__subtotal: User_cart__subtotal_operator
+  cart__total: User_cart__total_operator
+  cart__fees__label: User_cart__fees__label_operator
+  cart__fees__priceID: User_cart__fees__priceID_operator
+  cart__fees__total: User_cart__fees__total_operator
+  cart__fees__id: User_cart__fees__id_operator
   cart__items__product: User_cart__items__product_operator
   cart__items__stripeProductID: User_cart__items__stripeProductID_operator
   cart__items__priceID: User_cart__items__priceID_operator
-  cart__items__guestsQuantity: User_cart__items__guestsQuantity_operator
   cart__items__quantity: User_cart__items__quantity_operator
-  cart__items__from: User_cart__items__from_operator
-  cart__items__to: User_cart__items__to_operator
   cart__items__id: User_cart__items__id_operator
   skipSync: User_skipSync_operator
   updatedAt: User_updatedAt_operator
@@ -7452,7 +7988,29 @@ input User_where {
   OR: [User_where_or]
 }
 
-input User_name_operator {
+input User_firstName_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input User_lastName_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input User_phone_operator {
   equals: String
   not_equals: String
   like: String
@@ -7497,6 +8055,183 @@ input User_stripeCustomerID_operator {
   exists: Boolean
 }
 
+input User_cart__coupons__label_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input User_cart__coupons__couponID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input User_cart__coupons__amount_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+  exists: Boolean
+}
+
+input User_cart__coupons__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input User_cart__from_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input User_cart__to_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input User_cart__basePrice_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+  exists: Boolean
+}
+
+input User_cart__duration_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+  exists: Boolean
+}
+
+input User_cart__product_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input User_cart__listing_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input User_cart__guestsQuantity_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+  exists: Boolean
+}
+
+input User_cart__subtotal_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+  exists: Boolean
+}
+
+input User_cart__total_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+  exists: Boolean
+}
+
+input User_cart__fees__label_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input User_cart__fees__priceID_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input User_cart__fees__total_operator {
+  equals: Float
+  not_equals: Float
+  greater_than_equal: Float
+  greater_than: Float
+  less_than_equal: Float
+  less_than: Float
+  exists: Boolean
+}
+
+input User_cart__fees__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input User_cart__items__product_operator {
   equals: JSON
   not_equals: JSON
@@ -7527,16 +8262,6 @@ input User_cart__items__priceID_operator {
   all: [String]
 }
 
-input User_cart__items__guestsQuantity_operator {
-  equals: Float
-  not_equals: Float
-  greater_than_equal: Float
-  greater_than: Float
-  less_than_equal: Float
-  less_than: Float
-  exists: Boolean
-}
-
 input User_cart__items__quantity_operator {
   equals: Float
   not_equals: Float
@@ -7545,26 +8270,6 @@ input User_cart__items__quantity_operator {
   less_than_equal: Float
   less_than: Float
   exists: Boolean
-}
-
-input User_cart__items__from_operator {
-  equals: DateTime
-  not_equals: DateTime
-  greater_than_equal: DateTime
-  greater_than: DateTime
-  less_than_equal: DateTime
-  less_than: DateTime
-  like: DateTime
-}
-
-input User_cart__items__to_operator {
-  equals: DateTime
-  not_equals: DateTime
-  greater_than_equal: DateTime
-  greater_than: DateTime
-  less_than_equal: DateTime
-  less_than: DateTime
-  like: DateTime
 }
 
 input User_cart__items__id_operator {
@@ -7628,17 +8333,33 @@ input User_id_operator {
 }
 
 input User_where_and {
-  name: User_name_operator
+  firstName: User_firstName_operator
+  lastName: User_lastName_operator
+  phone: User_phone_operator
   roles: User_roles_operator
   purchases: User_purchases_operator
   stripeCustomerID: User_stripeCustomerID_operator
+  cart__coupons__label: User_cart__coupons__label_operator
+  cart__coupons__couponID: User_cart__coupons__couponID_operator
+  cart__coupons__amount: User_cart__coupons__amount_operator
+  cart__coupons__id: User_cart__coupons__id_operator
+  cart__from: User_cart__from_operator
+  cart__to: User_cart__to_operator
+  cart__basePrice: User_cart__basePrice_operator
+  cart__duration: User_cart__duration_operator
+  cart__product: User_cart__product_operator
+  cart__listing: User_cart__listing_operator
+  cart__guestsQuantity: User_cart__guestsQuantity_operator
+  cart__subtotal: User_cart__subtotal_operator
+  cart__total: User_cart__total_operator
+  cart__fees__label: User_cart__fees__label_operator
+  cart__fees__priceID: User_cart__fees__priceID_operator
+  cart__fees__total: User_cart__fees__total_operator
+  cart__fees__id: User_cart__fees__id_operator
   cart__items__product: User_cart__items__product_operator
   cart__items__stripeProductID: User_cart__items__stripeProductID_operator
   cart__items__priceID: User_cart__items__priceID_operator
-  cart__items__guestsQuantity: User_cart__items__guestsQuantity_operator
   cart__items__quantity: User_cart__items__quantity_operator
-  cart__items__from: User_cart__items__from_operator
-  cart__items__to: User_cart__items__to_operator
   cart__items__id: User_cart__items__id_operator
   skipSync: User_skipSync_operator
   updatedAt: User_updatedAt_operator
@@ -7650,17 +8371,33 @@ input User_where_and {
 }
 
 input User_where_or {
-  name: User_name_operator
+  firstName: User_firstName_operator
+  lastName: User_lastName_operator
+  phone: User_phone_operator
   roles: User_roles_operator
   purchases: User_purchases_operator
   stripeCustomerID: User_stripeCustomerID_operator
+  cart__coupons__label: User_cart__coupons__label_operator
+  cart__coupons__couponID: User_cart__coupons__couponID_operator
+  cart__coupons__amount: User_cart__coupons__amount_operator
+  cart__coupons__id: User_cart__coupons__id_operator
+  cart__from: User_cart__from_operator
+  cart__to: User_cart__to_operator
+  cart__basePrice: User_cart__basePrice_operator
+  cart__duration: User_cart__duration_operator
+  cart__product: User_cart__product_operator
+  cart__listing: User_cart__listing_operator
+  cart__guestsQuantity: User_cart__guestsQuantity_operator
+  cart__subtotal: User_cart__subtotal_operator
+  cart__total: User_cart__total_operator
+  cart__fees__label: User_cart__fees__label_operator
+  cart__fees__priceID: User_cart__fees__priceID_operator
+  cart__fees__total: User_cart__fees__total_operator
+  cart__fees__id: User_cart__fees__id_operator
   cart__items__product: User_cart__items__product_operator
   cart__items__stripeProductID: User_cart__items__stripeProductID_operator
   cart__items__priceID: User_cart__items__priceID_operator
-  cart__items__guestsQuantity: User_cart__items__guestsQuantity_operator
   cart__items__quantity: User_cart__items__quantity_operator
-  cart__items__from: User_cart__items__from_operator
-  cart__items__to: User_cart__items__to_operator
   cart__items__id: User_cart__items__id_operator
   skipSync: User_skipSync_operator
   updatedAt: User_updatedAt_operator
@@ -7685,7 +8422,9 @@ type usersDocAccess {
 }
 
 type UsersDocAccessFields {
-  name: UsersDocAccessFields_name
+  firstName: UsersDocAccessFields_firstName
+  lastName: UsersDocAccessFields_lastName
+  phone: UsersDocAccessFields_phone
   roles: UsersDocAccessFields_roles
   purchases: UsersDocAccessFields_purchases
   stripeCustomerID: UsersDocAccessFields_stripeCustomerID
@@ -7697,26 +8436,72 @@ type UsersDocAccessFields {
   password: UsersDocAccessFields_password
 }
 
-type UsersDocAccessFields_name {
-  create: UsersDocAccessFields_name_Create
-  read: UsersDocAccessFields_name_Read
-  update: UsersDocAccessFields_name_Update
-  delete: UsersDocAccessFields_name_Delete
+type UsersDocAccessFields_firstName {
+  create: UsersDocAccessFields_firstName_Create
+  read: UsersDocAccessFields_firstName_Read
+  update: UsersDocAccessFields_firstName_Update
+  delete: UsersDocAccessFields_firstName_Delete
 }
 
-type UsersDocAccessFields_name_Create {
+type UsersDocAccessFields_firstName_Create {
   permission: Boolean!
 }
 
-type UsersDocAccessFields_name_Read {
+type UsersDocAccessFields_firstName_Read {
   permission: Boolean!
 }
 
-type UsersDocAccessFields_name_Update {
+type UsersDocAccessFields_firstName_Update {
   permission: Boolean!
 }
 
-type UsersDocAccessFields_name_Delete {
+type UsersDocAccessFields_firstName_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_lastName {
+  create: UsersDocAccessFields_lastName_Create
+  read: UsersDocAccessFields_lastName_Read
+  update: UsersDocAccessFields_lastName_Update
+  delete: UsersDocAccessFields_lastName_Delete
+}
+
+type UsersDocAccessFields_lastName_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_lastName_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_lastName_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_lastName_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_phone {
+  create: UsersDocAccessFields_phone_Create
+  read: UsersDocAccessFields_phone_Read
+  update: UsersDocAccessFields_phone_Update
+  delete: UsersDocAccessFields_phone_Delete
+}
+
+type UsersDocAccessFields_phone_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_phone_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_phone_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_phone_Delete {
   permission: Boolean!
 }
 
@@ -7814,7 +8599,471 @@ type UsersDocAccessFields_cart_Delete {
 }
 
 type UsersDocAccessFields_cart_Fields {
+  coupons: UsersDocAccessFields_cart_coupons
+  from: UsersDocAccessFields_cart_from
+  to: UsersDocAccessFields_cart_to
+  basePrice: UsersDocAccessFields_cart_basePrice
+  duration: UsersDocAccessFields_cart_duration
+  product: UsersDocAccessFields_cart_product
+  listing: UsersDocAccessFields_cart_listing
+  guestsQuantity: UsersDocAccessFields_cart_guestsQuantity
+  subtotal: UsersDocAccessFields_cart_subtotal
+  total: UsersDocAccessFields_cart_total
+  fees: UsersDocAccessFields_cart_fees
   items: UsersDocAccessFields_cart_items
+}
+
+type UsersDocAccessFields_cart_coupons {
+  create: UsersDocAccessFields_cart_coupons_Create
+  read: UsersDocAccessFields_cart_coupons_Read
+  update: UsersDocAccessFields_cart_coupons_Update
+  delete: UsersDocAccessFields_cart_coupons_Delete
+  fields: UsersDocAccessFields_cart_coupons_Fields
+}
+
+type UsersDocAccessFields_cart_coupons_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_Fields {
+  label: UsersDocAccessFields_cart_coupons_label
+  couponID: UsersDocAccessFields_cart_coupons_couponID
+  amount: UsersDocAccessFields_cart_coupons_amount
+  id: UsersDocAccessFields_cart_coupons_id
+}
+
+type UsersDocAccessFields_cart_coupons_label {
+  create: UsersDocAccessFields_cart_coupons_label_Create
+  read: UsersDocAccessFields_cart_coupons_label_Read
+  update: UsersDocAccessFields_cart_coupons_label_Update
+  delete: UsersDocAccessFields_cart_coupons_label_Delete
+}
+
+type UsersDocAccessFields_cart_coupons_label_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_label_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_label_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_label_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_couponID {
+  create: UsersDocAccessFields_cart_coupons_couponID_Create
+  read: UsersDocAccessFields_cart_coupons_couponID_Read
+  update: UsersDocAccessFields_cart_coupons_couponID_Update
+  delete: UsersDocAccessFields_cart_coupons_couponID_Delete
+}
+
+type UsersDocAccessFields_cart_coupons_couponID_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_couponID_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_couponID_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_couponID_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_amount {
+  create: UsersDocAccessFields_cart_coupons_amount_Create
+  read: UsersDocAccessFields_cart_coupons_amount_Read
+  update: UsersDocAccessFields_cart_coupons_amount_Update
+  delete: UsersDocAccessFields_cart_coupons_amount_Delete
+}
+
+type UsersDocAccessFields_cart_coupons_amount_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_amount_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_amount_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_amount_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_id {
+  create: UsersDocAccessFields_cart_coupons_id_Create
+  read: UsersDocAccessFields_cart_coupons_id_Read
+  update: UsersDocAccessFields_cart_coupons_id_Update
+  delete: UsersDocAccessFields_cart_coupons_id_Delete
+}
+
+type UsersDocAccessFields_cart_coupons_id_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_id_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_id_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_coupons_id_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_from {
+  create: UsersDocAccessFields_cart_from_Create
+  read: UsersDocAccessFields_cart_from_Read
+  update: UsersDocAccessFields_cart_from_Update
+  delete: UsersDocAccessFields_cart_from_Delete
+}
+
+type UsersDocAccessFields_cart_from_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_from_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_from_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_from_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_to {
+  create: UsersDocAccessFields_cart_to_Create
+  read: UsersDocAccessFields_cart_to_Read
+  update: UsersDocAccessFields_cart_to_Update
+  delete: UsersDocAccessFields_cart_to_Delete
+}
+
+type UsersDocAccessFields_cart_to_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_to_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_to_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_to_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_basePrice {
+  create: UsersDocAccessFields_cart_basePrice_Create
+  read: UsersDocAccessFields_cart_basePrice_Read
+  update: UsersDocAccessFields_cart_basePrice_Update
+  delete: UsersDocAccessFields_cart_basePrice_Delete
+}
+
+type UsersDocAccessFields_cart_basePrice_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_basePrice_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_basePrice_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_basePrice_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_duration {
+  create: UsersDocAccessFields_cart_duration_Create
+  read: UsersDocAccessFields_cart_duration_Read
+  update: UsersDocAccessFields_cart_duration_Update
+  delete: UsersDocAccessFields_cart_duration_Delete
+}
+
+type UsersDocAccessFields_cart_duration_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_duration_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_duration_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_duration_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_product {
+  create: UsersDocAccessFields_cart_product_Create
+  read: UsersDocAccessFields_cart_product_Read
+  update: UsersDocAccessFields_cart_product_Update
+  delete: UsersDocAccessFields_cart_product_Delete
+}
+
+type UsersDocAccessFields_cart_product_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_product_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_product_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_product_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_listing {
+  create: UsersDocAccessFields_cart_listing_Create
+  read: UsersDocAccessFields_cart_listing_Read
+  update: UsersDocAccessFields_cart_listing_Update
+  delete: UsersDocAccessFields_cart_listing_Delete
+}
+
+type UsersDocAccessFields_cart_listing_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_listing_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_listing_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_listing_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_guestsQuantity {
+  create: UsersDocAccessFields_cart_guestsQuantity_Create
+  read: UsersDocAccessFields_cart_guestsQuantity_Read
+  update: UsersDocAccessFields_cart_guestsQuantity_Update
+  delete: UsersDocAccessFields_cart_guestsQuantity_Delete
+}
+
+type UsersDocAccessFields_cart_guestsQuantity_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_guestsQuantity_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_guestsQuantity_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_guestsQuantity_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_subtotal {
+  create: UsersDocAccessFields_cart_subtotal_Create
+  read: UsersDocAccessFields_cart_subtotal_Read
+  update: UsersDocAccessFields_cart_subtotal_Update
+  delete: UsersDocAccessFields_cart_subtotal_Delete
+}
+
+type UsersDocAccessFields_cart_subtotal_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_subtotal_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_subtotal_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_subtotal_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_total {
+  create: UsersDocAccessFields_cart_total_Create
+  read: UsersDocAccessFields_cart_total_Read
+  update: UsersDocAccessFields_cart_total_Update
+  delete: UsersDocAccessFields_cart_total_Delete
+}
+
+type UsersDocAccessFields_cart_total_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_total_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_total_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_total_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees {
+  create: UsersDocAccessFields_cart_fees_Create
+  read: UsersDocAccessFields_cart_fees_Read
+  update: UsersDocAccessFields_cart_fees_Update
+  delete: UsersDocAccessFields_cart_fees_Delete
+  fields: UsersDocAccessFields_cart_fees_Fields
+}
+
+type UsersDocAccessFields_cart_fees_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_Fields {
+  label: UsersDocAccessFields_cart_fees_label
+  priceID: UsersDocAccessFields_cart_fees_priceID
+  total: UsersDocAccessFields_cart_fees_total
+  id: UsersDocAccessFields_cart_fees_id
+}
+
+type UsersDocAccessFields_cart_fees_label {
+  create: UsersDocAccessFields_cart_fees_label_Create
+  read: UsersDocAccessFields_cart_fees_label_Read
+  update: UsersDocAccessFields_cart_fees_label_Update
+  delete: UsersDocAccessFields_cart_fees_label_Delete
+}
+
+type UsersDocAccessFields_cart_fees_label_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_label_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_label_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_label_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_priceID {
+  create: UsersDocAccessFields_cart_fees_priceID_Create
+  read: UsersDocAccessFields_cart_fees_priceID_Read
+  update: UsersDocAccessFields_cart_fees_priceID_Update
+  delete: UsersDocAccessFields_cart_fees_priceID_Delete
+}
+
+type UsersDocAccessFields_cart_fees_priceID_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_priceID_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_priceID_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_priceID_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_total {
+  create: UsersDocAccessFields_cart_fees_total_Create
+  read: UsersDocAccessFields_cart_fees_total_Read
+  update: UsersDocAccessFields_cart_fees_total_Update
+  delete: UsersDocAccessFields_cart_fees_total_Delete
+}
+
+type UsersDocAccessFields_cart_fees_total_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_total_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_total_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_total_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_id {
+  create: UsersDocAccessFields_cart_fees_id_Create
+  read: UsersDocAccessFields_cart_fees_id_Read
+  update: UsersDocAccessFields_cart_fees_id_Update
+  delete: UsersDocAccessFields_cart_fees_id_Delete
+}
+
+type UsersDocAccessFields_cart_fees_id_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_id_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_id_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_cart_fees_id_Delete {
+  permission: Boolean!
 }
 
 type UsersDocAccessFields_cart_items {
@@ -7845,10 +9094,7 @@ type UsersDocAccessFields_cart_items_Fields {
   product: UsersDocAccessFields_cart_items_product
   stripeProductID: UsersDocAccessFields_cart_items_stripeProductID
   priceID: UsersDocAccessFields_cart_items_priceID
-  guestsQuantity: UsersDocAccessFields_cart_items_guestsQuantity
   quantity: UsersDocAccessFields_cart_items_quantity
-  from: UsersDocAccessFields_cart_items_from
-  to: UsersDocAccessFields_cart_items_to
   id: UsersDocAccessFields_cart_items_id
 }
 
@@ -7921,29 +9167,6 @@ type UsersDocAccessFields_cart_items_priceID_Delete {
   permission: Boolean!
 }
 
-type UsersDocAccessFields_cart_items_guestsQuantity {
-  create: UsersDocAccessFields_cart_items_guestsQuantity_Create
-  read: UsersDocAccessFields_cart_items_guestsQuantity_Read
-  update: UsersDocAccessFields_cart_items_guestsQuantity_Update
-  delete: UsersDocAccessFields_cart_items_guestsQuantity_Delete
-}
-
-type UsersDocAccessFields_cart_items_guestsQuantity_Create {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_guestsQuantity_Read {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_guestsQuantity_Update {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_guestsQuantity_Delete {
-  permission: Boolean!
-}
-
 type UsersDocAccessFields_cart_items_quantity {
   create: UsersDocAccessFields_cart_items_quantity_Create
   read: UsersDocAccessFields_cart_items_quantity_Read
@@ -7964,52 +9187,6 @@ type UsersDocAccessFields_cart_items_quantity_Update {
 }
 
 type UsersDocAccessFields_cart_items_quantity_Delete {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_from {
-  create: UsersDocAccessFields_cart_items_from_Create
-  read: UsersDocAccessFields_cart_items_from_Read
-  update: UsersDocAccessFields_cart_items_from_Update
-  delete: UsersDocAccessFields_cart_items_from_Delete
-}
-
-type UsersDocAccessFields_cart_items_from_Create {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_from_Read {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_from_Update {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_from_Delete {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_to {
-  create: UsersDocAccessFields_cart_items_to_Create
-  read: UsersDocAccessFields_cart_items_to_Read
-  update: UsersDocAccessFields_cart_items_to_Update
-  delete: UsersDocAccessFields_cart_items_to_Delete
-}
-
-type UsersDocAccessFields_cart_items_to_Create {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_to_Read {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_to_Update {
-  permission: Boolean!
-}
-
-type UsersDocAccessFields_cart_items_to_Delete {
   permission: Boolean!
 }
 
@@ -8199,12 +9376,12 @@ type Reviews {
 }
 
 input Review_where {
-  title: Review_title_operator
+  name: Review_name_operator
+  relatedListing: Review_relatedListing_operator
   publishedOn: Review_publishedOn_operator
   rating: Review_rating_operator
   statement: Review_statement_operator
   user: Review_user_operator
-  slug: Review_slug_operator
   updatedAt: Review_updatedAt_operator
   createdAt: Review_createdAt_operator
   _status: Review__status_operator
@@ -8213,7 +9390,7 @@ input Review_where {
   OR: [Review_where_or]
 }
 
-input Review_title_operator {
+input Review_name_operator {
   equals: String
   not_equals: String
   like: String
@@ -8221,6 +9398,15 @@ input Review_title_operator {
   in: [String]
   not_in: [String]
   all: [String]
+}
+
+input Review_relatedListing_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
 }
 
 input Review_publishedOn_operator {
@@ -8241,7 +9427,6 @@ input Review_rating_operator {
   greater_than: Float
   less_than_equal: Float
   less_than: Float
-  exists: Boolean
 }
 
 input Review_statement_operator {
@@ -8257,17 +9442,6 @@ input Review_user_operator {
   in: [JSON]
   not_in: [JSON]
   all: [JSON]
-  exists: Boolean
-}
-
-input Review_slug_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
   exists: Boolean
 }
 
@@ -8319,12 +9493,12 @@ input Review_id_operator {
 }
 
 input Review_where_and {
-  title: Review_title_operator
+  name: Review_name_operator
+  relatedListing: Review_relatedListing_operator
   publishedOn: Review_publishedOn_operator
   rating: Review_rating_operator
   statement: Review_statement_operator
   user: Review_user_operator
-  slug: Review_slug_operator
   updatedAt: Review_updatedAt_operator
   createdAt: Review_createdAt_operator
   _status: Review__status_operator
@@ -8334,12 +9508,12 @@ input Review_where_and {
 }
 
 input Review_where_or {
-  title: Review_title_operator
+  name: Review_name_operator
+  relatedListing: Review_relatedListing_operator
   publishedOn: Review_publishedOn_operator
   rating: Review_rating_operator
   statement: Review_statement_operator
   user: Review_user_operator
-  slug: Review_slug_operator
   updatedAt: Review_updatedAt_operator
   createdAt: Review_createdAt_operator
   _status: Review__status_operator
@@ -8362,37 +9536,60 @@ type reviewsDocAccess {
 }
 
 type ReviewsDocAccessFields {
-  title: ReviewsDocAccessFields_title
+  name: ReviewsDocAccessFields_name
+  relatedListing: ReviewsDocAccessFields_relatedListing
   publishedOn: ReviewsDocAccessFields_publishedOn
   rating: ReviewsDocAccessFields_rating
   statement: ReviewsDocAccessFields_statement
   user: ReviewsDocAccessFields_user
-  slug: ReviewsDocAccessFields_slug
   updatedAt: ReviewsDocAccessFields_updatedAt
   createdAt: ReviewsDocAccessFields_createdAt
   _status: ReviewsDocAccessFields__status
 }
 
-type ReviewsDocAccessFields_title {
-  create: ReviewsDocAccessFields_title_Create
-  read: ReviewsDocAccessFields_title_Read
-  update: ReviewsDocAccessFields_title_Update
-  delete: ReviewsDocAccessFields_title_Delete
+type ReviewsDocAccessFields_name {
+  create: ReviewsDocAccessFields_name_Create
+  read: ReviewsDocAccessFields_name_Read
+  update: ReviewsDocAccessFields_name_Update
+  delete: ReviewsDocAccessFields_name_Delete
 }
 
-type ReviewsDocAccessFields_title_Create {
+type ReviewsDocAccessFields_name_Create {
   permission: Boolean!
 }
 
-type ReviewsDocAccessFields_title_Read {
+type ReviewsDocAccessFields_name_Read {
   permission: Boolean!
 }
 
-type ReviewsDocAccessFields_title_Update {
+type ReviewsDocAccessFields_name_Update {
   permission: Boolean!
 }
 
-type ReviewsDocAccessFields_title_Delete {
+type ReviewsDocAccessFields_name_Delete {
+  permission: Boolean!
+}
+
+type ReviewsDocAccessFields_relatedListing {
+  create: ReviewsDocAccessFields_relatedListing_Create
+  read: ReviewsDocAccessFields_relatedListing_Read
+  update: ReviewsDocAccessFields_relatedListing_Update
+  delete: ReviewsDocAccessFields_relatedListing_Delete
+}
+
+type ReviewsDocAccessFields_relatedListing_Create {
+  permission: Boolean!
+}
+
+type ReviewsDocAccessFields_relatedListing_Read {
+  permission: Boolean!
+}
+
+type ReviewsDocAccessFields_relatedListing_Update {
+  permission: Boolean!
+}
+
+type ReviewsDocAccessFields_relatedListing_Delete {
   permission: Boolean!
 }
 
@@ -8485,29 +9682,6 @@ type ReviewsDocAccessFields_user_Update {
 }
 
 type ReviewsDocAccessFields_user_Delete {
-  permission: Boolean!
-}
-
-type ReviewsDocAccessFields_slug {
-  create: ReviewsDocAccessFields_slug_Create
-  read: ReviewsDocAccessFields_slug_Read
-  update: ReviewsDocAccessFields_slug_Update
-  delete: ReviewsDocAccessFields_slug_Delete
-}
-
-type ReviewsDocAccessFields_slug_Create {
-  permission: Boolean!
-}
-
-type ReviewsDocAccessFields_slug_Read {
-  permission: Boolean!
-}
-
-type ReviewsDocAccessFields_slug_Update {
-  permission: Boolean!
-}
-
-type ReviewsDocAccessFields_slug_Delete {
   permission: Boolean!
 }
 
@@ -8615,12 +9789,12 @@ type ReviewVersion {
 }
 
 type ReviewVersion_Version {
-  title: String
+  name: String
+  relatedListing(draft: Boolean): Product
   publishedOn: DateTime
   rating: Float
   statement: String
   user: User
-  slug: String
   updatedAt: DateTime
   createdAt: DateTime
   _status: ReviewVersion_Version__status
@@ -8647,12 +9821,12 @@ type versionsReviews {
 
 input versionsReview_where {
   parent: versionsReview_parent_operator
-  version__title: versionsReview_version__title_operator
+  version__name: versionsReview_version__name_operator
+  version__relatedListing: versionsReview_version__relatedListing_operator
   version__publishedOn: versionsReview_version__publishedOn_operator
   version__rating: versionsReview_version__rating_operator
   version__statement: versionsReview_version__statement_operator
   version__user: versionsReview_version__user_operator
-  version__slug: versionsReview_version__slug_operator
   version__updatedAt: versionsReview_version__updatedAt_operator
   version__createdAt: versionsReview_version__createdAt_operator
   version___status: versionsReview_version___status_operator
@@ -8673,7 +9847,7 @@ input versionsReview_parent_operator {
   exists: Boolean
 }
 
-input versionsReview_version__title_operator {
+input versionsReview_version__name_operator {
   equals: String
   not_equals: String
   like: String
@@ -8681,6 +9855,15 @@ input versionsReview_version__title_operator {
   in: [String]
   not_in: [String]
   all: [String]
+}
+
+input versionsReview_version__relatedListing_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
 }
 
 input versionsReview_version__publishedOn_operator {
@@ -8701,7 +9884,6 @@ input versionsReview_version__rating_operator {
   greater_than: Float
   less_than_equal: Float
   less_than: Float
-  exists: Boolean
 }
 
 input versionsReview_version__statement_operator {
@@ -8717,17 +9899,6 @@ input versionsReview_version__user_operator {
   in: [JSON]
   not_in: [JSON]
   all: [JSON]
-  exists: Boolean
-}
-
-input versionsReview_version__slug_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
-  in: [String]
-  not_in: [String]
-  all: [String]
   exists: Boolean
 }
 
@@ -8808,12 +9979,12 @@ input versionsReview_id_operator {
 
 input versionsReview_where_and {
   parent: versionsReview_parent_operator
-  version__title: versionsReview_version__title_operator
+  version__name: versionsReview_version__name_operator
+  version__relatedListing: versionsReview_version__relatedListing_operator
   version__publishedOn: versionsReview_version__publishedOn_operator
   version__rating: versionsReview_version__rating_operator
   version__statement: versionsReview_version__statement_operator
   version__user: versionsReview_version__user_operator
-  version__slug: versionsReview_version__slug_operator
   version__updatedAt: versionsReview_version__updatedAt_operator
   version__createdAt: versionsReview_version__createdAt_operator
   version___status: versionsReview_version___status_operator
@@ -8827,12 +9998,12 @@ input versionsReview_where_and {
 
 input versionsReview_where_or {
   parent: versionsReview_parent_operator
-  version__title: versionsReview_version__title_operator
+  version__name: versionsReview_version__name_operator
+  version__relatedListing: versionsReview_version__relatedListing_operator
   version__publishedOn: versionsReview_version__publishedOn_operator
   version__rating: versionsReview_version__rating_operator
   version__statement: versionsReview_version__statement_operator
   version__user: versionsReview_version__user_operator
-  version__slug: versionsReview_version__slug_operator
   version__updatedAt: versionsReview_version__updatedAt_operator
   version__createdAt: versionsReview_version__createdAt_operator
   version___status: versionsReview_version___status_operator
@@ -8846,11 +10017,13 @@ input versionsReview_where_or {
 
 type Booking {
   id: String
+  type: Booking_type!
+  bookingStatus: Booking_bookingStatus
+  introduction: String
   startDate: DateTime!
   endDate: DateTime!
   product(draft: Boolean): Product!
-  type: Booking_type
-  order: Order
+  invoice: String
   user: User
   updatedAt: DateTime
   createdAt: DateTime
@@ -8859,6 +10032,16 @@ type Booking {
 enum Booking_type {
   blockout
   reservation
+}
+
+enum Booking_bookingStatus {
+  pending
+  initConfirmed
+  partiallyPaid
+  paid
+  cancelled
+  inProgress
+  complete
 }
 
 type Bookings {
@@ -8876,17 +10059,59 @@ type Bookings {
 }
 
 input Booking_where {
+  type: Booking_type_operator
+  bookingStatus: Booking_bookingStatus_operator
+  introduction: Booking_introduction_operator
   startDate: Booking_startDate_operator
   endDate: Booking_endDate_operator
   product: Booking_product_operator
-  type: Booking_type_operator
-  order: Booking_order_operator
+  invoice: Booking_invoice_operator
   user: Booking_user_operator
   updatedAt: Booking_updatedAt_operator
   createdAt: Booking_createdAt_operator
   id: Booking_id_operator
   AND: [Booking_where_and]
   OR: [Booking_where_or]
+}
+
+input Booking_type_operator {
+  equals: Booking_type_Input
+  not_equals: Booking_type_Input
+  in: [Booking_type_Input]
+  not_in: [Booking_type_Input]
+  all: [Booking_type_Input]
+}
+
+enum Booking_type_Input {
+  blockout
+  reservation
+}
+
+input Booking_bookingStatus_operator {
+  equals: Booking_bookingStatus_Input
+  not_equals: Booking_bookingStatus_Input
+  in: [Booking_bookingStatus_Input]
+  not_in: [Booking_bookingStatus_Input]
+  all: [Booking_bookingStatus_Input]
+  exists: Boolean
+}
+
+enum Booking_bookingStatus_Input {
+  pending
+  initConfirmed
+  partiallyPaid
+  paid
+  cancelled
+  inProgress
+  complete
+}
+
+input Booking_introduction_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
 }
 
 input Booking_startDate_operator {
@@ -8917,25 +10142,14 @@ input Booking_product_operator {
   all: [JSON]
 }
 
-input Booking_type_operator {
-  equals: Booking_type_Input
-  not_equals: Booking_type_Input
-  in: [Booking_type_Input]
-  not_in: [Booking_type_Input]
-  all: [Booking_type_Input]
-}
-
-enum Booking_type_Input {
-  blockout
-  reservation
-}
-
-input Booking_order_operator {
-  equals: JSON
-  not_equals: JSON
-  in: [JSON]
-  not_in: [JSON]
-  all: [JSON]
+input Booking_invoice_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -8982,11 +10196,13 @@ input Booking_id_operator {
 }
 
 input Booking_where_and {
+  type: Booking_type_operator
+  bookingStatus: Booking_bookingStatus_operator
+  introduction: Booking_introduction_operator
   startDate: Booking_startDate_operator
   endDate: Booking_endDate_operator
   product: Booking_product_operator
-  type: Booking_type_operator
-  order: Booking_order_operator
+  invoice: Booking_invoice_operator
   user: Booking_user_operator
   updatedAt: Booking_updatedAt_operator
   createdAt: Booking_createdAt_operator
@@ -8996,11 +10212,13 @@ input Booking_where_and {
 }
 
 input Booking_where_or {
+  type: Booking_type_operator
+  bookingStatus: Booking_bookingStatus_operator
+  introduction: Booking_introduction_operator
   startDate: Booking_startDate_operator
   endDate: Booking_endDate_operator
   product: Booking_product_operator
-  type: Booking_type_operator
-  order: Booking_order_operator
+  invoice: Booking_invoice_operator
   user: Booking_user_operator
   updatedAt: Booking_updatedAt_operator
   createdAt: Booking_createdAt_operator
@@ -9022,14 +10240,85 @@ type bookingsDocAccess {
 }
 
 type BookingsDocAccessFields {
+  type: BookingsDocAccessFields_type
+  bookingStatus: BookingsDocAccessFields_bookingStatus
+  introduction: BookingsDocAccessFields_introduction
   startDate: BookingsDocAccessFields_startDate
   endDate: BookingsDocAccessFields_endDate
   product: BookingsDocAccessFields_product
-  type: BookingsDocAccessFields_type
-  order: BookingsDocAccessFields_order
+  invoice: BookingsDocAccessFields_invoice
   user: BookingsDocAccessFields_user
   updatedAt: BookingsDocAccessFields_updatedAt
   createdAt: BookingsDocAccessFields_createdAt
+}
+
+type BookingsDocAccessFields_type {
+  create: BookingsDocAccessFields_type_Create
+  read: BookingsDocAccessFields_type_Read
+  update: BookingsDocAccessFields_type_Update
+  delete: BookingsDocAccessFields_type_Delete
+}
+
+type BookingsDocAccessFields_type_Create {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_type_Read {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_type_Update {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_type_Delete {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_bookingStatus {
+  create: BookingsDocAccessFields_bookingStatus_Create
+  read: BookingsDocAccessFields_bookingStatus_Read
+  update: BookingsDocAccessFields_bookingStatus_Update
+  delete: BookingsDocAccessFields_bookingStatus_Delete
+}
+
+type BookingsDocAccessFields_bookingStatus_Create {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_bookingStatus_Read {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_bookingStatus_Update {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_bookingStatus_Delete {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_introduction {
+  create: BookingsDocAccessFields_introduction_Create
+  read: BookingsDocAccessFields_introduction_Read
+  update: BookingsDocAccessFields_introduction_Update
+  delete: BookingsDocAccessFields_introduction_Delete
+}
+
+type BookingsDocAccessFields_introduction_Create {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_introduction_Read {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_introduction_Update {
+  permission: Boolean!
+}
+
+type BookingsDocAccessFields_introduction_Delete {
+  permission: Boolean!
 }
 
 type BookingsDocAccessFields_startDate {
@@ -9101,49 +10390,26 @@ type BookingsDocAccessFields_product_Delete {
   permission: Boolean!
 }
 
-type BookingsDocAccessFields_type {
-  create: BookingsDocAccessFields_type_Create
-  read: BookingsDocAccessFields_type_Read
-  update: BookingsDocAccessFields_type_Update
-  delete: BookingsDocAccessFields_type_Delete
+type BookingsDocAccessFields_invoice {
+  create: BookingsDocAccessFields_invoice_Create
+  read: BookingsDocAccessFields_invoice_Read
+  update: BookingsDocAccessFields_invoice_Update
+  delete: BookingsDocAccessFields_invoice_Delete
 }
 
-type BookingsDocAccessFields_type_Create {
+type BookingsDocAccessFields_invoice_Create {
   permission: Boolean!
 }
 
-type BookingsDocAccessFields_type_Read {
+type BookingsDocAccessFields_invoice_Read {
   permission: Boolean!
 }
 
-type BookingsDocAccessFields_type_Update {
+type BookingsDocAccessFields_invoice_Update {
   permission: Boolean!
 }
 
-type BookingsDocAccessFields_type_Delete {
-  permission: Boolean!
-}
-
-type BookingsDocAccessFields_order {
-  create: BookingsDocAccessFields_order_Create
-  read: BookingsDocAccessFields_order_Read
-  update: BookingsDocAccessFields_order_Update
-  delete: BookingsDocAccessFields_order_Delete
-}
-
-type BookingsDocAccessFields_order_Create {
-  permission: Boolean!
-}
-
-type BookingsDocAccessFields_order_Read {
-  permission: Boolean!
-}
-
-type BookingsDocAccessFields_order_Update {
-  permission: Boolean!
-}
-
-type BookingsDocAccessFields_order_Delete {
+type BookingsDocAccessFields_invoice_Delete {
   permission: Boolean!
 }
 
@@ -9252,7 +10518,9 @@ type Amenities {
 
 input Amenity_where {
   title: Amenity_title_operator
+  description: Amenity_description_operator
   media: Amenity_media_operator
+  category: Amenity_category_operator
   updatedAt: Amenity_updatedAt_operator
   createdAt: Amenity_createdAt_operator
   id: Amenity_id_operator
@@ -9270,12 +10538,29 @@ input Amenity_title_operator {
   all: [String]
 }
 
+input Amenity_description_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
+}
+
 input Amenity_media_operator {
   equals: JSON
   not_equals: JSON
   in: [JSON]
   not_in: [JSON]
   all: [JSON]
+}
+
+input Amenity_category_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
 }
 
 input Amenity_updatedAt_operator {
@@ -9313,7 +10598,9 @@ input Amenity_id_operator {
 
 input Amenity_where_and {
   title: Amenity_title_operator
+  description: Amenity_description_operator
   media: Amenity_media_operator
+  category: Amenity_category_operator
   updatedAt: Amenity_updatedAt_operator
   createdAt: Amenity_createdAt_operator
   id: Amenity_id_operator
@@ -9323,7 +10610,9 @@ input Amenity_where_and {
 
 input Amenity_where_or {
   title: Amenity_title_operator
+  description: Amenity_description_operator
   media: Amenity_media_operator
+  category: Amenity_category_operator
   updatedAt: Amenity_updatedAt_operator
   createdAt: Amenity_createdAt_operator
   id: Amenity_id_operator
@@ -9345,7 +10634,9 @@ type amenitiesDocAccess {
 
 type AmenitiesDocAccessFields {
   title: AmenitiesDocAccessFields_title
+  description: AmenitiesDocAccessFields_description
   media: AmenitiesDocAccessFields_media
+  category: AmenitiesDocAccessFields_category
   updatedAt: AmenitiesDocAccessFields_updatedAt
   createdAt: AmenitiesDocAccessFields_createdAt
 }
@@ -9373,6 +10664,29 @@ type AmenitiesDocAccessFields_title_Delete {
   permission: Boolean!
 }
 
+type AmenitiesDocAccessFields_description {
+  create: AmenitiesDocAccessFields_description_Create
+  read: AmenitiesDocAccessFields_description_Read
+  update: AmenitiesDocAccessFields_description_Update
+  delete: AmenitiesDocAccessFields_description_Delete
+}
+
+type AmenitiesDocAccessFields_description_Create {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_description_Read {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_description_Update {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_description_Delete {
+  permission: Boolean!
+}
+
 type AmenitiesDocAccessFields_media {
   create: AmenitiesDocAccessFields_media_Create
   read: AmenitiesDocAccessFields_media_Read
@@ -9393,6 +10707,29 @@ type AmenitiesDocAccessFields_media_Update {
 }
 
 type AmenitiesDocAccessFields_media_Delete {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_category {
+  create: AmenitiesDocAccessFields_category_Create
+  read: AmenitiesDocAccessFields_category_Read
+  update: AmenitiesDocAccessFields_category_Update
+  delete: AmenitiesDocAccessFields_category_Delete
+}
+
+type AmenitiesDocAccessFields_category_Create {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_category_Read {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_category_Update {
+  permission: Boolean!
+}
+
+type AmenitiesDocAccessFields_category_Delete {
   permission: Boolean!
 }
 
@@ -9458,6 +10795,239 @@ type AmenitiesUpdateDocAccess {
 }
 
 type AmenitiesDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Faq {
+  id: String
+  title: String!
+  richText(depth: Int): JSON!
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+type Faqs {
+  docs: [Faq]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input Faq_where {
+  title: Faq_title_operator
+  richText: Faq_richText_operator
+  updatedAt: Faq_updatedAt_operator
+  createdAt: Faq_createdAt_operator
+  id: Faq_id_operator
+  AND: [Faq_where_and]
+  OR: [Faq_where_or]
+}
+
+input Faq_title_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input Faq_richText_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+}
+
+input Faq_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Faq_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Faq_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Faq_where_and {
+  title: Faq_title_operator
+  richText: Faq_richText_operator
+  updatedAt: Faq_updatedAt_operator
+  createdAt: Faq_createdAt_operator
+  id: Faq_id_operator
+  AND: [Faq_where_and]
+  OR: [Faq_where_or]
+}
+
+input Faq_where_or {
+  title: Faq_title_operator
+  richText: Faq_richText_operator
+  updatedAt: Faq_updatedAt_operator
+  createdAt: Faq_createdAt_operator
+  id: Faq_id_operator
+  AND: [Faq_where_and]
+  OR: [Faq_where_or]
+}
+
+type countFaqs {
+  totalDocs: Int
+}
+
+type faqsDocAccess {
+  fields: FaqsDocAccessFields
+  create: FaqsCreateDocAccess
+  read: FaqsReadDocAccess
+  update: FaqsUpdateDocAccess
+  delete: FaqsDeleteDocAccess
+}
+
+type FaqsDocAccessFields {
+  title: FaqsDocAccessFields_title
+  richText: FaqsDocAccessFields_richText
+  updatedAt: FaqsDocAccessFields_updatedAt
+  createdAt: FaqsDocAccessFields_createdAt
+}
+
+type FaqsDocAccessFields_title {
+  create: FaqsDocAccessFields_title_Create
+  read: FaqsDocAccessFields_title_Read
+  update: FaqsDocAccessFields_title_Update
+  delete: FaqsDocAccessFields_title_Delete
+}
+
+type FaqsDocAccessFields_title_Create {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_title_Read {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_title_Update {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_title_Delete {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_richText {
+  create: FaqsDocAccessFields_richText_Create
+  read: FaqsDocAccessFields_richText_Read
+  update: FaqsDocAccessFields_richText_Update
+  delete: FaqsDocAccessFields_richText_Delete
+}
+
+type FaqsDocAccessFields_richText_Create {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_richText_Read {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_richText_Update {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_richText_Delete {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_updatedAt {
+  create: FaqsDocAccessFields_updatedAt_Create
+  read: FaqsDocAccessFields_updatedAt_Read
+  update: FaqsDocAccessFields_updatedAt_Update
+  delete: FaqsDocAccessFields_updatedAt_Delete
+}
+
+type FaqsDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_createdAt {
+  create: FaqsDocAccessFields_createdAt_Create
+  read: FaqsDocAccessFields_createdAt_Read
+  update: FaqsDocAccessFields_createdAt_Update
+  delete: FaqsDocAccessFields_createdAt_Delete
+}
+
+type FaqsDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type FaqsDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type FaqsCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type FaqsReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type FaqsUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type FaqsDeleteDocAccess {
   permission: Boolean!
   where: JSONObject
 }
@@ -11316,7 +12886,6 @@ type Settings {
   stripeCleaningFee: String
   stripeCleaningFeeJSON: String
   skipSync: Boolean
-  tax: Float
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -11335,7 +12904,6 @@ type SettingsDocAccessFields {
   stripeCleaningFee: SettingsDocAccessFields_stripeCleaningFee
   stripeCleaningFeeJSON: SettingsDocAccessFields_stripeCleaningFeeJSON
   skipSync: SettingsDocAccessFields_skipSync
-  tax: SettingsDocAccessFields_tax
   updatedAt: SettingsDocAccessFields_updatedAt
   createdAt: SettingsDocAccessFields_createdAt
 }
@@ -11498,29 +13066,6 @@ type SettingsDocAccessFields_skipSync_Update {
 }
 
 type SettingsDocAccessFields_skipSync_Delete {
-  permission: Boolean!
-}
-
-type SettingsDocAccessFields_tax {
-  create: SettingsDocAccessFields_tax_Create
-  read: SettingsDocAccessFields_tax_Read
-  update: SettingsDocAccessFields_tax_Update
-  delete: SettingsDocAccessFields_tax_Delete
-}
-
-type SettingsDocAccessFields_tax_Create {
-  permission: Boolean!
-}
-
-type SettingsDocAccessFields_tax_Read {
-  permission: Boolean!
-}
-
-type SettingsDocAccessFields_tax_Update {
-  permission: Boolean!
-}
-
-type SettingsDocAccessFields_tax_Delete {
   permission: Boolean!
 }
 
@@ -12188,6 +13733,7 @@ type Access {
   canAccessAdmin: Boolean!
   pages: pagesAccess
   products: productsAccess
+  policies: policiesAccess
   orders: ordersAccess
   media: mediaAccess
   categories: categoriesAccess
@@ -12195,6 +13741,7 @@ type Access {
   reviews: reviewsAccess
   bookings: bookingsAccess
   amenities: amenitiesAccess
+  faqs: faqsAccess
   forms: formsAccess
   form_submissions: form_submissionsAccess
   redirects: redirectsAccess
@@ -12848,13 +14395,13 @@ type ProductsFields {
   available: ProductsFields_available
   gallery: ProductsFields_gallery
   productDescription: ProductsFields_productDescription
-  amenities: ProductsFields_amenities
   layout: ProductsFields_layout
   bedroomQuantity: ProductsFields_bedroomQuantity
   bathQuantity: ProductsFields_bathQuantity
   maxGuestQuantity: ProductsFields_maxGuestQuantity
   baseGuestQuantity: ProductsFields_baseGuestQuantity
   priceJSON: ProductsFields_priceJSON
+  features: ProductsFields_features
   enablePaywall: ProductsFields_enablePaywall
   paywall: ProductsFields_paywall
   stripeProductID: ProductsFields_stripeProductID
@@ -13039,81 +14586,6 @@ type ProductsFields_productDescription_Delete {
   permission: Boolean!
 }
 
-type ProductsFields_amenities {
-  create: ProductsFields_amenities_Create
-  read: ProductsFields_amenities_Read
-  update: ProductsFields_amenities_Update
-  delete: ProductsFields_amenities_Delete
-  fields: ProductsFields_amenities_Fields
-}
-
-type ProductsFields_amenities_Create {
-  permission: Boolean!
-}
-
-type ProductsFields_amenities_Read {
-  permission: Boolean!
-}
-
-type ProductsFields_amenities_Update {
-  permission: Boolean!
-}
-
-type ProductsFields_amenities_Delete {
-  permission: Boolean!
-}
-
-type ProductsFields_amenities_Fields {
-  amenity: ProductsFields_amenities_amenity
-  id: ProductsFields_amenities_id
-}
-
-type ProductsFields_amenities_amenity {
-  create: ProductsFields_amenities_amenity_Create
-  read: ProductsFields_amenities_amenity_Read
-  update: ProductsFields_amenities_amenity_Update
-  delete: ProductsFields_amenities_amenity_Delete
-}
-
-type ProductsFields_amenities_amenity_Create {
-  permission: Boolean!
-}
-
-type ProductsFields_amenities_amenity_Read {
-  permission: Boolean!
-}
-
-type ProductsFields_amenities_amenity_Update {
-  permission: Boolean!
-}
-
-type ProductsFields_amenities_amenity_Delete {
-  permission: Boolean!
-}
-
-type ProductsFields_amenities_id {
-  create: ProductsFields_amenities_id_Create
-  read: ProductsFields_amenities_id_Read
-  update: ProductsFields_amenities_id_Update
-  delete: ProductsFields_amenities_id_Delete
-}
-
-type ProductsFields_amenities_id_Create {
-  permission: Boolean!
-}
-
-type ProductsFields_amenities_id_Read {
-  permission: Boolean!
-}
-
-type ProductsFields_amenities_id_Update {
-  permission: Boolean!
-}
-
-type ProductsFields_amenities_id_Delete {
-  permission: Boolean!
-}
-
 type ProductsFields_layout {
   create: ProductsFields_layout_Create
   read: ProductsFields_layout_Read
@@ -13249,6 +14721,29 @@ type ProductsFields_priceJSON_Update {
 }
 
 type ProductsFields_priceJSON_Delete {
+  permission: Boolean!
+}
+
+type ProductsFields_features {
+  create: ProductsFields_features_Create
+  read: ProductsFields_features_Read
+  update: ProductsFields_features_Update
+  delete: ProductsFields_features_Delete
+}
+
+type ProductsFields_features_Create {
+  permission: Boolean!
+}
+
+type ProductsFields_features_Read {
+  permission: Boolean!
+}
+
+type ProductsFields_features_Update {
+  permission: Boolean!
+}
+
+type ProductsFields_features_Delete {
   permission: Boolean!
 }
 
@@ -13918,6 +15413,211 @@ type ProductsDeleteAccess {
 }
 
 type ProductsReadVersionsAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type policiesAccess {
+  fields: PoliciesFields
+  create: PoliciesCreateAccess
+  read: PoliciesReadAccess
+  update: PoliciesUpdateAccess
+  delete: PoliciesDeleteAccess
+  readVersions: PoliciesReadVersionsAccess
+}
+
+type PoliciesFields {
+  title: PoliciesFields_title
+  attachment: PoliciesFields_attachment
+  slug: PoliciesFields_slug
+  body: PoliciesFields_body
+  updatedAt: PoliciesFields_updatedAt
+  createdAt: PoliciesFields_createdAt
+  _status: PoliciesFields__status
+}
+
+type PoliciesFields_title {
+  create: PoliciesFields_title_Create
+  read: PoliciesFields_title_Read
+  update: PoliciesFields_title_Update
+  delete: PoliciesFields_title_Delete
+}
+
+type PoliciesFields_title_Create {
+  permission: Boolean!
+}
+
+type PoliciesFields_title_Read {
+  permission: Boolean!
+}
+
+type PoliciesFields_title_Update {
+  permission: Boolean!
+}
+
+type PoliciesFields_title_Delete {
+  permission: Boolean!
+}
+
+type PoliciesFields_attachment {
+  create: PoliciesFields_attachment_Create
+  read: PoliciesFields_attachment_Read
+  update: PoliciesFields_attachment_Update
+  delete: PoliciesFields_attachment_Delete
+}
+
+type PoliciesFields_attachment_Create {
+  permission: Boolean!
+}
+
+type PoliciesFields_attachment_Read {
+  permission: Boolean!
+}
+
+type PoliciesFields_attachment_Update {
+  permission: Boolean!
+}
+
+type PoliciesFields_attachment_Delete {
+  permission: Boolean!
+}
+
+type PoliciesFields_slug {
+  create: PoliciesFields_slug_Create
+  read: PoliciesFields_slug_Read
+  update: PoliciesFields_slug_Update
+  delete: PoliciesFields_slug_Delete
+}
+
+type PoliciesFields_slug_Create {
+  permission: Boolean!
+}
+
+type PoliciesFields_slug_Read {
+  permission: Boolean!
+}
+
+type PoliciesFields_slug_Update {
+  permission: Boolean!
+}
+
+type PoliciesFields_slug_Delete {
+  permission: Boolean!
+}
+
+type PoliciesFields_body {
+  create: PoliciesFields_body_Create
+  read: PoliciesFields_body_Read
+  update: PoliciesFields_body_Update
+  delete: PoliciesFields_body_Delete
+}
+
+type PoliciesFields_body_Create {
+  permission: Boolean!
+}
+
+type PoliciesFields_body_Read {
+  permission: Boolean!
+}
+
+type PoliciesFields_body_Update {
+  permission: Boolean!
+}
+
+type PoliciesFields_body_Delete {
+  permission: Boolean!
+}
+
+type PoliciesFields_updatedAt {
+  create: PoliciesFields_updatedAt_Create
+  read: PoliciesFields_updatedAt_Read
+  update: PoliciesFields_updatedAt_Update
+  delete: PoliciesFields_updatedAt_Delete
+}
+
+type PoliciesFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PoliciesFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PoliciesFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PoliciesFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PoliciesFields_createdAt {
+  create: PoliciesFields_createdAt_Create
+  read: PoliciesFields_createdAt_Read
+  update: PoliciesFields_createdAt_Update
+  delete: PoliciesFields_createdAt_Delete
+}
+
+type PoliciesFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PoliciesFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PoliciesFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PoliciesFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PoliciesFields__status {
+  create: PoliciesFields__status_Create
+  read: PoliciesFields__status_Read
+  update: PoliciesFields__status_Update
+  delete: PoliciesFields__status_Delete
+}
+
+type PoliciesFields__status_Create {
+  permission: Boolean!
+}
+
+type PoliciesFields__status_Read {
+  permission: Boolean!
+}
+
+type PoliciesFields__status_Update {
+  permission: Boolean!
+}
+
+type PoliciesFields__status_Delete {
+  permission: Boolean!
+}
+
+type PoliciesCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PoliciesReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PoliciesUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PoliciesDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PoliciesReadVersionsAccess {
   permission: Boolean!
   where: JSONObject
 }
@@ -14825,7 +16525,9 @@ type usersAccess {
 }
 
 type UsersFields {
-  name: UsersFields_name
+  firstName: UsersFields_firstName
+  lastName: UsersFields_lastName
+  phone: UsersFields_phone
   roles: UsersFields_roles
   purchases: UsersFields_purchases
   stripeCustomerID: UsersFields_stripeCustomerID
@@ -14837,26 +16539,72 @@ type UsersFields {
   password: UsersFields_password
 }
 
-type UsersFields_name {
-  create: UsersFields_name_Create
-  read: UsersFields_name_Read
-  update: UsersFields_name_Update
-  delete: UsersFields_name_Delete
+type UsersFields_firstName {
+  create: UsersFields_firstName_Create
+  read: UsersFields_firstName_Read
+  update: UsersFields_firstName_Update
+  delete: UsersFields_firstName_Delete
 }
 
-type UsersFields_name_Create {
+type UsersFields_firstName_Create {
   permission: Boolean!
 }
 
-type UsersFields_name_Read {
+type UsersFields_firstName_Read {
   permission: Boolean!
 }
 
-type UsersFields_name_Update {
+type UsersFields_firstName_Update {
   permission: Boolean!
 }
 
-type UsersFields_name_Delete {
+type UsersFields_firstName_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_lastName {
+  create: UsersFields_lastName_Create
+  read: UsersFields_lastName_Read
+  update: UsersFields_lastName_Update
+  delete: UsersFields_lastName_Delete
+}
+
+type UsersFields_lastName_Create {
+  permission: Boolean!
+}
+
+type UsersFields_lastName_Read {
+  permission: Boolean!
+}
+
+type UsersFields_lastName_Update {
+  permission: Boolean!
+}
+
+type UsersFields_lastName_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_phone {
+  create: UsersFields_phone_Create
+  read: UsersFields_phone_Read
+  update: UsersFields_phone_Update
+  delete: UsersFields_phone_Delete
+}
+
+type UsersFields_phone_Create {
+  permission: Boolean!
+}
+
+type UsersFields_phone_Read {
+  permission: Boolean!
+}
+
+type UsersFields_phone_Update {
+  permission: Boolean!
+}
+
+type UsersFields_phone_Delete {
   permission: Boolean!
 }
 
@@ -14954,7 +16702,471 @@ type UsersFields_cart_Delete {
 }
 
 type UsersFields_cart_Fields {
+  coupons: UsersFields_cart_coupons
+  from: UsersFields_cart_from
+  to: UsersFields_cart_to
+  basePrice: UsersFields_cart_basePrice
+  duration: UsersFields_cart_duration
+  product: UsersFields_cart_product
+  listing: UsersFields_cart_listing
+  guestsQuantity: UsersFields_cart_guestsQuantity
+  subtotal: UsersFields_cart_subtotal
+  total: UsersFields_cart_total
+  fees: UsersFields_cart_fees
   items: UsersFields_cart_items
+}
+
+type UsersFields_cart_coupons {
+  create: UsersFields_cart_coupons_Create
+  read: UsersFields_cart_coupons_Read
+  update: UsersFields_cart_coupons_Update
+  delete: UsersFields_cart_coupons_Delete
+  fields: UsersFields_cart_coupons_Fields
+}
+
+type UsersFields_cart_coupons_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_Fields {
+  label: UsersFields_cart_coupons_label
+  couponID: UsersFields_cart_coupons_couponID
+  amount: UsersFields_cart_coupons_amount
+  id: UsersFields_cart_coupons_id
+}
+
+type UsersFields_cart_coupons_label {
+  create: UsersFields_cart_coupons_label_Create
+  read: UsersFields_cart_coupons_label_Read
+  update: UsersFields_cart_coupons_label_Update
+  delete: UsersFields_cart_coupons_label_Delete
+}
+
+type UsersFields_cart_coupons_label_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_label_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_label_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_label_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_couponID {
+  create: UsersFields_cart_coupons_couponID_Create
+  read: UsersFields_cart_coupons_couponID_Read
+  update: UsersFields_cart_coupons_couponID_Update
+  delete: UsersFields_cart_coupons_couponID_Delete
+}
+
+type UsersFields_cart_coupons_couponID_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_couponID_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_couponID_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_couponID_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_amount {
+  create: UsersFields_cart_coupons_amount_Create
+  read: UsersFields_cart_coupons_amount_Read
+  update: UsersFields_cart_coupons_amount_Update
+  delete: UsersFields_cart_coupons_amount_Delete
+}
+
+type UsersFields_cart_coupons_amount_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_amount_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_amount_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_amount_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_id {
+  create: UsersFields_cart_coupons_id_Create
+  read: UsersFields_cart_coupons_id_Read
+  update: UsersFields_cart_coupons_id_Update
+  delete: UsersFields_cart_coupons_id_Delete
+}
+
+type UsersFields_cart_coupons_id_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_id_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_id_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_coupons_id_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_from {
+  create: UsersFields_cart_from_Create
+  read: UsersFields_cart_from_Read
+  update: UsersFields_cart_from_Update
+  delete: UsersFields_cart_from_Delete
+}
+
+type UsersFields_cart_from_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_from_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_from_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_from_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_to {
+  create: UsersFields_cart_to_Create
+  read: UsersFields_cart_to_Read
+  update: UsersFields_cart_to_Update
+  delete: UsersFields_cart_to_Delete
+}
+
+type UsersFields_cart_to_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_to_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_to_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_to_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_basePrice {
+  create: UsersFields_cart_basePrice_Create
+  read: UsersFields_cart_basePrice_Read
+  update: UsersFields_cart_basePrice_Update
+  delete: UsersFields_cart_basePrice_Delete
+}
+
+type UsersFields_cart_basePrice_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_basePrice_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_basePrice_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_basePrice_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_duration {
+  create: UsersFields_cart_duration_Create
+  read: UsersFields_cart_duration_Read
+  update: UsersFields_cart_duration_Update
+  delete: UsersFields_cart_duration_Delete
+}
+
+type UsersFields_cart_duration_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_duration_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_duration_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_duration_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_product {
+  create: UsersFields_cart_product_Create
+  read: UsersFields_cart_product_Read
+  update: UsersFields_cart_product_Update
+  delete: UsersFields_cart_product_Delete
+}
+
+type UsersFields_cart_product_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_product_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_product_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_product_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_listing {
+  create: UsersFields_cart_listing_Create
+  read: UsersFields_cart_listing_Read
+  update: UsersFields_cart_listing_Update
+  delete: UsersFields_cart_listing_Delete
+}
+
+type UsersFields_cart_listing_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_listing_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_listing_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_listing_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_guestsQuantity {
+  create: UsersFields_cart_guestsQuantity_Create
+  read: UsersFields_cart_guestsQuantity_Read
+  update: UsersFields_cart_guestsQuantity_Update
+  delete: UsersFields_cart_guestsQuantity_Delete
+}
+
+type UsersFields_cart_guestsQuantity_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_guestsQuantity_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_guestsQuantity_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_guestsQuantity_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_subtotal {
+  create: UsersFields_cart_subtotal_Create
+  read: UsersFields_cart_subtotal_Read
+  update: UsersFields_cart_subtotal_Update
+  delete: UsersFields_cart_subtotal_Delete
+}
+
+type UsersFields_cart_subtotal_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_subtotal_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_subtotal_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_subtotal_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_total {
+  create: UsersFields_cart_total_Create
+  read: UsersFields_cart_total_Read
+  update: UsersFields_cart_total_Update
+  delete: UsersFields_cart_total_Delete
+}
+
+type UsersFields_cart_total_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_total_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_total_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_total_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees {
+  create: UsersFields_cart_fees_Create
+  read: UsersFields_cart_fees_Read
+  update: UsersFields_cart_fees_Update
+  delete: UsersFields_cart_fees_Delete
+  fields: UsersFields_cart_fees_Fields
+}
+
+type UsersFields_cart_fees_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_Fields {
+  label: UsersFields_cart_fees_label
+  priceID: UsersFields_cart_fees_priceID
+  total: UsersFields_cart_fees_total
+  id: UsersFields_cart_fees_id
+}
+
+type UsersFields_cart_fees_label {
+  create: UsersFields_cart_fees_label_Create
+  read: UsersFields_cart_fees_label_Read
+  update: UsersFields_cart_fees_label_Update
+  delete: UsersFields_cart_fees_label_Delete
+}
+
+type UsersFields_cart_fees_label_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_label_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_label_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_label_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_priceID {
+  create: UsersFields_cart_fees_priceID_Create
+  read: UsersFields_cart_fees_priceID_Read
+  update: UsersFields_cart_fees_priceID_Update
+  delete: UsersFields_cart_fees_priceID_Delete
+}
+
+type UsersFields_cart_fees_priceID_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_priceID_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_priceID_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_priceID_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_total {
+  create: UsersFields_cart_fees_total_Create
+  read: UsersFields_cart_fees_total_Read
+  update: UsersFields_cart_fees_total_Update
+  delete: UsersFields_cart_fees_total_Delete
+}
+
+type UsersFields_cart_fees_total_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_total_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_total_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_total_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_id {
+  create: UsersFields_cart_fees_id_Create
+  read: UsersFields_cart_fees_id_Read
+  update: UsersFields_cart_fees_id_Update
+  delete: UsersFields_cart_fees_id_Delete
+}
+
+type UsersFields_cart_fees_id_Create {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_id_Read {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_id_Update {
+  permission: Boolean!
+}
+
+type UsersFields_cart_fees_id_Delete {
+  permission: Boolean!
 }
 
 type UsersFields_cart_items {
@@ -14985,10 +17197,7 @@ type UsersFields_cart_items_Fields {
   product: UsersFields_cart_items_product
   stripeProductID: UsersFields_cart_items_stripeProductID
   priceID: UsersFields_cart_items_priceID
-  guestsQuantity: UsersFields_cart_items_guestsQuantity
   quantity: UsersFields_cart_items_quantity
-  from: UsersFields_cart_items_from
-  to: UsersFields_cart_items_to
   id: UsersFields_cart_items_id
 }
 
@@ -15061,29 +17270,6 @@ type UsersFields_cart_items_priceID_Delete {
   permission: Boolean!
 }
 
-type UsersFields_cart_items_guestsQuantity {
-  create: UsersFields_cart_items_guestsQuantity_Create
-  read: UsersFields_cart_items_guestsQuantity_Read
-  update: UsersFields_cart_items_guestsQuantity_Update
-  delete: UsersFields_cart_items_guestsQuantity_Delete
-}
-
-type UsersFields_cart_items_guestsQuantity_Create {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_guestsQuantity_Read {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_guestsQuantity_Update {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_guestsQuantity_Delete {
-  permission: Boolean!
-}
-
 type UsersFields_cart_items_quantity {
   create: UsersFields_cart_items_quantity_Create
   read: UsersFields_cart_items_quantity_Read
@@ -15104,52 +17290,6 @@ type UsersFields_cart_items_quantity_Update {
 }
 
 type UsersFields_cart_items_quantity_Delete {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_from {
-  create: UsersFields_cart_items_from_Create
-  read: UsersFields_cart_items_from_Read
-  update: UsersFields_cart_items_from_Update
-  delete: UsersFields_cart_items_from_Delete
-}
-
-type UsersFields_cart_items_from_Create {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_from_Read {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_from_Update {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_from_Delete {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_to {
-  create: UsersFields_cart_items_to_Create
-  read: UsersFields_cart_items_to_Read
-  update: UsersFields_cart_items_to_Update
-  delete: UsersFields_cart_items_to_Delete
-}
-
-type UsersFields_cart_items_to_Create {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_to_Read {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_to_Update {
-  permission: Boolean!
-}
-
-type UsersFields_cart_items_to_Delete {
   permission: Boolean!
 }
 
@@ -15326,37 +17466,60 @@ type reviewsAccess {
 }
 
 type ReviewsFields {
-  title: ReviewsFields_title
+  name: ReviewsFields_name
+  relatedListing: ReviewsFields_relatedListing
   publishedOn: ReviewsFields_publishedOn
   rating: ReviewsFields_rating
   statement: ReviewsFields_statement
   user: ReviewsFields_user
-  slug: ReviewsFields_slug
   updatedAt: ReviewsFields_updatedAt
   createdAt: ReviewsFields_createdAt
   _status: ReviewsFields__status
 }
 
-type ReviewsFields_title {
-  create: ReviewsFields_title_Create
-  read: ReviewsFields_title_Read
-  update: ReviewsFields_title_Update
-  delete: ReviewsFields_title_Delete
+type ReviewsFields_name {
+  create: ReviewsFields_name_Create
+  read: ReviewsFields_name_Read
+  update: ReviewsFields_name_Update
+  delete: ReviewsFields_name_Delete
 }
 
-type ReviewsFields_title_Create {
+type ReviewsFields_name_Create {
   permission: Boolean!
 }
 
-type ReviewsFields_title_Read {
+type ReviewsFields_name_Read {
   permission: Boolean!
 }
 
-type ReviewsFields_title_Update {
+type ReviewsFields_name_Update {
   permission: Boolean!
 }
 
-type ReviewsFields_title_Delete {
+type ReviewsFields_name_Delete {
+  permission: Boolean!
+}
+
+type ReviewsFields_relatedListing {
+  create: ReviewsFields_relatedListing_Create
+  read: ReviewsFields_relatedListing_Read
+  update: ReviewsFields_relatedListing_Update
+  delete: ReviewsFields_relatedListing_Delete
+}
+
+type ReviewsFields_relatedListing_Create {
+  permission: Boolean!
+}
+
+type ReviewsFields_relatedListing_Read {
+  permission: Boolean!
+}
+
+type ReviewsFields_relatedListing_Update {
+  permission: Boolean!
+}
+
+type ReviewsFields_relatedListing_Delete {
   permission: Boolean!
 }
 
@@ -15449,29 +17612,6 @@ type ReviewsFields_user_Update {
 }
 
 type ReviewsFields_user_Delete {
-  permission: Boolean!
-}
-
-type ReviewsFields_slug {
-  create: ReviewsFields_slug_Create
-  read: ReviewsFields_slug_Read
-  update: ReviewsFields_slug_Update
-  delete: ReviewsFields_slug_Delete
-}
-
-type ReviewsFields_slug_Create {
-  permission: Boolean!
-}
-
-type ReviewsFields_slug_Read {
-  permission: Boolean!
-}
-
-type ReviewsFields_slug_Update {
-  permission: Boolean!
-}
-
-type ReviewsFields_slug_Delete {
   permission: Boolean!
 }
 
@@ -15578,14 +17718,85 @@ type bookingsAccess {
 }
 
 type BookingsFields {
+  type: BookingsFields_type
+  bookingStatus: BookingsFields_bookingStatus
+  introduction: BookingsFields_introduction
   startDate: BookingsFields_startDate
   endDate: BookingsFields_endDate
   product: BookingsFields_product
-  type: BookingsFields_type
-  order: BookingsFields_order
+  invoice: BookingsFields_invoice
   user: BookingsFields_user
   updatedAt: BookingsFields_updatedAt
   createdAt: BookingsFields_createdAt
+}
+
+type BookingsFields_type {
+  create: BookingsFields_type_Create
+  read: BookingsFields_type_Read
+  update: BookingsFields_type_Update
+  delete: BookingsFields_type_Delete
+}
+
+type BookingsFields_type_Create {
+  permission: Boolean!
+}
+
+type BookingsFields_type_Read {
+  permission: Boolean!
+}
+
+type BookingsFields_type_Update {
+  permission: Boolean!
+}
+
+type BookingsFields_type_Delete {
+  permission: Boolean!
+}
+
+type BookingsFields_bookingStatus {
+  create: BookingsFields_bookingStatus_Create
+  read: BookingsFields_bookingStatus_Read
+  update: BookingsFields_bookingStatus_Update
+  delete: BookingsFields_bookingStatus_Delete
+}
+
+type BookingsFields_bookingStatus_Create {
+  permission: Boolean!
+}
+
+type BookingsFields_bookingStatus_Read {
+  permission: Boolean!
+}
+
+type BookingsFields_bookingStatus_Update {
+  permission: Boolean!
+}
+
+type BookingsFields_bookingStatus_Delete {
+  permission: Boolean!
+}
+
+type BookingsFields_introduction {
+  create: BookingsFields_introduction_Create
+  read: BookingsFields_introduction_Read
+  update: BookingsFields_introduction_Update
+  delete: BookingsFields_introduction_Delete
+}
+
+type BookingsFields_introduction_Create {
+  permission: Boolean!
+}
+
+type BookingsFields_introduction_Read {
+  permission: Boolean!
+}
+
+type BookingsFields_introduction_Update {
+  permission: Boolean!
+}
+
+type BookingsFields_introduction_Delete {
+  permission: Boolean!
 }
 
 type BookingsFields_startDate {
@@ -15657,49 +17868,26 @@ type BookingsFields_product_Delete {
   permission: Boolean!
 }
 
-type BookingsFields_type {
-  create: BookingsFields_type_Create
-  read: BookingsFields_type_Read
-  update: BookingsFields_type_Update
-  delete: BookingsFields_type_Delete
+type BookingsFields_invoice {
+  create: BookingsFields_invoice_Create
+  read: BookingsFields_invoice_Read
+  update: BookingsFields_invoice_Update
+  delete: BookingsFields_invoice_Delete
 }
 
-type BookingsFields_type_Create {
+type BookingsFields_invoice_Create {
   permission: Boolean!
 }
 
-type BookingsFields_type_Read {
+type BookingsFields_invoice_Read {
   permission: Boolean!
 }
 
-type BookingsFields_type_Update {
+type BookingsFields_invoice_Update {
   permission: Boolean!
 }
 
-type BookingsFields_type_Delete {
-  permission: Boolean!
-}
-
-type BookingsFields_order {
-  create: BookingsFields_order_Create
-  read: BookingsFields_order_Read
-  update: BookingsFields_order_Update
-  delete: BookingsFields_order_Delete
-}
-
-type BookingsFields_order_Create {
-  permission: Boolean!
-}
-
-type BookingsFields_order_Read {
-  permission: Boolean!
-}
-
-type BookingsFields_order_Update {
-  permission: Boolean!
-}
-
-type BookingsFields_order_Delete {
+type BookingsFields_invoice_Delete {
   permission: Boolean!
 }
 
@@ -15802,7 +17990,9 @@ type amenitiesAccess {
 
 type AmenitiesFields {
   title: AmenitiesFields_title
+  description: AmenitiesFields_description
   media: AmenitiesFields_media
+  category: AmenitiesFields_category
   updatedAt: AmenitiesFields_updatedAt
   createdAt: AmenitiesFields_createdAt
 }
@@ -15830,6 +18020,29 @@ type AmenitiesFields_title_Delete {
   permission: Boolean!
 }
 
+type AmenitiesFields_description {
+  create: AmenitiesFields_description_Create
+  read: AmenitiesFields_description_Read
+  update: AmenitiesFields_description_Update
+  delete: AmenitiesFields_description_Delete
+}
+
+type AmenitiesFields_description_Create {
+  permission: Boolean!
+}
+
+type AmenitiesFields_description_Read {
+  permission: Boolean!
+}
+
+type AmenitiesFields_description_Update {
+  permission: Boolean!
+}
+
+type AmenitiesFields_description_Delete {
+  permission: Boolean!
+}
+
 type AmenitiesFields_media {
   create: AmenitiesFields_media_Create
   read: AmenitiesFields_media_Read
@@ -15850,6 +18063,29 @@ type AmenitiesFields_media_Update {
 }
 
 type AmenitiesFields_media_Delete {
+  permission: Boolean!
+}
+
+type AmenitiesFields_category {
+  create: AmenitiesFields_category_Create
+  read: AmenitiesFields_category_Read
+  update: AmenitiesFields_category_Update
+  delete: AmenitiesFields_category_Delete
+}
+
+type AmenitiesFields_category_Create {
+  permission: Boolean!
+}
+
+type AmenitiesFields_category_Read {
+  permission: Boolean!
+}
+
+type AmenitiesFields_category_Update {
+  permission: Boolean!
+}
+
+type AmenitiesFields_category_Delete {
   permission: Boolean!
 }
 
@@ -15915,6 +18151,133 @@ type AmenitiesUpdateAccess {
 }
 
 type AmenitiesDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type faqsAccess {
+  fields: FaqsFields
+  create: FaqsCreateAccess
+  read: FaqsReadAccess
+  update: FaqsUpdateAccess
+  delete: FaqsDeleteAccess
+}
+
+type FaqsFields {
+  title: FaqsFields_title
+  richText: FaqsFields_richText
+  updatedAt: FaqsFields_updatedAt
+  createdAt: FaqsFields_createdAt
+}
+
+type FaqsFields_title {
+  create: FaqsFields_title_Create
+  read: FaqsFields_title_Read
+  update: FaqsFields_title_Update
+  delete: FaqsFields_title_Delete
+}
+
+type FaqsFields_title_Create {
+  permission: Boolean!
+}
+
+type FaqsFields_title_Read {
+  permission: Boolean!
+}
+
+type FaqsFields_title_Update {
+  permission: Boolean!
+}
+
+type FaqsFields_title_Delete {
+  permission: Boolean!
+}
+
+type FaqsFields_richText {
+  create: FaqsFields_richText_Create
+  read: FaqsFields_richText_Read
+  update: FaqsFields_richText_Update
+  delete: FaqsFields_richText_Delete
+}
+
+type FaqsFields_richText_Create {
+  permission: Boolean!
+}
+
+type FaqsFields_richText_Read {
+  permission: Boolean!
+}
+
+type FaqsFields_richText_Update {
+  permission: Boolean!
+}
+
+type FaqsFields_richText_Delete {
+  permission: Boolean!
+}
+
+type FaqsFields_updatedAt {
+  create: FaqsFields_updatedAt_Create
+  read: FaqsFields_updatedAt_Read
+  update: FaqsFields_updatedAt_Update
+  delete: FaqsFields_updatedAt_Delete
+}
+
+type FaqsFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type FaqsFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type FaqsFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type FaqsFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type FaqsFields_createdAt {
+  create: FaqsFields_createdAt_Create
+  read: FaqsFields_createdAt_Read
+  update: FaqsFields_createdAt_Update
+  delete: FaqsFields_createdAt_Delete
+}
+
+type FaqsFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type FaqsFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type FaqsFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type FaqsFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type FaqsCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type FaqsReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type FaqsUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type FaqsDeleteAccess {
   permission: Boolean!
   where: JSONObject
 }
@@ -16961,7 +19324,6 @@ type SettingsFields {
   stripeCleaningFee: SettingsFields_stripeCleaningFee
   stripeCleaningFeeJSON: SettingsFields_stripeCleaningFeeJSON
   skipSync: SettingsFields_skipSync
-  tax: SettingsFields_tax
   updatedAt: SettingsFields_updatedAt
   createdAt: SettingsFields_createdAt
 }
@@ -17124,29 +19486,6 @@ type SettingsFields_skipSync_Update {
 }
 
 type SettingsFields_skipSync_Delete {
-  permission: Boolean!
-}
-
-type SettingsFields_tax {
-  create: SettingsFields_tax_Create
-  read: SettingsFields_tax_Read
-  update: SettingsFields_tax_Update
-  delete: SettingsFields_tax_Delete
-}
-
-type SettingsFields_tax_Create {
-  permission: Boolean!
-}
-
-type SettingsFields_tax_Read {
-  permission: Boolean!
-}
-
-type SettingsFields_tax_Update {
-  permission: Boolean!
-}
-
-type SettingsFields_tax_Delete {
   permission: Boolean!
 }
 
@@ -17749,6 +20088,10 @@ type Mutation {
   updateProduct(id: String!, autosave: Boolean, data: mutationProductUpdateInput!, draft: Boolean): Product
   deleteProduct(id: String!): Product
   restoreVersionProduct(id: String): Product
+  createPolicy(data: mutationPolicyInput!, draft: Boolean): Policy
+  updatePolicy(id: String!, autosave: Boolean, data: mutationPolicyUpdateInput!, draft: Boolean): Policy
+  deletePolicy(id: String!): Policy
+  restoreVersionPolicy(id: String): Policy
   createOrder(data: mutationOrderInput!): Order
   updateOrder(id: String!, autosave: Boolean, data: mutationOrderUpdateInput!): Order
   deleteOrder(id: String!): Order
@@ -17778,6 +20121,9 @@ type Mutation {
   createAmenity(data: mutationAmenityInput!): Amenity
   updateAmenity(id: String!, autosave: Boolean, data: mutationAmenityUpdateInput!): Amenity
   deleteAmenity(id: String!): Amenity
+  createFaq(data: mutationFaqInput!): Faq
+  updateFaq(id: String!, autosave: Boolean, data: mutationFaqUpdateInput!): Faq
+  deleteFaq(id: String!): Faq
   createForm(data: mutationFormInput!): Form
   updateForm(id: String!, autosave: Boolean, data: mutationFormUpdateInput!): Form
   deleteForm(id: String!): Form
@@ -17935,13 +20281,13 @@ input mutationProductInput {
   available: Boolean
   gallery: [mutationProduct_GalleryInput]
   productDescription: JSON!
-  amenities: [mutationProduct_AmenitiesInput]
   layout: JSON
   bedroomQuantity: Float!
   bathQuantity: Float!
   maxGuestQuantity: Float!
   baseGuestQuantity: Float!
   priceJSON: String
+  features: [String]
   enablePaywall: Boolean
   paywall: JSON
   stripeProductID: String
@@ -17961,11 +20307,6 @@ input mutationProductInput {
 
 input mutationProduct_GalleryInput {
   media: String!
-  id: String
-}
-
-input mutationProduct_AmenitiesInput {
-  amenity: String
   id: String
 }
 
@@ -18001,13 +20342,13 @@ input mutationProductUpdateInput {
   available: Boolean
   gallery: [mutationProductUpdate_GalleryInput]
   productDescription: JSON
-  amenities: [mutationProductUpdate_AmenitiesInput]
   layout: JSON
   bedroomQuantity: Float
   bathQuantity: Float
   maxGuestQuantity: Float
   baseGuestQuantity: Float
   priceJSON: String
+  features: [String]
   enablePaywall: Boolean
   paywall: JSON
   stripeProductID: String
@@ -18027,11 +20368,6 @@ input mutationProductUpdateInput {
 
 input mutationProductUpdate_GalleryInput {
   media: String!
-  id: String
-}
-
-input mutationProductUpdate_AmenitiesInput {
-  amenity: String
   id: String
 }
 
@@ -18057,6 +20393,36 @@ input mutationProductUpdate_MetaInput {
 }
 
 enum ProductUpdate__status_MutationInput {
+  draft
+  published
+}
+
+input mutationPolicyInput {
+  title: String!
+  attachment: String
+  slug: String
+  body: JSON
+  updatedAt: String
+  createdAt: String
+  _status: Policy__status_MutationInput
+}
+
+enum Policy__status_MutationInput {
+  draft
+  published
+}
+
+input mutationPolicyUpdateInput {
+  title: String
+  attachment: String
+  slug: String
+  body: JSON
+  updatedAt: String
+  createdAt: String
+  _status: PolicyUpdate__status_MutationInput
+}
+
+enum PolicyUpdate__status_MutationInput {
   draft
   published
 }
@@ -18158,7 +20524,9 @@ input mutationCategoryUpdate_BreadcrumbsInput {
 }
 
 input mutationUserInput {
-  name: String
+  firstName: String
+  lastName: String
+  phone: String
   roles: [User_roles_MutationInput]
   purchases: [String]
   stripeCustomerID: String
@@ -18182,22 +20550,46 @@ enum User_roles_MutationInput {
 }
 
 input mutationUser_CartInput {
+  coupons: [mutationUser_Cart_CouponsInput]
+  from: String
+  to: String
+  basePrice: Float
+  duration: Float
+  product: String
+  listing: String
+  guestsQuantity: Float
+  subtotal: Float
+  total: Float
+  fees: [mutationUser_Cart_FeesInput]
   items: [mutationUser_Cart_ItemsInput]
+}
+
+input mutationUser_Cart_CouponsInput {
+  label: String
+  couponID: String!
+  amount: Float
+  id: String
+}
+
+input mutationUser_Cart_FeesInput {
+  label: String
+  priceID: String
+  total: Float
+  id: String
 }
 
 input mutationUser_Cart_ItemsInput {
   product: String
   stripeProductID: String
   priceID: String!
-  guestsQuantity: Float
   quantity: Float
-  from: String!
-  to: String!
   id: String
 }
 
 input mutationUserUpdateInput {
-  name: String
+  firstName: String
+  lastName: String
+  phone: String
   roles: [UserUpdate_roles_MutationInput]
   purchases: [String]
   stripeCustomerID: String
@@ -18221,17 +20613,39 @@ enum UserUpdate_roles_MutationInput {
 }
 
 input mutationUserUpdate_CartInput {
+  coupons: [mutationUserUpdate_Cart_CouponsInput]
+  from: String
+  to: String
+  basePrice: Float
+  duration: Float
+  product: String
+  listing: String
+  guestsQuantity: Float
+  subtotal: Float
+  total: Float
+  fees: [mutationUserUpdate_Cart_FeesInput]
   items: [mutationUserUpdate_Cart_ItemsInput]
+}
+
+input mutationUserUpdate_Cart_CouponsInput {
+  label: String
+  couponID: String!
+  amount: Float
+  id: String
+}
+
+input mutationUserUpdate_Cart_FeesInput {
+  label: String
+  priceID: String
+  total: Float
+  id: String
 }
 
 input mutationUserUpdate_Cart_ItemsInput {
   product: String
   stripeProductID: String
   priceID: String!
-  guestsQuantity: Float
   quantity: Float
-  from: String!
-  to: String!
   id: String
 }
 
@@ -18259,12 +20673,12 @@ type usersResetPassword {
 }
 
 input mutationReviewInput {
-  title: String!
+  name: String!
+  relatedListing: String
   publishedOn: String
-  rating: Float
+  rating: Float!
   statement: String!
   user: String
-  slug: String
   updatedAt: String
   createdAt: String
   _status: Review__status_MutationInput
@@ -18276,12 +20690,12 @@ enum Review__status_MutationInput {
 }
 
 input mutationReviewUpdateInput {
-  title: String
+  name: String
+  relatedListing: String
   publishedOn: String
   rating: Float
   statement: String
   user: String
-  slug: String
   updatedAt: String
   createdAt: String
   _status: ReviewUpdate__status_MutationInput
@@ -18293,11 +20707,13 @@ enum ReviewUpdate__status_MutationInput {
 }
 
 input mutationBookingInput {
+  type: Booking_type_MutationInput!
+  bookingStatus: Booking_bookingStatus_MutationInput
+  introduction: String
   startDate: String!
   endDate: String!
   product: String
-  type: Booking_type_MutationInput
-  order: String
+  invoice: String
   user: String
   updatedAt: String
   createdAt: String
@@ -18308,12 +20724,24 @@ enum Booking_type_MutationInput {
   reservation
 }
 
+enum Booking_bookingStatus_MutationInput {
+  pending
+  initConfirmed
+  partiallyPaid
+  paid
+  cancelled
+  inProgress
+  complete
+}
+
 input mutationBookingUpdateInput {
+  type: BookingUpdate_type_MutationInput
+  bookingStatus: BookingUpdate_bookingStatus_MutationInput
+  introduction: String
   startDate: String
   endDate: String
   product: String
-  type: BookingUpdate_type_MutationInput
-  order: String
+  invoice: String
   user: String
   updatedAt: String
   createdAt: String
@@ -18324,16 +20752,44 @@ enum BookingUpdate_type_MutationInput {
   reservation
 }
 
+enum BookingUpdate_bookingStatus_MutationInput {
+  pending
+  initConfirmed
+  partiallyPaid
+  paid
+  cancelled
+  inProgress
+  complete
+}
+
 input mutationAmenityInput {
   title: String!
+  description: String
   media: String
+  category: [String]
   updatedAt: String
   createdAt: String
 }
 
 input mutationAmenityUpdateInput {
   title: String
+  description: String
   media: String
+  category: [String]
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationFaqInput {
+  title: String!
+  richText: JSON!
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationFaqUpdateInput {
+  title: String
+  richText: JSON
   updatedAt: String
   createdAt: String
 }
@@ -18506,7 +20962,6 @@ input mutationSettingsInput {
   stripeCleaningFee: String
   stripeCleaningFeeJSON: String
   skipSync: Boolean
-  tax: Float
   updatedAt: String
   createdAt: String
 }

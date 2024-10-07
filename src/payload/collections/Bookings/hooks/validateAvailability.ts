@@ -3,6 +3,8 @@ import { APIError } from 'payload/errors'
 import type { CollectionBeforeChangeHook, FieldHook } from 'payload/types'
 
 import type { Booking, Product } from '../../../payload-types'
+import { UTCDate } from '@date-fns/utc'
+import { endOfDay, startOfDay } from 'date-fns'
 
 interface Conflict {
   id1: string
@@ -17,8 +19,8 @@ interface Season {
 }
 export const validateAvailability: CollectionBeforeChangeHook<Booking> = async ({
   data, // incoming data to update or create with
-  req, // full express request
-  originalDoc,
+  req, // full expre
+  originalDoc
 }) => {
   const hasValidDateRange = validateDateRange(new Date(data.startDate), new Date(data.endDate))
   if (!hasValidDateRange.isValid) {
@@ -40,8 +42,10 @@ export const validateAvailability: CollectionBeforeChangeHook<Booking> = async (
         },
         {
           id: {
-            not_equals: originalDoc.id,
-          },
+            not_equals: originalDoc?.id
+          }
+        },
+        {
           startDate: {
             less_than_equal: data.endDate,
           },
@@ -54,12 +58,12 @@ export const validateAvailability: CollectionBeforeChangeHook<Booking> = async (
   })
   const conflicts = getConflicts(data, p.docs)
   if (!p || p.totalDocs === 0 || !conflicts) return data
-  if (conflicts) {
+  if (conflicts.length) {
     throw new APIError(
-      `Scheduling conflict with booking ID(s): ${conflicts.map(c => c.id)}`,
+      `Scheduling conflict with an existing booking: ${conflicts.map(c => c.id)}`,
       409,
       { data, conflicts },
-      true,
+      false,
     )
   }
   return data // Return data to either create or update a document with
@@ -79,13 +83,17 @@ export const validateAvailability: CollectionBeforeChangeHook<Booking> = async (
 function getConflicts(newBooking: Partial<Booking>, existingBookings: Booking[]): Booking[] {
   const conflicts: Booking[] = []
   const curr = {
-    startDate: new Date(newBooking.startDate),
-    endDate: new Date(newBooking.endDate),
+    startDate: startOfDay(new Date(newBooking.startDate)),
+    endDate: startOfDay(new Date(newBooking.endDate)),
   }
   for (const existingBooking of existingBookings) {
+    console.log(existingBooking, curr,
+      curr.startDate > startOfDay(new UTCDate(existingBooking.endDate)),
+      curr.endDate <= startOfDay(new UTCDate(existingBooking.startDate))
+    )
     const isValid =
-      curr.startDate >= new Date(existingBooking.endDate) ||
-      curr.endDate <= new Date(existingBooking.startDate)
+      curr.startDate >= startOfDay(new Date(existingBooking.endDate)) ||
+      curr.endDate <= startOfDay(new Date(existingBooking.startDate))
 
     if (!isValid) {
       conflicts.push(existingBooking)

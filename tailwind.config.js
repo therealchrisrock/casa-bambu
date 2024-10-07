@@ -11,6 +11,16 @@ export default {
       },
     },
     extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: '75ch',
+            h1: {
+              marginBottom: 0,
+            },
+          },
+        },
+      },
       fontFamily: {
         sans: [
           'var(--font-sans)',

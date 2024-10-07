@@ -54,7 +54,7 @@ export const ProductSelect: React.FC<TextField> = props => {
   }products/${stripeProductID}`
 
   return (
-    <div style={{paddingBottom: '12px'}}>
+    <div style={{ paddingBottom: '12px' }}>
       <p style={{ marginBottom: '0' }}>{typeof label === 'string' ? label : 'Product'}</p>
       <p
         style={{
@@ -88,7 +88,7 @@ export const ProductSelect: React.FC<TextField> = props => {
               className="label"
               style={{
                 color: '#9A9A9A',
-                paddingTop: '12px'
+                paddingTop: '12px',
               }}
             >
               {`Manage "${
@@ -119,5 +119,3 @@ export const ProductSelect: React.FC<TextField> = props => {
     </div>
   )
 }
-
-

@@ -25,8 +25,8 @@ export const couponsProxy: PayloadHandler = async (req: PayloadRequest, res) => 
       limit: 100,
     });
     if (!coupons) {
-      if (logs) req.payload.logger.error({ err: `No Product price information found from stripe for ${pid}` })
-      res.status(404).json({ error: `No Product price information found from stripe for ${pid}` })
+      if (logs) req.payload.logger.error({ err: `No Product price information found from stripe` })
+      res.status(404).json({ error: `No Product price information found from stripe` })
       return
     }
     res.status(200).json(coupons)

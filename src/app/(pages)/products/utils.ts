@@ -1,5 +1,4 @@
-import type { DateRange } from 'react-day-picker'
-import type { DateAfter, DateBefore, Matcher } from 'react-day-picker/src'
+import type { DateAfter, DateBefore, DateRange, Matcher } from 'react-day-picker'
 import { addDays, differenceInDays } from 'date-fns'
 
 import type { Booking, Settings } from '../../../payload/payload-types'
@@ -7,7 +6,7 @@ import type { Booking, Settings } from '../../../payload/payload-types'
 export const DEFAULT_MIN_DAYS = 5
 export const DEFAULT_LAST_BOOKING_DATE = 365 // Bookings must be made within 1 year of the present day
 export function getSettings(settings: Settings): Settings {
-  if (!settings?.advancedBookingLimit) settings.advancedBookingLimit = DEFAULT_LAST_BOOKING_DATE;
+  if (!settings?.advancedBookingLimit) settings.advancedBookingLimit = DEFAULT_LAST_BOOKING_DATE
   if (!settings?.minBooking) settings.minBooking = DEFAULT_MIN_DAYS
   return settings
 }
@@ -16,11 +15,9 @@ export function findFirstAvailableDateRange(
   minDays = DEFAULT_MIN_DAYS,
   lastAvailableBookingDate: number = DEFAULT_LAST_BOOKING_DATE,
 ): DateRange | null {
-  // Sort bookings by startDate
   const sortedBookings = bookings
     .filter(b => new Date(b.endDate) >= new Date()) // Ignore bookings that are entirely in the past
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-
   const today = addDays(new Date(), 1)
   const maxBookingDate = addDays(today, lastAvailableBookingDate)
 
@@ -29,7 +26,7 @@ export function findFirstAvailableDateRange(
     sortedBookings.length === 0 ||
     differenceInDays(new Date(sortedBookings[0].startDate), today) >= minDays
   ) {
-    const potentialEndDate = addDays(today, minDays - 1)
+    const potentialEndDate = addDays(today, minDays)
     if (potentialEndDate <= maxBookingDate) {
       return {
         from: today,
@@ -40,7 +37,7 @@ export function findFirstAvailableDateRange(
     }
   }
 
-  // Check for gaps between bookings, allowing new bookings to start on the endDate of the previous booking
+  // Check for gaps between bookings
   for (let i = 0; i < sortedBookings.length - 1; i++) {
     const currentEndDate = new Date(sortedBookings[i].endDate)
     const nextStartDate = new Date(sortedBookings[i + 1].startDate)
@@ -69,7 +66,6 @@ export function findFirstAvailableDateRange(
 
   return null // No valid dates found within the specified range
 }
-
 export function getUnavailableDates(bookings: Booking[], settings: Settings): Matcher[] {
   const unavailableDates: Matcher[] = []
   const today = new Date()
@@ -88,7 +84,7 @@ export function getUnavailableDates(bookings: Booking[], settings: Settings): Ma
   })
   // Exclude today's date
   const outerBounds: [DateBefore, DateAfter] = [
-    { before: addDays(today, 1) },
+    { before: today },
     {
       after: addDays(
         today,

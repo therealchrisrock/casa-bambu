@@ -24,3 +24,47 @@ export const formatDateTime = (timestamp: string): string => {
 export function formatDateToDayMonthYear(date: Date): string {
   return format(date, 'd MMM, yyyy')
 }
+
+export function getDateForStorage(date: Date): string {
+  return date.toISOString().split('T')[0]
+}
+
+
+
+export function formatDateRange(from: Date, to: Date): string {
+  const currentYear = new Date().getFullYear();
+
+  const fromMonth = from.toLocaleDateString('en-US', { month: 'short' });
+  const toMonth = to.toLocaleDateString('en-US', { month: 'short' });
+
+  const fromDay = from.getDate();
+  const toDay = to.getDate();
+
+  const fromYear = from.getFullYear();
+  const toYear = to.getFullYear();
+
+  // Same month and year
+  if (fromMonth === toMonth && fromYear === toYear) {
+    // If in the current year
+    if (fromYear === currentYear) {
+      return `${fromMonth} ${fromDay} – ${toDay}`;
+    } else {
+      // If in a future year
+      return `${fromMonth} ${fromDay} – ${toDay}, ${fromYear}`;
+    }
+  }
+
+  // Same year, different months
+  if (fromYear === toYear) {
+    // If in the current year
+    if (fromYear === currentYear) {
+      return `${fromMonth} ${fromDay} – ${toMonth} ${toDay}`;
+    } else {
+      // If in a future year
+      return `${fromMonth} ${fromDay}, ${fromYear} – ${toMonth} ${toDay}, ${toYear}`;
+    }
+  }
+
+  // Different years
+  return `${fromMonth} ${fromDay}, ${fromYear} – ${toMonth} ${toDay}, ${toYear}`;
+}

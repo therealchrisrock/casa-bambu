@@ -17,9 +17,12 @@ export default async function CreateAccount() {
   })
 
   return (
-    <Gutter className={classes.createAccount}>
+    <Gutter top >
       <RenderParams />
+      <div className={' mx-auto max-w-md'}>
       <CreateAccountForm />
+      </div>
+
     </Gutter>
   )
 }

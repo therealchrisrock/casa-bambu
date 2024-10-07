@@ -10,3 +10,4 @@ node_modules
 appointments-plugin
 ecosystem.config.js
 .env.*
+mongodump

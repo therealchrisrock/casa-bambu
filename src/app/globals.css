@@ -70,6 +70,9 @@
   }
 
   @layer base {
+    html {
+      @apply text-[14px] md:text-[16px]
+    }
     * {
       @apply border-border;
     }

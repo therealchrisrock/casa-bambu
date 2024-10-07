@@ -11,6 +11,7 @@ import { Media } from '../Media'
 import { Button } from '@/_components/ui/button'
 
 import classes from './index.module.scss'
+import { cn } from '@/_lib/utils'
 
 const priceFromJSON = (priceJSON): string => {
   let price = ''
@@ -114,9 +115,9 @@ export const Card: React.FC<{
               {description && <p className={classes.description}>{sanitizedDescription}</p>}
             </div>
           )}
-          <div className={'mt-4 flex gap-3 items-center'}>
+          <div className={'mt-4 flex gap-3 hidden items-center'}>
             <Button>Book Now</Button>
-            <button className={'flex'}>
+            <button className={'flex text-sm'}>
               Learn More &nbsp;
               <MoveRightIcon strokeWidth={1} />
             </button>
@@ -127,53 +128,35 @@ export const Card: React.FC<{
   }
 
   return (
-    <div className={'grid'}>
-      <Link href={href} className={classes.mediaWrapper}>
-        {!metaImage && <div className={classes.placeholder}>No image</div>}
-        {metaImage && typeof metaImage !== 'string' && (
-          <Media imgClassName={classes.image} resource={metaImage} fill />
-        )}
-      </Link>
-      <div className={classes.content}>
-        {showCategories && hasCategories && (
-          <div className={classes.leader}>
-            {showCategories && hasCategories && (
-              <div>
-                {categories?.map((category, index) => {
-                  if (typeof category === 'object' && category !== null) {
-                    const { title: titleFromCategory } = category
-
-                    const categoryTitle = titleFromCategory || 'Untitled category'
-
-                    const isLast = index === categories.length - 1
-
-                    return (
-                      <Fragment key={index}>
-                        {categoryTitle}
-                        {!isLast && <Fragment>, &nbsp;</Fragment>}
-                      </Fragment>
-                    )
-                  }
-
-                  return null
-                })}
-              </div>
-            )}
-          </div>
-        )}
+    <div className={'flex flex-col md:flex-row items-center '}>
+      <div className={'md:w-1/2 p-6'}>
+        <span className={'text-sm'}>Introducing</span>
         {titleToUse && (
-          <h4 className={classes.title}>
+          <h4 className={'text-2xl font-semibold'}>
             <Link href={href} className={classes.titleLink}>
               {titleToUse}
             </Link>
           </h4>
         )}
         {description && (
-          <div className={classes.body}>
+          <div className={cn(classes.body, 'prose max-w-md')}>
             {description && <p className={classes.description}>{sanitizedDescription}</p>}
           </div>
         )}
+        <div className={'mt-4 flex gap-3 '}>
+          <Button>Book Now</Button>
+          <button className={'flex text-sm items-center'}>
+            Learn More &nbsp;
+            <MoveRightIcon strokeWidth={1} />
+          </button>
+        </div>
       </div>
+      <Link href={href} className={'md:w-1/2 aspect-[6/4] relative rounded-lg overflow-hidden'}>
+        {!metaImage && <div className={classes.placeholder}>No image</div>}
+        {metaImage && typeof metaImage !== 'string' && (
+          <Media imgClassName={classes.image} resource={metaImage} fill />
+        )}
+      </Link>
     </div>
   )
 }

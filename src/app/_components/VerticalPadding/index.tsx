@@ -12,7 +12,7 @@ type Props = {
 }
 
 export const VerticalPadding: React.FC<Props> = ({
-  top = 'medium',
+  top = 'large',
   bottom = 'medium',
   className,
   children,

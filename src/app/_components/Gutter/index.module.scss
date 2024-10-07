@@ -1,13 +1,24 @@
+@import "../../_css/common";
+
 .gutter {
   max-width: 1500px;
   margin-left: auto;
   margin-right: auto;
 }
 
+.narrow {
+  max-width: 1000px;
+}
 .gutterLeft {
   padding-left: var(--gutter-h);
+  @include mid-break {
+    padding-left: calc(var(--gutter-h) / 2 + 2px);
+  }
 }
 
 .gutterRight {
   padding-right: var(--gutter-h);
+  @include mid-break {
+    padding-right: calc(var(--gutter-h) / 2 + 2px);
+  }
 }

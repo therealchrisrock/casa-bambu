@@ -2,27 +2,46 @@
 
 import React, { Fragment, useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import Link from 'next/link'
+import { toast } from 'sonner'
 
-import { Button } from '../../../_components/Button'
-import { Input } from '../../../_components/Input'
 import { Message } from '../../../_components/Message'
 
+import { Button } from '@/_components/ui/button'
+import { Form, FormField, FormItem, FormLabel } from '@/_components/ui/form'
+import { Input } from '@/_components/ui/input'
+
 import classes from './index.module.scss'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 type FormData = {
   email: string
 }
 
-export const RecoverPasswordForm: React.FC = () => {
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
 
+const formSchema = z.object({
+  email: z.string().email('This is not a valid email.').min(1, {
+    message: 'You must provide an email',
+  }),
+})
+export const RecoverPasswordForm: React.FC<{
+  hasSuccessMsg?: boolean
+  success?: [boolean, React.Dispatch<React.SetStateAction<boolean>>]
+}> = ({ success: successProp, hasSuccessMsg = true }) => {
+  const [error, setError] = useState('')
+  const internalSuccess = useState(false)
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+    },
+  })
+  const [success, setSuccess] = successProp ? successProp : internalSuccess
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>()
+  } = form
 
   const onSubmit = useCallback(async (data: FormData) => {
     const response = await fetch(
@@ -38,6 +57,10 @@ export const RecoverPasswordForm: React.FC = () => {
 
     if (response.ok) {
       setSuccess(true)
+      form.reset({ email: '' })
+      toast.success(
+        'Your request has been submitted. Check your email for a link that will allow you to securely reset your password.',
+      )
       setError('')
     } else {
       setError(
@@ -48,42 +71,26 @@ export const RecoverPasswordForm: React.FC = () => {
 
   return (
     <Fragment>
-      {!success && (
-        <React.Fragment>
-          <h1>Recover Password</h1>
-          <div className={classes.formWrapper}>
-            <p>
-              {`Please enter your email below. You will receive an email message with instructions on
-              how to reset your password. To manage your all users, `}
-              <Link href="/admin/collections/users">login to the admin dashboard</Link>
-              {'.'}
-            </p>
-            <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
-              <Message error={error} className={classes.message} />
-              <Input
-                name="email"
-                label="Email Address"
-                required
-                register={register}
-                error={errors.email}
-                type="email"
-              />
-              <Button
-                type="submit"
+      <div>
+        <Form {...form}>
+          <form onSubmit={handleSubmit(onSubmit)} className={'grid gap-4'}>
+            <Message error={error} className={classes.message} />
+            <FormField
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <Input {...field} required type="email" />
+                </FormItem>
+              )}
+              name={'email'}
+            />
 
-                label="Recover Password"
-                className={classes.submit}
-              />
-            </form>
-          </div>
-        </React.Fragment>
-      )}
-      {success && (
-        <React.Fragment>
-          <h1>Request submitted</h1>
-          <p>Check your email for a link that will allow you to securely reset your password.</p>
-        </React.Fragment>
-      )}
+            <Button type="submit" className={'w-full'}>
+              Recover Password
+            </Button>
+          </form>
+        </Form>
+      </div>
     </Fragment>
   )
 }

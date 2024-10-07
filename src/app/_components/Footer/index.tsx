@@ -33,7 +33,7 @@ export async function Footer() {
           })}
         </nav>
         <img
-          className={'w-48'}
+          className={'w-48 md:mx-0 mx-auto'}
           src={'/media/large-logo.png'}
           alt={
             'The logo of Casa Bambu, a company offering vacation rental properties in West Bay, Roatan, Honduras, featuring a stylized design with the company’s name in a modern, elegant font.'

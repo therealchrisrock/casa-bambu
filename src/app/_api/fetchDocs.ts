@@ -9,6 +9,7 @@ import { payloadToken } from './token'
 
 import { BOOKINGS } from '@/_graphql/bookings'
 import { Where } from 'payload/types'
+import { FAQS } from '@/_graphql/faqs'
 
 const queryMap = {
   pages: {
@@ -27,6 +28,10 @@ const queryMap = {
     query: BOOKINGS,
     key: 'Bookings',
   },
+  faqs: {
+    query: FAQS,
+    key: 'Faqs',
+  }
 }
 
 export const fetchDocs = async <T, W extends Where = {}>(

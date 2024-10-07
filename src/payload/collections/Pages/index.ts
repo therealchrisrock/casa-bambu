@@ -11,6 +11,7 @@ import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
 import { adminsOrPublished } from './access/adminsOrPublished'
 import { revalidatePage } from './hooks/revalidatePage'
 import { ReviewBlock } from '../../blocks/ReviewBlock'
+import { FormBlock } from '../../blocks/Form'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -76,7 +77,7 @@ export const Pages: CollectionConfig = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, ReviewBlock],
+              blocks: [CallToAction, Content, MediaBlock, Archive, ReviewBlock, FormBlock],
             },
           ],
         },

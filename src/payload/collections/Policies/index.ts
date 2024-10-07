@@ -11,7 +11,7 @@ export const Policies: CollectionConfig = {
     drafts: true,
   },
   admin: {
-    group: 'Ecommerce Data',
+    group: 'Business Data',
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'updatedAt'],
   },
@@ -27,7 +27,12 @@ export const Policies: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'attachment',
+      type: 'relationship',
+      relationTo: 'media'
+    },
     slugField(),
-    richText({ name: 'body' }),
+    richText({ name: 'body', required: false}),
   ],
 }

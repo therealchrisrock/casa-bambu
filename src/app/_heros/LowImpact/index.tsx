@@ -9,10 +9,10 @@ import classes from './index.module.scss'
 
 export const LowImpactHero: React.FC<Page['hero']> = ({ richText }) => {
   return (
-    <Gutter className={classes.lowImpactHero}>
+    <Gutter className={classes.lowImpactHero} narrow>
       <div className={classes.content}>
         <VerticalPadding>
-          <RichText className={classes.richText} content={richText} />
+          <RichText className={classes.richText} content={richText}  />
         </VerticalPadding>
       </div>
     </Gutter>

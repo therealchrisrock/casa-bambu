@@ -1,7 +1,6 @@
 @import '../../_css/common';
 
 .card  {
-  border: 1px var(--theme-elevation-200) solid;
   border-radius: 4px;
   height: 100%;
   display: flex;
@@ -14,7 +13,8 @@
   display: flex;
   flex-direction: column;
   @include small-break {
-    padding: calc(var(--base) / 2);
+    padding: calc(var(--base) / 2) 0;
+
   }
 }
 
@@ -62,9 +62,11 @@
 
 .mediaWrapper {
   text-decoration: none;
+  overflow: hidden;
+  border-radius: 5px;
   display: block;
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 6 / 4;
 }
 
 .image {

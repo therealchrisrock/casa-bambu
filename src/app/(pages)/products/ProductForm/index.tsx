@@ -1,30 +1,26 @@
 'use client'
 
-import React, { ReactNode, useMemo, useState } from 'react'
+import React, { ReactNode } from 'react'
 import { DateRange } from 'react-day-picker'
 import { BathIcon, BedSingleIcon, MapPin, UsersIcon } from 'lucide-react'
 
-import { Booking, Product, Settings } from '../../../../payload/payload-types'
-
-import { AddToCartButton } from '@/_components/AddToCartButton'
-import { DatePickerWithRange } from '@/_components/DateSelector'
-import { getAvgPrice } from '@/_components/Price'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/_components/ui/select'
-import { calculateBookingDetails } from '@/_utilities/bookingCalculations'
-import { DEFAULT_MIN_DAYS, findFirstAvailableDateRange, getUnavailableDates } from '@/(pages)/products/utils'
 import { PriceBreakdown } from '@/_components/BookingDetails/PriceBreakdown'
+import { CreateReservationButton } from '@/_components/CreateReservationButton'
+import { DatePickerWithRange } from '@/_components/DateSelector'
+import { formattedPrice } from '@/_components/Price'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/_components/ui/select'
+import { useBooking } from '@/_providers/Booking'
+import { DEFAULT_MIN_DAYS } from '@/(pages)/products/utils'
 
-export function ProductDetails({
-  product,
-  bookings,
-  settings,
-}: {
-  settings: Settings
-  bookings: Booking[]
-  product: Product
-}) {
+export function ProductDetails() {
+  const { product } = useBooking()
   const padding = 'px-4 pt-4 pb-8'
-  const initDates = findFirstAvailableDateRange(bookings)
   return (
     <div className={'rounded-lg border shadow-lg'}>
       <div
@@ -56,57 +52,44 @@ export function ProductDetails({
         </div>
       </div>
       <div className={` space-y-6 ${padding}`}>
-        {initDates ? (
-          <ProductForm
-            initDates={initDates}
-            product={product}
-            bookings={bookings}
-            settings={settings}
-          />
-        ) : (
-          <div>SOLD OUT</div>
-        )}
+        <ProductForm />
       </div>
     </div>
   )
 }
-export function ProductForm({
-  product,
-  bookings,
-  settings,
-  initDates,
-}: {
-  settings: Settings
-  bookings: Booking[]
-  product: Product
-  initDates: DateRange
-}) {
-  const unavailableDates = getUnavailableDates(bookings, settings)
-  const [dates, setDates] = useState<DateRange>(initDates)
-  const [guestsQuantity, setGuestsQuantity] = useState(String(product.baseGuestQuantity))
-  const bookingDetails = useMemo(() => {
-    return calculateBookingDetails(product, dates, parseInt(guestsQuantity), settings)
-  }, [product, dates, guestsQuantity])
 
+export function ProductForm() {
+  const { loading, settings, unavailableDates, product, booking, setBooking, clearBooking } =
+    useBooking()
+
+  // Handle guest selection change
+  const handleGuestChange = (value: string) => {
+    if (booking) {
+      const updatedBooking = {
+        ...booking,
+        guestCount: parseInt(value, 10),
+      }
+      setBooking(updatedBooking)
+    }
+  }
+  if (loading) return <ProductFormSkeleton />
   return (
     <>
       <div>
-        <h3 className={'flex gap-1 items-baseline'}>
-          <span className={'text-2xl text-tertiary font-semibold'}>
-            {getAvgPrice(product, bookingDetails)}
-          </span>
-          <span className={'text-sm'}>night</span>
-        </h3>
-        <h5 className={'text-xs'}>(min. {settings.minBooking ?? DEFAULT_MIN_DAYS} nights)</h5>
+        {booking?.averageRate && (
+          <h3 className={'flex gap-1 items-baseline'}>
+            <span className={'text-2xl text-tertiary font-semibold'}>
+              {formattedPrice(booking.averageRate)}
+            </span>
+            <span className={'text-sm'}>night</span>
+          </h3>
+        )}
+        <h5 className={'text-xs'}>(min. {(settings.minBooking ?? DEFAULT_MIN_DAYS) - 1} nights)</h5>
       </div>
       <div className={'space-y-6'}>
         <div className={'space-y-2'}>
-          <DatePickerWithRange disabled={unavailableDates} dates={dates} setDates={setDates} />
-          <Select
-            value={guestsQuantity}
-            defaultValue={guestsQuantity}
-            onValueChange={setGuestsQuantity}
-          >
+          <DatePickerWithRange />
+          <Select value={booking?.guestCount.toString()} onValueChange={handleGuestChange}>
             <SelectTrigger className="">
               <SelectValue placeholder="Number of Guests" />
             </SelectTrigger>
@@ -118,8 +101,8 @@ export function ProductForm({
               ))}
             </SelectContent>
           </Select>
-          <AddToCartButton settings={settings} bookingDetails={bookingDetails} />
-
+          <CreateReservationButton />
+          {/*<AddToCartButton settings={settings} bookingDetails={bookingDetails} />*/}
           {/*{CART_MODE === 'invoice' ? (*/}
           {/*  <CreateReservationButton*/}
           {/*    dates={dates}*/}
@@ -129,9 +112,50 @@ export function ProductForm({
           {/*) : (*/}
           {/*)}*/}
         </div>
-        {bookingDetails && <PriceBreakdown booking={bookingDetails} />}
+        {booking && <PriceBreakdown booking={booking} />}
       </div>
     </>
+  )
+}
+
+export function ProductFormSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      {/* Skeleton for the price display */}
+      <div className="h-7 bg-gray-200 rounded w-1/3"></div>
+
+      {/* Skeleton for the minimum booking nights text */}
+      <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+      <div className={'space-y-2'}>
+        {/* Skeleton for the date picker placeholder */}
+        <div className="h-10 bg-gray-200 rounded"></div>
+
+        {/* Skeleton for the guest picker placeholder */}
+        <div className="h-10 bg-gray-200 rounded"></div>
+
+        {/* Skeleton for the reservation button */}
+        <div className="h-10 bg-gray-200 rounded"></div>
+      </div>
+
+      {/* Skeleton for the price breakdown (optional) */}
+      <div className="space-y-2">
+        <div className={'flex justify-between'}>
+          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+        </div>
+        <div className={'flex justify-between'}>
+          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+        </div>
+        <div className={'flex justify-between'}>
+          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+        </div>
+      </div>
+      <div>
+        <div className="h-8 bg-gray-200 rounded pt-5"></div>
+      </div>
+    </div>
   )
 }
 

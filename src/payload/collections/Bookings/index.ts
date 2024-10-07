@@ -1,9 +1,39 @@
 import type { CollectionConfig } from 'payload/types'
 
-import { admins } from '../../access/admins'
-import BeforeNavLinks from '../../components/BeforeNavLinks'
+import adminsAndUser from './adminsAndUser'
 import { validateAvailability } from './hooks/validateAvailability'
-
+import { InvoiceSelect } from './ui/InvoiceSelect'
+import { newBookingNotif } from './hooks/newBookingNotif'
+export const bookingStatusMap  =  [
+  {
+    label: 'Under Initial Review',
+    value: 'pending',
+  },
+  {
+    label: 'Awaiting Deposit',
+    value: 'initConfirmed',
+  },
+  {
+    label: 'Partially Paid',
+    value: 'partiallyPaid',
+  },
+  {
+    label: 'Fully Paid',
+    value: 'paid',
+  },
+  {
+    label: 'Cancelled',
+    value: 'cancelled',
+  },
+  {
+    label: 'In Progress',
+    value: 'inProgress',
+  },
+  {
+    label: 'Complete',
+    value: 'complete',
+  },
+]
 export const Bookings: CollectionConfig = {
   slug: 'bookings',
   labels: {
@@ -11,43 +41,19 @@ export const Bookings: CollectionConfig = {
     plural: 'Bookings',
   },
   admin: {
-    group: 'Ecommerce Data',
+    group: 'Business Data',
   },
   hooks: {
+    afterChange: [newBookingNotif],
     beforeChange: [validateAvailability],
   },
   access: {
     read: () => true,
-    create: admins,
-    update: admins,
-    delete: admins,
+    create: adminsAndUser,
+    update: adminsAndUser,
+    delete: adminsAndUser,
   },
   fields: [
-    {
-      name: 'startDate',
-      label: 'Start Date',
-      type: 'date',
-      required: true,
-      admin: {
-        position: 'sidebar',
-      },
-    },
-    {
-      name: 'endDate',
-      label: 'End Date',
-      type: 'date',
-      required: true,
-      admin: {
-        position: 'sidebar',
-      },
-    },
-    {
-      name: 'product',
-      type: 'relationship',
-      relationTo: 'products',
-      label: 'Listing',
-      required: true,
-    },
     {
       name: 'type',
       label: 'Booking Type',
@@ -63,21 +69,62 @@ export const Bookings: CollectionConfig = {
           value: 'reservation',
         },
       ],
-      access: {
-        read: admins,
-        create: admins,
-        update: admins,
+    },
+    {
+      name: 'bookingStatus',
+      type: 'select',
+      defaultValue: 'pending',
+      options: bookingStatusMap,
+      admin: {
+        position: 'sidebar',
       },
     },
     {
-      name: 'order',
+      name: 'introduction',
+      label: 'Introductory Message',
+      type: 'textarea',
+    },
+    {
+      name: 'startDate',
+      label: 'Start Date',
+      type: 'date',
+      required: true,
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'd MMM yyy',
+        },
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'endDate',
+      label: 'End Date',
+      type: 'date',
+      required: true,
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'd MMM yyy',
+        },
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'product',
       type: 'relationship',
-      relationTo: 'orders',
-      label: 'Associated Order',
-      access: {
-        read: admins,
-        create: admins,
-        update: admins,
+      relationTo: 'products',
+      label: 'Listing',
+      required: true,
+    },
+    {
+      name: 'invoice',
+      type: 'text',
+      label: 'Associated Invoice',
+      admin: {
+        components: {
+          Field: InvoiceSelect,
+        },
       },
     },
     {
@@ -85,11 +132,6 @@ export const Bookings: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       label: 'Guest',
-      access: {
-        read: admins,
-        create: admins,
-        update: admins,
-      },
     },
   ],
 }

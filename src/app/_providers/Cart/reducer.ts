@@ -1,6 +1,9 @@
-import type { CartItems, Product, User } from '../../../payload/payload-types'
+import type { CartItems, CouponItems, Product, User } from '../../../payload/payload-types'
+
+import type { BookingDetails } from '@/_utilities/bookingCalculations'
 
 export type CartItem = CartItems[0]
+export type CouponItem = CouponItems[0]
 
 type CartType = User['cart']
 
@@ -18,6 +21,10 @@ type CartAction =
       payload: CartItem
     }
   | {
+      type: 'ADD_BOOKING'
+      payload: BookingDetails
+    }
+  | {
       type: 'DELETE_ITEM'
       payload: Product
     }
@@ -30,10 +37,25 @@ export const cartReducer = (cart: CartType, action: CartAction): CartType => {
     case 'SET_CART': {
       return action.payload
     }
-
+    case 'ADD_BOOKING': {
+      const { payload: d } = action
+      return {
+        ...cart,
+        duration: d.duration,
+        listing: d.listing,
+        product: d.productID,
+        fees: d.additionalFees,
+        from: d.from,
+        to: d.to,
+        total: d.total,
+        guestsQuantity: d.guestCount,
+        basePrice: d.basePrice,
+        subtotal: d.subtotal,
+        coupons: d.coupons
+      }
+    }
     case 'MERGE_CART': {
       const { payload: incomingCart } = action
-
       const syncedItems: CartItem[] = [
         ...(cart?.items || []),
         ...(incomingCart?.items || []),
@@ -56,9 +78,8 @@ export const cartReducer = (cart: CartType, action: CartAction): CartType => {
         }
         return acc
       }, [])
-
       return {
-        ...cart,
+        ...incomingCart,
         items: syncedItems,
       }
     }
@@ -85,7 +106,6 @@ export const cartReducer = (cart: CartType, action: CartAction): CartType => {
           quantity: (incomingItem.quantity || 0) > 0 ? incomingItem.quantity : undefined,
         }
       }
-      console.log('reducer.ts incomingItem',incomingItem )
       return {
         ...cart,
         items: withAddedItem,

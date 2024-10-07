@@ -1,38 +1,21 @@
-import React from 'react'
-import { DateRange } from 'react-day-picker'
-
-import { Product } from '../../../payload/payload-types'
-
-import classes from '@/_components/AddToCartButton/index.module.scss'
-import { Button as ShadButton } from '@/_components/ui/button'
-import { useCart } from '@/_providers/Cart'
+import React, { useMemo } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-export function CreateReservationButton({
-  dates,
-  headProduct,
-  items,
-}: {
-  dates: DateRange
-  headProduct: string
-  items: { product: Product; quantity: number }[]
-}) {
-  const { cart, addBooking } = useCart()
+
+import { Button as ShadButton } from '@/_components/ui/button'
+import { useBooking } from '@/_providers/Booking'
+
+export function CreateReservationButton() {
   const router = useRouter()
+  const { booking, product, isValidBooking } = useBooking()
   return (
-    <ShadButton
-      className={'w-full'}
-      variant={'tertiary'}
-      onClick={() => {
-        addBooking({
-          headProduct,
-          startDate: dates.from.toDateString(),
-          endDate: dates.to.toDateString(),
-        })
-        // router.push('/booking')
-      }}
-    >
-      Reserve
+    <ShadButton className={'w-full'} variant={'tertiary'} disabled={!isValidBooking} asChild>
+      <Link
+        href={`/book/${product.slug}?guests=${booking?.guestCount}&from=${booking?.from}&to=${booking?.to}`}
+      >
+        Reserve
+      </Link>
     </ShadButton>
   )
 }

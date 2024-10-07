@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useCallback, useRef } from 'react'
+import React, { ReactNode, useCallback, useRef } from 'react'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { z } from 'zod'
 
 import { Message } from '../../../_components/Message'
 import { useAuth } from '../../../_providers/Auth'
@@ -33,16 +35,27 @@ type FormData = {
   email: string
   password: string
 }
-
-const LoginForm: React.FC = () => {
+const formSchema = z.object({
+  email: z.string().email('This is not a valid email.').min(1, {
+    message: 'You must provide an email',
+  }),
+  password: z.string().min(4),
+})
+const LoginForm: React.FC<{ overrideSearchParams?: string, children?: ReactNode, customRedirect?: string }> = ({customRedirect, children, overrideSearchParams }) => {
   const searchParams = useSearchParams()
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
-  const redirect = useRef(searchParams.get('redirect'))
+  const redirect = useRef( customRedirect ?? searchParams.get('redirect'))
   const { login } = useAuth()
   const router = useRouter()
   const [error, setError] = React.useState<string | null>(null)
 
-  const form = useForm<FormData>()
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
 
   const {
     control,
@@ -68,10 +81,10 @@ const LoginForm: React.FC = () => {
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Card className="mx-auto max-w-sm">
+        <Card className="mx-auto">
           <CardHeader>
             <CardTitle className="text-2xl">Login</CardTitle>
-            <CardDescription>Enter your email below to login to your account</CardDescription>
+            <CardDescription>{children}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
@@ -96,7 +109,7 @@ const LoginForm: React.FC = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type={'password'} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -108,11 +121,11 @@ const LoginForm: React.FC = () => {
             </div>
             <div className="mt-4 text-center text-sm space-y-2">
               Don&apos;t have an account?{' '}
-              <Link href={`/create-account${allParams}`} className="underline">
+              <Link href={`/create-account${customRedirect ? `?redirect=${encodeURIComponent(customRedirect)}` : allParams}`} className="underline">
                 Sign up
               </Link>
               <br />
-              <Link href={`/recover-password${allParams}`}>Recover your password</Link>
+              <Link href={`/recover-password${customRedirect ? `?redirect=${encodeURIComponent(customRedirect)}` : allParams}`}>Recover your password</Link>
             </div>
           </CardContent>
         </Card>

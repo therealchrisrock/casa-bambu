@@ -7,46 +7,14 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Booking, CartItems, Product, Settings } from '../../../payload/payload-types'
 
-import { calculateBookingDetails } from '@/_utilities/bookingCalculations'
+import { BookingDetails, calculateBookingDetails } from '@/_utilities/bookingCalculations'
 import { getSettings, getUnavailableDates } from '@/(pages)/products/utils'
 import { isBookingAvailable, parseDateAsUTC } from '@/_lib/bookings'
 import { UTCDate } from '@date-fns/utc'
 import { eachDayOfInterval } from 'date-fns'
 
-interface AdditionalFee {
-  label: string
-  priceID?: string
-  total: number
-  description?: string
-}
 
-interface GuestFee {
-  extraGuests: number
-  unitAmount: number
-  total: number
-  priceID: string
-}
 
-type Coupon = Array<Omit<AdditionalFee, 'priceID'> & { couponID: string }>
-
-export interface BookingDetails {
-  listing: string
-  productID: string
-  dates: DateRange
-  items: CartItems
-  averageRate: number
-  total: number
-  duration: number
-  guestCount: number
-  subtotal: number
-  currency: string
-  guestFee: Maybe<GuestFee>
-  additionalFees: AdditionalFee[]
-  coupons: Coupon
-  from: string
-  basePrice: number
-  to: string
-}
 
 interface BookingContextType {
   booking: BookingDetails | null
@@ -57,7 +25,8 @@ interface BookingContextType {
   settings: Settings
   setDates:  (dates: DateRange) => void
   isValidBooking: () => boolean
-
+  loading: boolean
+  isAvailable: boolean
 }
 
 // Create the context
@@ -84,11 +53,15 @@ export const BookingProvider = ({
   settings: Settings
   bookings: Booking[]
 }) => {
+  const [loading, setLoading] = useState(true)
   const [hasInitialized, setHasInitialized] = useState(false) // Guard for initial load
   const [booking, setBookingState] = useState<BookingDetails | null>(null)
   const searchParams = useSearchParams() // Retrieve search parameters
   const router = useRouter()
   const settings = getSettings(settingsProp)
+  const unavailableDates = getUnavailableDates(bookings, settings)
+  let [isAvailable, setIsAvailable] = useState(true)
+
   const setBooking = (newBooking: BookingDetails) => {
     setBookingState(newBooking)
   }
@@ -96,25 +69,27 @@ export const BookingProvider = ({
   const clearBooking = () => {
     setBookingState(null)
   }
+  useEffect(() => {
+    if (product && bookings && settings) {
+      setLoading(false)
+    }
+  }, [product, bookings, settings])
 
   // Sync the booking details with the search params
   useEffect(() => {
-    console.log('search params', searchParams.get('guests'))
     const guestsQuantity = parseInt(searchParams.get('guests'), 10)
     const from = searchParams.get('from')
     const to = searchParams.get('to')
 
     if (product && from && to) {
-      console.log('search params inner', searchParams.get('guests'), searchParams.get('from'))
       // Convert search params into the DateRange object
       const dates: DateRange = {
         from: new UTCDate(from),
         to: new UTCDate(to),
       }
-
+      setIsAvailable(isBookingAvailable(dates.from, dates.to, unavailableDates))
       // Fetch product and settings objects based on productID
       // You would retrieve these based on your app’s logic, here's a placeholder
-
       // Calculate booking details
       const calculatedBookingDetails = calculateBookingDetails(
         product,
@@ -136,7 +111,6 @@ export const BookingProvider = ({
     const toDate = booking.dates.to
 
     const bookingDates = eachDayOfInterval({ start: fromDate, end: toDate })
-    const isAvailable = isBookingAvailable(fromDate, toDate, unavailableDates)
     const hasValidDuration = bookingDates.length >= settings.minBooking
     const hasValidGuestCount = booking.guestCount >= 1 && booking.guestCount <= product.maxGuestQuantity
     return isAvailable && hasValidDuration && hasValidGuestCount
@@ -165,11 +139,10 @@ export const BookingProvider = ({
       // Update the URL without reloading the page
     }
   }, [booking, hasInitialized])
-  const unavailableDates = getUnavailableDates(bookings, settings)
 
   return (
     <BookingContext.Provider
-      value={{ booking, setBooking, clearBooking, product, unavailableDates, settings, setDates, isValidBooking}}
+      value={{ booking, setBooking, clearBooking, product, unavailableDates, settings, setDates, isValidBooking, loading, isAvailable}}
     >
       {children}
     </BookingContext.Provider>

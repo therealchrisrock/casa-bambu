@@ -8,6 +8,18 @@
 
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CouponItems".
+ */
+export type CouponItems =
+  | {
+      label?: string | null;
+      couponID: string;
+      amount?: number | null;
+      id?: string | null;
+    }[]
+  | null;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "CartItems".
  */
 export type CartItems =
@@ -15,10 +27,7 @@ export type CartItems =
       product?: (string | null) | Product;
       stripeProductID?: string | null;
       priceID: string;
-      guestsQuantity?: number | null;
       quantity?: number | null;
-      from: string;
-      to: string;
       id?: string | null;
     }[]
   | null;
@@ -27,6 +36,7 @@ export interface Config {
   collections: {
     pages: Page;
     products: Product;
+    policies: Policy;
     orders: Order;
     media: Media;
     categories: Category;
@@ -34,6 +44,7 @@ export interface Config {
     reviews: Review;
     bookings: Booking;
     amenities: Amenity;
+    faqs: Faq;
     forms: Form;
     'form-submissions': FormSubmission;
     redirects: Redirect;
@@ -246,105 +257,102 @@ export interface Product {
   productDescription: {
     [k: string]: unknown;
   }[];
-  amenities?:
-    | {
-        amenity?: (string | null) | Amenity;
-        id?: string | null;
-      }[]
+  layout?:
+    | (
+        | {
+            invertBackground?: boolean | null;
+            richText: {
+              [k: string]: unknown;
+            }[];
+            links?:
+              | {
+                  link: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?: {
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null;
+                    url?: string | null;
+                    label: string;
+                    appearance?: ('primary' | 'secondary') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
+        | {
+            invertBackground?: boolean | null;
+            columns?:
+              | {
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+                  richText: {
+                    [k: string]: unknown;
+                  }[];
+                  enableLink?: boolean | null;
+                  link?: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?: {
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null;
+                    url?: string | null;
+                    label: string;
+                    appearance?: ('default' | 'primary' | 'secondary' | 'link') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content';
+          }
+        | {
+            invertBackground?: boolean | null;
+            position?: ('default' | 'fullscreen') | null;
+            media: string | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mediaBlock';
+          }
+        | {
+            introContent: {
+              [k: string]: unknown;
+            }[];
+            populateBy?: ('collection' | 'selection') | null;
+            relationTo?: 'products' | null;
+            appearance?: ('card' | 'wide') | null;
+            categories?: (string | Category)[] | null;
+            limit?: number | null;
+            selectedDocs?:
+              | {
+                  relationTo: 'products';
+                  value: string | Product;
+                }[]
+              | null;
+            populatedDocs?:
+              | {
+                  relationTo: 'products';
+                  value: string | Product;
+                }[]
+              | null;
+            populatedDocsTotal?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'archive';
+          }
+      )[]
     | null;
-  layout: (
-    | {
-        invertBackground?: boolean | null;
-        richText: {
-          [k: string]: unknown;
-        }[];
-        links?:
-          | {
-              link: {
-                type?: ('reference' | 'custom') | null;
-                newTab?: boolean | null;
-                reference?: {
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null;
-                url?: string | null;
-                label: string;
-                appearance?: ('primary' | 'secondary') | null;
-              };
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'cta';
-      }
-    | {
-        invertBackground?: boolean | null;
-        columns?:
-          | {
-              size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-              richText: {
-                [k: string]: unknown;
-              }[];
-              enableLink?: boolean | null;
-              link?: {
-                type?: ('reference' | 'custom') | null;
-                newTab?: boolean | null;
-                reference?: {
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null;
-                url?: string | null;
-                label: string;
-                appearance?: ('default' | 'primary' | 'secondary' | 'link') | null;
-              };
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'content';
-      }
-    | {
-        invertBackground?: boolean | null;
-        position?: ('default' | 'fullscreen') | null;
-        media: string | Media;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'mediaBlock';
-      }
-    | {
-        introContent: {
-          [k: string]: unknown;
-        }[];
-        populateBy?: ('collection' | 'selection') | null;
-        relationTo?: 'products' | null;
-        appearance?: ('card' | 'wide') | null;
-        categories?: (string | Category)[] | null;
-        limit?: number | null;
-        selectedDocs?:
-          | {
-              relationTo: 'products';
-              value: string | Product;
-            }[]
-          | null;
-        populatedDocs?:
-          | {
-              relationTo: 'products';
-              value: string | Product;
-            }[]
-          | null;
-        populatedDocsTotal?: number | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'archive';
-      }
-  )[];
   bedroomQuantity: number;
   bathQuantity: number;
   maxGuestQuantity: number;
   baseGuestQuantity: number;
   priceJSON?: string | null;
+  features?: (string | Amenity)[] | null;
   enablePaywall?: boolean | null;
   paywall?:
     | (
@@ -476,7 +484,9 @@ export interface Product {
 export interface Amenity {
   id: string;
   title: string;
+  description?: string | null;
   media: string | Media;
+  category?: (string | Category)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -486,12 +496,12 @@ export interface Amenity {
  */
 export interface Review {
   id: string;
-  title: string;
+  name: string;
+  relatedListing?: (string | null) | Product;
   publishedOn?: string | null;
-  rating?: number | null;
+  rating: number;
   statement: string;
   user?: (string | null) | User;
-  slug?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -502,11 +512,31 @@ export interface Review {
  */
 export interface User {
   id: string;
-  name?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
   roles?: ('admin' | 'customer')[] | null;
   purchases?: (string | Product)[] | null;
   stripeCustomerID?: string | null;
   cart?: {
+    coupons?: CouponItems;
+    from?: string | null;
+    to?: string | null;
+    basePrice?: number | null;
+    duration?: number | null;
+    product?: (string | null) | Product;
+    listing?: string | null;
+    guestsQuantity?: number | null;
+    subtotal?: number | null;
+    total?: number | null;
+    fees?:
+      | {
+          label?: string | null;
+          priceID?: string | null;
+          total?: number | null;
+          id?: string | null;
+        }[]
+      | null;
     items?: CartItems;
   };
   skipSync?: boolean | null;
@@ -520,6 +550,24 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "policies".
+ */
+export interface Policy {
+  id: string;
+  title: string;
+  attachment?: (string | null) | Media;
+  slug?: string | null;
+  body?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -549,12 +597,29 @@ export interface Order {
  */
 export interface Booking {
   id: string;
+  type: 'blockout' | 'reservation';
+  bookingStatus?:
+    | ('pending' | 'initConfirmed' | 'partiallyPaid' | 'paid' | 'cancelled' | 'inProgress' | 'complete')
+    | null;
+  introduction?: string | null;
   startDate: string;
   endDate: string;
   product: string | Product;
-  type: 'blockout' | 'reservation';
-  order?: (string | null) | Order;
+  invoice?: string | null;
   user?: (string | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faqs".
+ */
+export interface Faq {
+  id: string;
+  title: string;
+  richText: {
+    [k: string]: unknown;
+  }[];
   updatedAt: string;
   createdAt: string;
 }
@@ -779,7 +844,6 @@ export interface Settings {
   stripeCleaningFee?: string | null;
   stripeCleaningFeeJSON?: string | null;
   skipSync?: boolean | null;
-  tax?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }

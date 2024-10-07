@@ -18,6 +18,7 @@ export const PRODUCT = `
     Products(where: { slug: { equals: $slug}}, limit: 1, draft: $draft) {
       docs {
         id
+        slug
         title
         productDescription
         maxGuestQuantity
@@ -50,6 +51,11 @@ export const PRODUCT = `
           seasonStart
           seasonEnd
         }
+        features {
+          title
+          id
+          ${MEDIA}
+        }
         enablePaywall
         relatedProducts {
           id
@@ -57,6 +63,7 @@ export const PRODUCT = `
           title
           ${META}
         }
+     
         ${META}
       }
     }

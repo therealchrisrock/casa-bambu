@@ -40,7 +40,12 @@ export async function Header() {
               src="/media/small-logo.png"
             />
           </Link>
-          <HeaderNav header={header} />
+          <div className={'md:block hidden'}>
+            <HeaderNav header={header} />
+          </div>
+          <div className={'md:hidden flex items-center py-4'}>
+            <HeaderNav isMobile header={header} />
+          </div>
         </Gutter>
       </header>
     </>

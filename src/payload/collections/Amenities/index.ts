@@ -22,10 +22,30 @@ export const Amenities: CollectionConfig = {
       required: true,
     },
     {
+      name: 'description',
+      type: 'textarea',
+    },
+    {
       name: 'media',
       type: 'relationship',
       required: true,
       relationTo: 'media',
+    },
+    {
+      name: 'category',
+      type: 'relationship',
+      relationTo: 'categories',
+      hasMany: true,
+      filterOptions: () => {
+        return {
+          parent: {
+            equals: '66f76ad4673fad73c580a55f', // ID for the Amenity Parent Category
+          },
+        }
+      },
+      admin: {
+        position: 'sidebar',
+      },
     },
   ],
 }

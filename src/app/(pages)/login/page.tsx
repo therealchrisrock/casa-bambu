@@ -14,9 +14,11 @@ export default async function Login() {
     validUserRedirect: `/account?warning=${encodeURIComponent('You are already logged in.')}`,
   })
   return (
-    <Gutter className={'pt-8 lg:pt-10 xl:pt-12'}>
+    <Gutter top>
       <RenderParams className={classes.params} />
-      <LoginForm />
+      <div className={'max-w-sm mx-auto'}>
+        <LoginForm />
+      </div>
     </Gutter>
   )
 }

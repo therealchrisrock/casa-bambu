@@ -26,7 +26,7 @@ const Products: CollectionConfig = {
     plural: 'Listings',
   },
   admin: {
-    group: 'Ecommerce Data',
+    group: 'Business Data',
     useAsTitle: 'title',
     defaultColumns: ['title', 'stripeProductID', '_status'],
     preview: doc => {
@@ -115,21 +115,21 @@ const Products: CollectionConfig = {
               },
             },
             richText({ name: 'productDescription' }),
-            {
-              name: 'amenities',
-              type: 'array',
-              fields: [
-                {
-                  name: 'amenity',
-                  type: 'relationship',
-                  relationTo: 'amenities',
-                },
-              ],
-            },
+            // {
+            //   name: 'amenities',
+            //   type: 'array',
+            //   fields: [
+            //     {
+            //       name: 'amenity',
+            //       type: 'relationship',
+            //       relationTo: 'amenities',
+            //       required: true
+            //     },
+            //   ],
+            // },
             {
               name: 'layout',
               type: 'blocks',
-              required: true,
               blocks: [CallToAction, Content, MediaBlock, Archive],
             },
           ],
@@ -170,6 +170,12 @@ const Products: CollectionConfig = {
                 hidden: true,
                 rows: 10,
               },
+            },
+            {
+              name: 'features',
+              type: 'relationship',
+              relationTo: 'amenities',
+              hasMany: true
             },
             {
               name: 'enablePaywall',

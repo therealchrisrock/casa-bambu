@@ -185,11 +185,11 @@ export const CollectionArchive: React.FC<Props> = props => {
         <Gutter>
           {appearance === 'wide' ? (
             <div>
-              <div className={'lg:block hidden'}>
+              <div className={'lg:grid gap-8 hidden'}>
                 {results.docs?.map((result, index) => {
                   if (typeof result === 'object' && result !== null) {
                     return (
-                      <div className={'grid grid-cols-2'} key={index}>
+                      <div className={''} key={index}>
                         <Card size={'large'} doc={result} relationTo={relationTo} showCategories />
                       </div>
                     )

@@ -7,8 +7,8 @@ import { adminsOrPublished } from '../Pages/access/adminsOrPublished'
 export const Reviews: CollectionConfig = {
   slug: 'reviews',
   admin: {
-    useAsTitle: 'title',
-    group: 'Ecommerce Data',
+    useAsTitle: 'name',
+    group: 'Business Data',
     defaultColumns: ['title', 'slug', 'updatedAt'],
     preview: doc => {
       return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/next/preview?url=${encodeURIComponent(
@@ -27,9 +27,15 @@ export const Reviews: CollectionConfig = {
   },
   fields: [
     {
-      name: 'title',
+      name: 'name',
       type: 'text',
-      required: true,
+      required: true
+    },
+    {
+      name: 'relatedListing',
+      label: 'Associated Listing',
+      type: 'relationship',
+      relationTo: 'products'
     },
     {
       name: 'publishedOn',
@@ -54,11 +60,13 @@ export const Reviews: CollectionConfig = {
     {
       name: 'rating',
       type: 'number',
+      required: true,
+      label: 'Rating (between 1 - 10)',
       validate: val => {
         if (val >= 1 && val <= 10) {
           return val
         }
-        return 'The rating must be a number between 1 and 5'
+        return 'The rating must be a number between 1 and 10'
       },
     },
     {
@@ -71,6 +79,5 @@ export const Reviews: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
     },
-    slugField(),
   ],
 }

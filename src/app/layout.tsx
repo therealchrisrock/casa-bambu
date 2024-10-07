@@ -12,6 +12,7 @@ import { mergeOpenGraph } from './_utilities/mergeOpenGraph'
 import './_css/app.scss'
 import './globals.css'
 import { cn } from '@/_lib/utils'
+import { Toaster } from '@/_components/ui/sonner'
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -35,6 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </main>
           {/* @ts-expect-error */}
           <Footer />
+          <Toaster />
         </Providers>
       </body>
     </html>

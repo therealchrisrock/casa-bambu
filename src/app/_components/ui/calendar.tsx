@@ -2,13 +2,14 @@
 
 import * as React from 'react'
 import { DayPicker, labelNext, labelPrevious, useDayPicker } from 'react-day-picker'
-import { differenceInCalendarDays } from 'date-fns'
+import { addDays, differenceInCalendarDays, isBefore, isSameDay, isWithinInterval } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import { cn } from '@/_lib/utils'
 import { Button, buttonVariants } from '@/_components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/_components/ui/tooltip'
+import { cn } from '@/_lib/utils'
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+type BaseCalendarProps = React.ComponentProps<typeof DayPicker> & {
   /**
    * In the year view, the number of years to display at once.
    * @default 12
@@ -19,6 +20,11 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
    * @default false
    */
   showYearSwitcher?: boolean
+  min?: number
+}
+export type CalendarProps = BaseCalendarProps & {
+  mode: 'range'
+  min: number
 }
 
 function Calendar({
@@ -28,6 +34,7 @@ function Calendar({
   yearRange = 12,
   showYearSwitcher = false,
   numberOfMonths,
+  min,
   ...props
 }: CalendarProps) {
   const [navView, setNavView] = React.useState<'days' | 'years'>('days')
@@ -50,6 +57,8 @@ function Calendar({
 
   return (
     <DayPicker
+      min={min}
+      timeZone="UTC"
       showOutsideDays={showOutsideDays}
       className={cn('p-3', className)}
       style={{
@@ -96,6 +105,48 @@ function Calendar({
         ...classNames,
       }}
       components={{
+        DayButton: props => {
+          const { selected } = useDayPicker()
+          const { day, modifiers, ...buttonProps } = props
+          if (!selected || !selected['from'] || !min) {
+            return <span {...buttonProps} />
+          }
+
+          // Determine the effective range for the minimum night tooltip
+          const minRangeEnd = addDays(selected['from'], min - 1)
+
+          // If there is no "to" date, apply the minimum nights range from the "from" date
+          // If there is a "to" date, ensure the tooltip appears for dates before the "to" date
+          const isWithinMinRange = !selected['to']
+            ? isWithinInterval(day.date, { start: selected['from'], end: minRangeEnd })
+            : isWithinInterval(day.date, { start: selected['from'], end: minRangeEnd }) &&
+              isBefore(day.date, selected['to'])
+
+          return (
+            <TooltipProvider>
+              {isWithinMinRange && !modifiers.range_start ? (
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger>
+                    <span
+                      {...buttonProps}
+                      // Prevent the default click event
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      Minimum {min} night{min > 1 ? 's' : ''}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <button
+                  {...buttonProps}
+                  // Prevent the default click event
+                />
+              )}
+            </TooltipProvider>
+          )
+        },
         Chevron: ({ orientation }) => {
           const Icon = orientation === 'left' ? ChevronLeft : ChevronRight
           return <Icon className="h-4 w-4" />
@@ -260,6 +311,7 @@ function Calendar({
     />
   )
 }
+
 Calendar.displayName = 'Calendar'
 
 export { Calendar }

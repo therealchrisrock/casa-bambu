@@ -13,6 +13,14 @@ export const CALL_TO_ACTION = `
   }
 }
 `
+export const FORM_BLOCK = `
+...on FormBlock {
+  introContent
+  form {
+    id   
+  }
+}
+`
 
 export const CONTENT = `
 ...on Content {
@@ -35,7 +43,20 @@ export const MEDIA_BLOCK = `
   ${MEDIA}
 }
 `
-
+export const REVIEW_BLOCK = `
+...on ReviewBlock {
+  blockType
+  ${MEDIA}
+  review {
+      rating
+      name
+      statement
+      relatedListing {
+        title
+      }
+  }
+}
+`
 export const ARCHIVE_BLOCK = `
 ...on Archive {
   blockType
@@ -44,6 +65,7 @@ export const ARCHIVE_BLOCK = `
   relationTo
   ${CATEGORIES}
   limit
+  appearance
   selectedDocs {
     relationTo
     value {

@@ -29,12 +29,12 @@ export const Settings: GlobalConfig = {
     {
       name: 'minBooking',
       type: 'number',
-      label: 'Minimum Booking (nights)',
+      label: 'Minimum Booking Duration (days)',
     },
     {
       name: 'maxBooking',
       type: 'number',
-      label: 'Maximum Booking (nights)',
+      label: 'Maximum Booking Duration (days)',
     },
     {
       name: 'advancedBookingLimit',
@@ -69,11 +69,6 @@ export const Settings: GlobalConfig = {
         readOnly: true,
         hidden: true,
       },
-    },
-    {
-      name: 'tax',
-      label: 'Tax (percentage)',
-      type: 'number',
     },
   ],
 }

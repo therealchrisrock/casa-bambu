@@ -33,7 +33,7 @@ export const MediumImpactHero: React.FC<Page['hero']> = props => {
       {typeof media === 'object' && (
         <Media
           htmlElement={null}
-          className={'absolute w-full h-full inset-0 -z-20'}
+          className={'absolute w-full h-full inset-0 -z-20 object-cover'}
           resource={media}
         />
       )}

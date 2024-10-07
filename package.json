@@ -113,7 +113,6 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
-    "handlebars": "^4.7.8",
     "inline-css": "^4.0.2",
     "nodemailer": "^6.9.15",
     "nodemon": "^2.0.6",

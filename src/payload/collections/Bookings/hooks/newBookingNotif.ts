@@ -10,14 +10,14 @@ export const newBookingNotif: CollectionAfterChangeHook<Booking> = async ({
 }) => {
   // && !checkRole(['admin'], req.user)
   if (operation === 'create' && doc.type === 'reservation' && doc.bookingStatus === 'pending') {
-    req.payload.sendEmail({
-      to: 'help@casambuwestbay.com',
-      from: 'help@casambuwestbay.com',
-      subject: 'A New Booking Request Awaits your review',
-      html: await generateEmailHTML({
-        headline: `Booking for ${doc.startDate} - ${doc.endDate}`,
-        content: `<a href="${process.env.PAYLOAD_PUBLIC_SERVER_URL}/admin/collections/bookings/${doc.id}">See here for details</a>`,
-      }),
-    })
+    // req.payload.sendEmail({
+    //   to: 'help@casambuwestbay.com',
+    //   from: 'help@casambuwestbay.com',
+    //   subject: 'A New Booking Request Awaits your review',
+    //   html: await generateEmailHTML({
+    //     headline: `Booking for ${doc.startDate} - ${doc.endDate}`,
+    //     content: `<a href="${process.env.PAYLOAD_PUBLIC_SERVER_URL}/admin/collections/bookings/${doc.id}">See here for details</a>`,
+    //   }),
+    // })
   }
 }

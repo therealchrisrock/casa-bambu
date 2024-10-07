@@ -90,13 +90,13 @@ export default buildConfig({
         ...config,
         // plugins: [new NodePolyfillPlugin()],
         resolve: {
-          // fallback: {
-          //   assert: require.resolve('assert/'),
-          //   url: require.resolve('url/'),
-          //   os: false,
-          //   fs: false
-          //   // { "assert": require.resolve("assert/") }
-          // },
+          fallback: {
+            assert: require.resolve('assert/'),
+            url: require.resolve('url/'),
+            os: false,
+            fs: false
+            // { "assert": require.resolve("assert/") }
+          },
           // fallback: {
           //   tls: false,
           //   net: false,
@@ -113,7 +113,6 @@ export default buildConfig({
           ...config.resolve,
           alias: {
             'fs': mockModulePath,
-            'handlebars': mockModulePath,
             'inline-css': mockModulePath,
             ...config.resolve?.alias,
             dotenv: path.resolve(__dirname, './dotenv.js'),

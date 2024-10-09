@@ -185,6 +185,16 @@ export interface Page {
             blockName?: string | null;
             blockType: 'reviewBlock';
           }
+        | {
+            form: string | Form;
+            enableIntro?: boolean | null;
+            introContent: {
+              [k: string]: unknown;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'formBlock';
+          }
       )[]
     | null;
   slug?: string | null;
@@ -450,7 +460,7 @@ export interface Product {
   coupons?:
     | {
         nickname?: string | null;
-        quantity: number;
+        nights: number;
         stripeCoupon: string;
         stripeCouponJSON?: string | null;
         id?: string | null;
@@ -550,78 +560,6 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "policies".
- */
-export interface Policy {
-  id: string;
-  title: string;
-  attachment?: (string | null) | Media;
-  slug?: string | null;
-  body?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orders".
- */
-export interface Order {
-  id: string;
-  orderedBy?: (string | null) | User;
-  stripePaymentIntentID?: string | null;
-  total: number;
-  items?:
-    | {
-        product: string | Product;
-        price?: number | null;
-        quantity?: number | null;
-        startDate?: string | null;
-        endDate?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "bookings".
- */
-export interface Booking {
-  id: string;
-  type: 'blockout' | 'reservation';
-  bookingStatus?:
-    | ('pending' | 'initConfirmed' | 'partiallyPaid' | 'paid' | 'cancelled' | 'inProgress' | 'complete')
-    | null;
-  introduction?: string | null;
-  startDate: string;
-  endDate: string;
-  product: string | Product;
-  invoice?: string | null;
-  user?: (string | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "faqs".
- */
-export interface Faq {
-  id: string;
-  title: string;
-  richText: {
-    [k: string]: unknown;
-  }[];
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -754,6 +692,78 @@ export interface Form {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "policies".
+ */
+export interface Policy {
+  id: string;
+  title: string;
+  attachment?: (string | null) | Media;
+  slug?: string | null;
+  body?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: string;
+  orderedBy?: (string | null) | User;
+  stripePaymentIntentID?: string | null;
+  total: number;
+  items?:
+    | {
+        product: string | Product;
+        price?: number | null;
+        quantity?: number | null;
+        startDate?: string | null;
+        endDate?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bookings".
+ */
+export interface Booking {
+  id: string;
+  type: 'blockout' | 'reservation';
+  bookingStatus?:
+    | ('pending' | 'initConfirmed' | 'partiallyPaid' | 'paid' | 'cancelled' | 'inProgress' | 'complete')
+    | null;
+  introduction?: string | null;
+  startDate: string;
+  endDate: string;
+  product: string | Product;
+  invoice?: string | null;
+  user?: (string | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faqs".
+ */
+export interface Faq {
+  id: string;
+  title: string;
+  richText: {
+    [k: string]: unknown;
+  }[];
   updatedAt: string;
   createdAt: string;
 }

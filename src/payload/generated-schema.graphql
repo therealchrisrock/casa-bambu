@@ -1,79 +1,79 @@
 type Query {
-  Page(id: String!, draft: Boolean): Page
-  Pages(draft: Boolean, where: Page_where, limit: Int, page: Int, sort: String): Pages
-  countPages(draft: Boolean, where: Page_where): countPages
+  Page(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Page
+  Pages(draft: Boolean, where: Page_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Pages
+  countPages(draft: Boolean, where: Page_where, locale: LocaleInputType): countPages
   docAccessPage(id: String!): pagesDocAccess
-  versionPage(id: String): PageVersion
-  versionsPages(where: versionsPage_where, limit: Int, page: Int, sort: String): versionsPages
-  Product(id: String!, draft: Boolean): Product
-  Products(draft: Boolean, where: Product_where, limit: Int, page: Int, sort: String): Products
-  countProducts(draft: Boolean, where: Product_where): countProducts
+  versionPage(id: String, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PageVersion
+  versionsPages(where: versionsPage_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): versionsPages
+  Product(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Product
+  Products(draft: Boolean, where: Product_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Products
+  countProducts(draft: Boolean, where: Product_where, locale: LocaleInputType): countProducts
   docAccessProduct(id: String!): productsDocAccess
-  versionProduct(id: String): ProductVersion
-  versionsProducts(where: versionsProduct_where, limit: Int, page: Int, sort: String): versionsProducts
-  Policy(id: String!, draft: Boolean): Policy
-  Policies(draft: Boolean, where: Policy_where, limit: Int, page: Int, sort: String): Policies
-  countPolicies(draft: Boolean, where: Policy_where): countPolicies
+  versionProduct(id: String, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): ProductVersion
+  versionsProducts(where: versionsProduct_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): versionsProducts
+  Policy(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Policy
+  Policies(draft: Boolean, where: Policy_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Policies
+  countPolicies(draft: Boolean, where: Policy_where, locale: LocaleInputType): countPolicies
   docAccessPolicy(id: String!): policiesDocAccess
-  versionPolicy(id: String): PolicyVersion
-  versionsPolicies(where: versionsPolicy_where, limit: Int, page: Int, sort: String): versionsPolicies
-  Order(id: String!): Order
-  Orders(where: Order_where, limit: Int, page: Int, sort: String): Orders
-  countOrders(where: Order_where): countOrders
+  versionPolicy(id: String, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PolicyVersion
+  versionsPolicies(where: versionsPolicy_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): versionsPolicies
+  Order(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Order
+  Orders(where: Order_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Orders
+  countOrders(where: Order_where, locale: LocaleInputType): countOrders
   docAccessOrder(id: String!): ordersDocAccess
-  Media(id: String!): Media
-  allMedia(where: Media_where, limit: Int, page: Int, sort: String): allMedia
-  countallMedia(where: Media_where): countallMedia
+  Media(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Media
+  allMedia(where: Media_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): allMedia
+  countallMedia(where: Media_where, locale: LocaleInputType): countallMedia
   docAccessMedia(id: String!): mediaDocAccess
-  Category(id: String!): Category
-  Categories(where: Category_where, limit: Int, page: Int, sort: String): Categories
-  countCategories(where: Category_where): countCategories
+  Category(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Category
+  Categories(where: Category_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Categories
+  countCategories(where: Category_where, locale: LocaleInputType): countCategories
   docAccessCategory(id: String!): categoriesDocAccess
-  User(id: String!): User
-  Users(where: User_where, limit: Int, page: Int, sort: String): Users
-  countUsers(where: User_where): countUsers
+  User(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): User
+  Users(where: User_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Users
+  countUsers(where: User_where, locale: LocaleInputType): countUsers
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
-  Review(id: String!, draft: Boolean): Review
-  Reviews(draft: Boolean, where: Review_where, limit: Int, page: Int, sort: String): Reviews
-  countReviews(draft: Boolean, where: Review_where): countReviews
+  Review(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Review
+  Reviews(draft: Boolean, where: Review_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Reviews
+  countReviews(draft: Boolean, where: Review_where, locale: LocaleInputType): countReviews
   docAccessReview(id: String!): reviewsDocAccess
-  versionReview(id: String): ReviewVersion
-  versionsReviews(where: versionsReview_where, limit: Int, page: Int, sort: String): versionsReviews
-  Booking(id: String!): Booking
-  Bookings(where: Booking_where, limit: Int, page: Int, sort: String): Bookings
-  countBookings(where: Booking_where): countBookings
+  versionReview(id: String, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): ReviewVersion
+  versionsReviews(where: versionsReview_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): versionsReviews
+  Booking(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Booking
+  Bookings(where: Booking_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Bookings
+  countBookings(where: Booking_where, locale: LocaleInputType): countBookings
   docAccessBooking(id: String!): bookingsDocAccess
-  Amenity(id: String!): Amenity
-  Amenities(where: Amenity_where, limit: Int, page: Int, sort: String): Amenities
-  countAmenities(where: Amenity_where): countAmenities
+  Amenity(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Amenity
+  Amenities(where: Amenity_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Amenities
+  countAmenities(where: Amenity_where, locale: LocaleInputType): countAmenities
   docAccessAmenity(id: String!): amenitiesDocAccess
-  Faq(id: String!): Faq
-  Faqs(where: Faq_where, limit: Int, page: Int, sort: String): Faqs
-  countFaqs(where: Faq_where): countFaqs
+  Faq(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Faq
+  Faqs(where: Faq_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Faqs
+  countFaqs(where: Faq_where, locale: LocaleInputType): countFaqs
   docAccessFaq(id: String!): faqsDocAccess
-  Form(id: String!): Form
-  Forms(where: Form_where, limit: Int, page: Int, sort: String): Forms
-  countForms(where: Form_where): countForms
+  Form(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Form
+  Forms(where: Form_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Forms
+  countForms(where: Form_where, locale: LocaleInputType): countForms
   docAccessForm(id: String!): formsDocAccess
-  FormSubmission(id: String!): FormSubmission
-  FormSubmissions(where: FormSubmission_where, limit: Int, page: Int, sort: String): FormSubmissions
-  countFormSubmissions(where: FormSubmission_where): countFormSubmissions
+  FormSubmission(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): FormSubmission
+  FormSubmissions(where: FormSubmission_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): FormSubmissions
+  countFormSubmissions(where: FormSubmission_where, locale: LocaleInputType): countFormSubmissions
   docAccessFormSubmission(id: String!): form_submissionsDocAccess
-  Redirect(id: String!): Redirect
-  Redirects(where: Redirect_where, limit: Int, page: Int, sort: String): Redirects
-  countRedirects(where: Redirect_where): countRedirects
+  Redirect(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Redirect
+  Redirects(where: Redirect_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Redirects
+  countRedirects(where: Redirect_where, locale: LocaleInputType): countRedirects
   docAccessRedirect(id: String!): redirectsDocAccess
-  PayloadPreference(id: String!): PayloadPreference
-  PayloadPreferences(where: PayloadPreference_where, limit: Int, page: Int, sort: String): PayloadPreferences
-  countPayloadPreferences(where: PayloadPreference_where): countPayloadPreferences
+  PayloadPreference(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PayloadPreference
+  PayloadPreferences(where: PayloadPreference_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): PayloadPreferences
+  countPayloadPreferences(where: PayloadPreference_where, locale: LocaleInputType): countPayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
-  Settings(draft: Boolean): Settings
+  Settings(draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Settings
   docAccessSettings: settingsDocAccess
-  Header(draft: Boolean): Header
+  Header(draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Header
   docAccessHeader: headerDocAccess
-  Footer(draft: Boolean): Footer
+  Footer(draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Footer
   docAccessFooter: footerDocAccess
   Access: Access
 }
@@ -100,7 +100,7 @@ type Page_Hero {
   type: Page_Hero_type
   richText(depth: Int): JSON
   links: [Page_Hero_Links!]
-  media(where: Page_Hero_Media_where): Media
+  media(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType, where: Page_Hero_Media_where): Media
 }
 
 enum Page_Hero_type {
@@ -123,7 +123,7 @@ type Page_Hero_Links {
 type Page_Hero_Links_Link {
   type: Page_Hero_Links_Link_type
   newTab: Boolean
-  reference(draft: Boolean): Page_Hero_Links_Link_Reference_Relationship
+  reference(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Page_Hero_Links_Link_Reference_Relationship
   url: String
   label: String
   appearance: Page_Hero_Links_Link_appearance
@@ -144,6 +144,15 @@ enum Page_Hero_Links_Link_Reference_RelationTo {
 }
 
 union Page_Hero_Links_Link_Reference = Page
+
+enum LocaleInputType {
+  en
+}
+
+enum FallbackLocaleInputType {
+  en
+  none
+}
 
 enum Page_Hero_Links_Link_appearance {
   default
@@ -357,7 +366,7 @@ input Page_Hero_Media_where_or {
   OR: [Page_Hero_Media_where_or]
 }
 
-union Page_Layout = Cta | Content | MediaBlock | Archive | ReviewBlock
+union Page_Layout = Cta | Content | MediaBlock | Archive | ReviewBlock | FormBlock
 
 type Cta {
   invertBackground: Boolean
@@ -376,7 +385,7 @@ type Cta_Links {
 type Cta_Links_Link {
   type: Cta_Links_Link_type
   newTab: Boolean
-  reference(draft: Boolean): Cta_Links_Link_Reference_Relationship
+  reference(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Cta_Links_Link_Reference_Relationship
   url: String
   label: String
   appearance: Cta_Links_Link_appearance
@@ -429,7 +438,7 @@ enum Content_Columns_size {
 type Content_Columns_Link {
   type: Content_Columns_Link_type
   newTab: Boolean
-  reference(draft: Boolean): Content_Columns_Link_Reference_Relationship
+  reference(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Content_Columns_Link_Reference_Relationship
   url: String
   label: String
   appearance: Content_Columns_Link_appearance
@@ -461,7 +470,7 @@ enum Content_Columns_Link_appearance {
 type MediaBlock {
   invertBackground: Boolean
   position: MediaBlock_position
-  media(where: MediaBlock_Media_where): Media
+  media(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType, where: MediaBlock_Media_where): Media
   id: String
   blockName: String
   blockType: String
@@ -666,10 +675,10 @@ type Archive {
   populateBy: Archive_populateBy
   relationTo: Archive_relationTo
   appearance: Archive_appearance
-  categories: [Category!]
+  categories(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Category!]
   limit: Float
-  selectedDocs(draft: Boolean): [Archive_SelectedDocs_Relationship!]
-  populatedDocs(draft: Boolean): [Archive_PopulatedDocs_Relationship!]
+  selectedDocs(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Archive_SelectedDocs_Relationship!]
+  populatedDocs(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Archive_PopulatedDocs_Relationship!]
   populatedDocsTotal: Float
   id: String
   blockName: String
@@ -693,14 +702,14 @@ enum Archive_appearance {
 type Category {
   id: String
   title: String
-  parent: Category
+  parent(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Category
   breadcrumbs: [Category_Breadcrumbs!]
   updatedAt: DateTime
   createdAt: DateTime
 }
 
 type Category_Breadcrumbs {
-  doc: Category
+  doc(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Category
   url: String
   label: String
   id: String
@@ -730,7 +739,7 @@ type Product {
   maxGuestQuantity: Float
   baseGuestQuantity: Float
   priceJSON: String
-  features: [Amenity!]
+  features(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Amenity!]
   enablePaywall: Boolean
   paywall: [Product_Paywall!]
   stripeProductID: String
@@ -738,8 +747,8 @@ type Product {
   guestFeePriceJSON: String
   coupons: [Product_Coupons!]
   variants: [Product_Variants!]
-  categories: [Category!]
-  relatedProducts(draft: Boolean): [Product!]
+  categories(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Category!]
+  relatedProducts(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Product!]
   slug: String
   skipSync: Boolean
   meta: Product_Meta
@@ -749,7 +758,7 @@ type Product {
 }
 
 type Product_Gallery {
-  media(where: Product_Gallery_Media_where): Media
+  media(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType, where: Product_Gallery_Media_where): Media
   id: String
 }
 
@@ -948,8 +957,8 @@ type Amenity {
   id: String
   title: String!
   description: String
-  media: Media!
-  category: [Category!]
+  media(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Media!
+  category(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Category!]
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -958,7 +967,7 @@ union Product_Paywall = Cta | Content | MediaBlock | Archive
 
 type Product_Coupons {
   nickname: String
-  quantity: Float
+  nights: Float
   stripeCoupon: String
   stripeCouponJSON: String
   id: String
@@ -974,7 +983,7 @@ type Product_Variants {
 type Product_Meta {
   title: String
   description: String
-  image(where: Product_Meta_Image_where): Media
+  image(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType, where: Product_Meta_Image_where): Media
 }
 
 input Product_Meta_Image_where {
@@ -1183,8 +1192,8 @@ enum Archive_PopulatedDocs_RelationTo {
 union Archive_PopulatedDocs = Product
 
 type ReviewBlock {
-  review(draft: Boolean): Review
-  media(where: ReviewBlock_Media_where): Media
+  review(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Review
+  media(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType, where: ReviewBlock_Media_where): Media
   id: String
   blockName: String
   blockType: String
@@ -1193,11 +1202,11 @@ type ReviewBlock {
 type Review {
   id: String
   name: String
-  relatedListing(draft: Boolean): Product
+  relatedListing(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Product
   publishedOn: DateTime
   rating: Float
   statement: String
-  user: User
+  user(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): User
   updatedAt: DateTime
   createdAt: DateTime
   _status: Review__status
@@ -1209,7 +1218,7 @@ type User {
   lastName: String
   phone: String
   roles: [User_roles!]
-  purchases(draft: Boolean): [Product!]
+  purchases(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Product!]
   stripeCustomerID: String
   cart: User_Cart
   skipSync: Boolean
@@ -1236,7 +1245,7 @@ type User_Cart {
   to: DateTime
   basePrice: Float
   duration: Float
-  product(draft: Boolean): Product
+  product(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Product
   listing: String
   guestsQuantity: Float
   subtotal: Float
@@ -1260,7 +1269,7 @@ type User_Cart_Fees {
 }
 
 type CartItems {
-  product(draft: Boolean): Product
+  product(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Product
   stripeProductID: String
   priceID: String
   quantity: Float
@@ -1466,10 +1475,153 @@ input ReviewBlock_Media_where_or {
   OR: [ReviewBlock_Media_where_or]
 }
 
+type FormBlock {
+  form(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Form
+  enableIntro: Boolean
+  introContent(depth: Int): JSON
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Form {
+  id: String
+  title: String!
+  fields: [Form_Fields!]
+  submitButtonLabel: String
+  confirmationType: Form_confirmationType
+  confirmationMessage(depth: Int): JSON
+  redirect: Form_Redirect
+  emails: [Form_Emails!]
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+union Form_Fields = Checkbox | Country | Email | Message | Number | Select | State | Text | Textarea
+
+type Checkbox {
+  name: String!
+  label: String
+  width: Float
+  required: Boolean
+  defaultValue: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Country {
+  name: String!
+  label: String
+  width: Float
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Email {
+  name: String!
+  label: String
+  width: Float
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Message {
+  message(depth: Int): JSON
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Number {
+  name: String!
+  label: String
+  width: Float
+  defaultValue: Float
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Select {
+  name: String!
+  label: String
+  width: Float
+  defaultValue: String
+  options: [Select_Options!]
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Select_Options {
+  label: String
+  value: String
+  id: String
+}
+
+type State {
+  name: String!
+  label: String
+  width: Float
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Text {
+  name: String!
+  label: String
+  width: Float
+  defaultValue: String
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Textarea {
+  name: String!
+  label: String
+  width: Float
+  defaultValue: String
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+enum Form_confirmationType {
+  message
+  redirect
+}
+
+type Form_Redirect {
+  url: String
+}
+
+type Form_Emails {
+  emailTo: String
+  cc: String
+  bcc: String
+  replyTo: String
+  emailFrom: String
+  subject: String
+  message(depth: Int): JSON
+  id: String
+}
+
 type Page_Meta {
   title: String
   description: String
-  image(where: Page_Meta_Image_where): Media
+  image(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType, where: Page_Meta_Image_where): Media
 }
 
 input Page_Meta_Image_where {
@@ -2601,7 +2753,7 @@ type PagesReadVersionsDocAccess {
 }
 
 type PageVersion {
-  parent(draft: Boolean): Page
+  parent(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Page
   version: PageVersion_Version
   createdAt: DateTime
   updatedAt: DateTime
@@ -2625,7 +2777,7 @@ type PageVersion_Version_Hero {
   type: PageVersion_Version_Hero_type
   richText(depth: Int): JSON
   links: [PageVersion_Version_Hero_Links!]
-  media(where: PageVersion_Version_Hero_Media_where): Media
+  media(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType, where: PageVersion_Version_Hero_Media_where): Media
 }
 
 enum PageVersion_Version_Hero_type {
@@ -2643,7 +2795,7 @@ type PageVersion_Version_Hero_Links {
 type PageVersion_Version_Hero_Links_Link {
   type: PageVersion_Version_Hero_Links_Link_type
   newTab: Boolean
-  reference(draft: Boolean): PageVersion_Version_Hero_Links_Link_Reference_Relationship
+  reference(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PageVersion_Version_Hero_Links_Link_Reference_Relationship
   url: String
   label: String
   appearance: PageVersion_Version_Hero_Links_Link_appearance
@@ -2861,12 +3013,12 @@ input PageVersion_Version_Hero_Media_where_or {
   OR: [PageVersion_Version_Hero_Media_where_or]
 }
 
-union PageVersion_Version_Layout = Cta | Content | MediaBlock | Archive | ReviewBlock
+union PageVersion_Version_Layout = Cta | Content | MediaBlock | Archive | ReviewBlock | FormBlock
 
 type PageVersion_Version_Meta {
   title: String
   description: String
-  image(where: PageVersion_Version_Meta_Image_where): Media
+  image(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType, where: PageVersion_Version_Meta_Image_where): Media
 }
 
 input PageVersion_Version_Meta_Image_where {
@@ -3440,7 +3592,7 @@ input Product_where {
   stripeGuestFeeID: Product_stripeGuestFeeID_operator
   guestFeePriceJSON: Product_guestFeePriceJSON_operator
   coupons__nickname: Product_coupons__nickname_operator
-  coupons__quantity: Product_coupons__quantity_operator
+  coupons__nights: Product_coupons__nights_operator
   coupons__stripeCoupon: Product_coupons__stripeCoupon_operator
   coupons__stripeCouponJSON: Product_coupons__stripeCouponJSON_operator
   coupons__id: Product_coupons__id_operator
@@ -3613,7 +3765,7 @@ input Product_coupons__nickname_operator {
   exists: Boolean
 }
 
-input Product_coupons__quantity_operator {
+input Product_coupons__nights_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -3817,7 +3969,7 @@ input Product_where_and {
   stripeGuestFeeID: Product_stripeGuestFeeID_operator
   guestFeePriceJSON: Product_guestFeePriceJSON_operator
   coupons__nickname: Product_coupons__nickname_operator
-  coupons__quantity: Product_coupons__quantity_operator
+  coupons__nights: Product_coupons__nights_operator
   coupons__stripeCoupon: Product_coupons__stripeCoupon_operator
   coupons__stripeCouponJSON: Product_coupons__stripeCouponJSON_operator
   coupons__id: Product_coupons__id_operator
@@ -3858,7 +4010,7 @@ input Product_where_or {
   stripeGuestFeeID: Product_stripeGuestFeeID_operator
   guestFeePriceJSON: Product_guestFeePriceJSON_operator
   coupons__nickname: Product_coupons__nickname_operator
-  coupons__quantity: Product_coupons__quantity_operator
+  coupons__nights: Product_coupons__nights_operator
   coupons__stripeCoupon: Product_coupons__stripeCoupon_operator
   coupons__stripeCouponJSON: Product_coupons__stripeCouponJSON_operator
   coupons__id: Product_coupons__id_operator
@@ -4393,7 +4545,7 @@ type ProductsDocAccessFields_coupons_Delete {
 
 type ProductsDocAccessFields_coupons_Fields {
   nickname: ProductsDocAccessFields_coupons_nickname
-  quantity: ProductsDocAccessFields_coupons_quantity
+  nights: ProductsDocAccessFields_coupons_nights
   stripeCoupon: ProductsDocAccessFields_coupons_stripeCoupon
   stripeCouponJSON: ProductsDocAccessFields_coupons_stripeCouponJSON
   id: ProductsDocAccessFields_coupons_id
@@ -4422,26 +4574,26 @@ type ProductsDocAccessFields_coupons_nickname_Delete {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_coupons_quantity {
-  create: ProductsDocAccessFields_coupons_quantity_Create
-  read: ProductsDocAccessFields_coupons_quantity_Read
-  update: ProductsDocAccessFields_coupons_quantity_Update
-  delete: ProductsDocAccessFields_coupons_quantity_Delete
+type ProductsDocAccessFields_coupons_nights {
+  create: ProductsDocAccessFields_coupons_nights_Create
+  read: ProductsDocAccessFields_coupons_nights_Read
+  update: ProductsDocAccessFields_coupons_nights_Update
+  delete: ProductsDocAccessFields_coupons_nights_Delete
 }
 
-type ProductsDocAccessFields_coupons_quantity_Create {
+type ProductsDocAccessFields_coupons_nights_Create {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_coupons_quantity_Read {
+type ProductsDocAccessFields_coupons_nights_Read {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_coupons_quantity_Update {
+type ProductsDocAccessFields_coupons_nights_Update {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_coupons_quantity_Delete {
+type ProductsDocAccessFields_coupons_nights_Delete {
   permission: Boolean!
 }
 
@@ -4923,7 +5075,7 @@ type ProductsReadVersionsDocAccess {
 }
 
 type ProductVersion {
-  parent(draft: Boolean): Product
+  parent(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Product
   version: ProductVersion_Version
   createdAt: DateTime
   updatedAt: DateTime
@@ -4943,7 +5095,7 @@ type ProductVersion_Version {
   maxGuestQuantity: Float
   baseGuestQuantity: Float
   priceJSON: String
-  features: [Amenity!]
+  features(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Amenity!]
   enablePaywall: Boolean
   paywall: [ProductVersion_Version_Paywall!]
   stripeProductID: String
@@ -4951,8 +5103,8 @@ type ProductVersion_Version {
   guestFeePriceJSON: String
   coupons: [ProductVersion_Version_Coupons!]
   variants: [ProductVersion_Version_Variants!]
-  categories: [Category!]
-  relatedProducts(draft: Boolean): [Product!]
+  categories(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Category!]
+  relatedProducts(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Product!]
   slug: String
   skipSync: Boolean
   meta: ProductVersion_Version_Meta
@@ -4962,7 +5114,7 @@ type ProductVersion_Version {
 }
 
 type ProductVersion_Version_Gallery {
-  media(where: ProductVersion_Version_Gallery_Media_where): Media
+  media(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType, where: ProductVersion_Version_Gallery_Media_where): Media
   id: String
 }
 
@@ -5161,7 +5313,7 @@ union ProductVersion_Version_Paywall = Cta | Content | MediaBlock | Archive
 
 type ProductVersion_Version_Coupons {
   nickname: String
-  quantity: Float
+  nights: Float
   stripeCoupon: String
   stripeCouponJSON: String
   id: String
@@ -5177,7 +5329,7 @@ type ProductVersion_Version_Variants {
 type ProductVersion_Version_Meta {
   title: String
   description: String
-  image(where: ProductVersion_Version_Meta_Image_where): Media
+  image(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType, where: ProductVersion_Version_Meta_Image_where): Media
 }
 
 input ProductVersion_Version_Meta_Image_where {
@@ -5407,7 +5559,7 @@ input versionsProduct_where {
   version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
   version__guestFeePriceJSON: versionsProduct_version__guestFeePriceJSON_operator
   version__coupons__nickname: versionsProduct_version__coupons__nickname_operator
-  version__coupons__quantity: versionsProduct_version__coupons__quantity_operator
+  version__coupons__nights: versionsProduct_version__coupons__nights_operator
   version__coupons__stripeCoupon: versionsProduct_version__coupons__stripeCoupon_operator
   version__coupons__stripeCouponJSON: versionsProduct_version__coupons__stripeCouponJSON_operator
   version__coupons__id: versionsProduct_version__coupons__id_operator
@@ -5592,7 +5744,7 @@ input versionsProduct_version__coupons__nickname_operator {
   exists: Boolean
 }
 
-input versionsProduct_version__coupons__quantity_operator {
+input versionsProduct_version__coupons__nights_operator {
   equals: Float
   not_equals: Float
   greater_than_equal: Float
@@ -5825,7 +5977,7 @@ input versionsProduct_where_and {
   version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
   version__guestFeePriceJSON: versionsProduct_version__guestFeePriceJSON_operator
   version__coupons__nickname: versionsProduct_version__coupons__nickname_operator
-  version__coupons__quantity: versionsProduct_version__coupons__quantity_operator
+  version__coupons__nights: versionsProduct_version__coupons__nights_operator
   version__coupons__stripeCoupon: versionsProduct_version__coupons__stripeCoupon_operator
   version__coupons__stripeCouponJSON: versionsProduct_version__coupons__stripeCouponJSON_operator
   version__coupons__id: versionsProduct_version__coupons__id_operator
@@ -5870,7 +6022,7 @@ input versionsProduct_where_or {
   version__stripeGuestFeeID: versionsProduct_version__stripeGuestFeeID_operator
   version__guestFeePriceJSON: versionsProduct_version__guestFeePriceJSON_operator
   version__coupons__nickname: versionsProduct_version__coupons__nickname_operator
-  version__coupons__quantity: versionsProduct_version__coupons__quantity_operator
+  version__coupons__nights: versionsProduct_version__coupons__nights_operator
   version__coupons__stripeCoupon: versionsProduct_version__coupons__stripeCoupon_operator
   version__coupons__stripeCouponJSON: versionsProduct_version__coupons__stripeCouponJSON_operator
   version__coupons__id: versionsProduct_version__coupons__id_operator
@@ -5899,7 +6051,7 @@ input versionsProduct_where_or {
 type Policy {
   id: String
   title: String
-  attachment: Media
+  attachment(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Media
   slug: String
   body(depth: Int): JSON
   updatedAt: DateTime
@@ -6260,7 +6412,7 @@ type PoliciesReadVersionsDocAccess {
 }
 
 type PolicyVersion {
-  parent(draft: Boolean): Policy
+  parent(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Policy
   version: PolicyVersion_Version
   createdAt: DateTime
   updatedAt: DateTime
@@ -6270,7 +6422,7 @@ type PolicyVersion {
 
 type PolicyVersion_Version {
   title: String
-  attachment: Media
+  attachment(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Media
   slug: String
   body(depth: Int): JSON
   updatedAt: DateTime
@@ -6472,7 +6624,7 @@ input versionsPolicy_where_or {
 
 type Order {
   id: String
-  orderedBy: User
+  orderedBy(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): User
   stripePaymentIntentID: String
   total: Float!
   items: [Order_Items!]
@@ -6481,7 +6633,7 @@ type Order {
 }
 
 type Order_Items {
-  product(draft: Boolean): Product
+  product(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Product
   price: Float
   quantity: Float
   startDate: DateTime
@@ -9780,7 +9932,7 @@ type ReviewsReadVersionsDocAccess {
 }
 
 type ReviewVersion {
-  parent(draft: Boolean): Review
+  parent(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Review
   version: ReviewVersion_Version
   createdAt: DateTime
   updatedAt: DateTime
@@ -9790,11 +9942,11 @@ type ReviewVersion {
 
 type ReviewVersion_Version {
   name: String
-  relatedListing(draft: Boolean): Product
+  relatedListing(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Product
   publishedOn: DateTime
   rating: Float
   statement: String
-  user: User
+  user(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): User
   updatedAt: DateTime
   createdAt: DateTime
   _status: ReviewVersion_Version__status
@@ -10022,9 +10174,9 @@ type Booking {
   introduction: String
   startDate: DateTime!
   endDate: DateTime!
-  product(draft: Boolean): Product!
+  product(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Product!
   invoice: String
-  user: User
+  user(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): User
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -11032,140 +11184,6 @@ type FaqsDeleteDocAccess {
   where: JSONObject
 }
 
-type Form {
-  id: String
-  title: String!
-  fields: [Form_Fields!]
-  submitButtonLabel: String
-  confirmationType: Form_confirmationType
-  confirmationMessage(depth: Int): JSON
-  redirect: Form_Redirect
-  emails: [Form_Emails!]
-  updatedAt: DateTime
-  createdAt: DateTime
-}
-
-union Form_Fields = Checkbox | Country | Email | Message | Number | Select | State | Text | Textarea
-
-type Checkbox {
-  name: String!
-  label: String
-  width: Float
-  required: Boolean
-  defaultValue: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Country {
-  name: String!
-  label: String
-  width: Float
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Email {
-  name: String!
-  label: String
-  width: Float
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Message {
-  message(depth: Int): JSON
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Number {
-  name: String!
-  label: String
-  width: Float
-  defaultValue: Float
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Select {
-  name: String!
-  label: String
-  width: Float
-  defaultValue: String
-  options: [Select_Options!]
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Select_Options {
-  label: String
-  value: String
-  id: String
-}
-
-type State {
-  name: String!
-  label: String
-  width: Float
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Text {
-  name: String!
-  label: String
-  width: Float
-  defaultValue: String
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Textarea {
-  name: String!
-  label: String
-  width: Float
-  defaultValue: String
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-enum Form_confirmationType {
-  message
-  redirect
-}
-
-type Form_Redirect {
-  url: String
-}
-
-type Form_Emails {
-  emailTo: String
-  cc: String
-  bcc: String
-  replyTo: String
-  emailFrom: String
-  subject: String
-  message(depth: Int): JSON
-  id: String
-}
-
 type Forms {
   docs: [Form]
   hasNextPage: Boolean
@@ -11888,7 +11906,7 @@ type FormsDeleteDocAccess {
 
 type FormSubmission {
   id: String
-  form: Form!
+  form(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Form!
   submissionData: [FormSubmission_SubmissionData!]
   updatedAt: DateTime
   createdAt: DateTime
@@ -12239,7 +12257,7 @@ type Redirect {
 
 type Redirect_To {
   type: Redirect_To_type
-  reference(draft: Boolean): Redirect_To_Reference_Relationship
+  reference(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Redirect_To_Reference_Relationship
   url: String
 }
 
@@ -12595,7 +12613,7 @@ type RedirectsDeleteDocAccess {
 
 type PayloadPreference {
   id: String
-  user: PayloadPreference_User_Relationship!
+  user(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadPreference_User_Relationship!
   key: String
   value: JSON
   updatedAt: DateTime
@@ -12879,7 +12897,7 @@ type PayloadPreferencesDeleteDocAccess {
 }
 
 type Settings {
-  productsPage(draft: Boolean): Page
+  productsPage(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Page
   minBooking: Float
   maxBooking: Float
   advancedBookingLimit: Float
@@ -13139,7 +13157,7 @@ type Header_NavItems {
 type Header_NavItems_Link {
   type: Header_NavItems_Link_type
   newTab: Boolean
-  reference(draft: Boolean): Header_NavItems_Link_Reference_Relationship
+  reference(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Header_NavItems_Link_Reference_Relationship
   url: String
   label: String
 }
@@ -13441,7 +13459,7 @@ type Footer_NavItems {
 type Footer_NavItems_Link {
   type: Footer_NavItems_Link_type
   newTab: Boolean
-  reference(draft: Boolean): Footer_NavItems_Link_Reference_Relationship
+  reference(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Footer_NavItems_Link_Reference_Relationship
   url: String
   label: String
 }
@@ -14888,7 +14906,7 @@ type ProductsFields_coupons_Delete {
 
 type ProductsFields_coupons_Fields {
   nickname: ProductsFields_coupons_nickname
-  quantity: ProductsFields_coupons_quantity
+  nights: ProductsFields_coupons_nights
   stripeCoupon: ProductsFields_coupons_stripeCoupon
   stripeCouponJSON: ProductsFields_coupons_stripeCouponJSON
   id: ProductsFields_coupons_id
@@ -14917,26 +14935,26 @@ type ProductsFields_coupons_nickname_Delete {
   permission: Boolean!
 }
 
-type ProductsFields_coupons_quantity {
-  create: ProductsFields_coupons_quantity_Create
-  read: ProductsFields_coupons_quantity_Read
-  update: ProductsFields_coupons_quantity_Update
-  delete: ProductsFields_coupons_quantity_Delete
+type ProductsFields_coupons_nights {
+  create: ProductsFields_coupons_nights_Create
+  read: ProductsFields_coupons_nights_Read
+  update: ProductsFields_coupons_nights_Update
+  delete: ProductsFields_coupons_nights_Delete
 }
 
-type ProductsFields_coupons_quantity_Create {
+type ProductsFields_coupons_nights_Create {
   permission: Boolean!
 }
 
-type ProductsFields_coupons_quantity_Read {
+type ProductsFields_coupons_nights_Read {
   permission: Boolean!
 }
 
-type ProductsFields_coupons_quantity_Update {
+type ProductsFields_coupons_nights_Update {
   permission: Boolean!
 }
 
-type ProductsFields_coupons_quantity_Delete {
+type ProductsFields_coupons_nights_Delete {
   permission: Boolean!
 }
 
@@ -20080,29 +20098,29 @@ type FooterUpdateAccess {
 }
 
 type Mutation {
-  createPage(data: mutationPageInput!, draft: Boolean): Page
-  updatePage(id: String!, autosave: Boolean, data: mutationPageUpdateInput!, draft: Boolean): Page
+  createPage(data: mutationPageInput!, draft: Boolean, locale: LocaleInputType): Page
+  updatePage(id: String!, autosave: Boolean, data: mutationPageUpdateInput!, draft: Boolean, locale: LocaleInputType): Page
   deletePage(id: String!): Page
   restoreVersionPage(id: String): Page
-  createProduct(data: mutationProductInput!, draft: Boolean): Product
-  updateProduct(id: String!, autosave: Boolean, data: mutationProductUpdateInput!, draft: Boolean): Product
+  createProduct(data: mutationProductInput!, draft: Boolean, locale: LocaleInputType): Product
+  updateProduct(id: String!, autosave: Boolean, data: mutationProductUpdateInput!, draft: Boolean, locale: LocaleInputType): Product
   deleteProduct(id: String!): Product
   restoreVersionProduct(id: String): Product
-  createPolicy(data: mutationPolicyInput!, draft: Boolean): Policy
-  updatePolicy(id: String!, autosave: Boolean, data: mutationPolicyUpdateInput!, draft: Boolean): Policy
+  createPolicy(data: mutationPolicyInput!, draft: Boolean, locale: LocaleInputType): Policy
+  updatePolicy(id: String!, autosave: Boolean, data: mutationPolicyUpdateInput!, draft: Boolean, locale: LocaleInputType): Policy
   deletePolicy(id: String!): Policy
   restoreVersionPolicy(id: String): Policy
-  createOrder(data: mutationOrderInput!): Order
-  updateOrder(id: String!, autosave: Boolean, data: mutationOrderUpdateInput!): Order
+  createOrder(data: mutationOrderInput!, locale: LocaleInputType): Order
+  updateOrder(id: String!, autosave: Boolean, data: mutationOrderUpdateInput!, locale: LocaleInputType): Order
   deleteOrder(id: String!): Order
-  createMedia(data: mutationMediaInput!): Media
-  updateMedia(id: String!, autosave: Boolean, data: mutationMediaUpdateInput!): Media
+  createMedia(data: mutationMediaInput!, locale: LocaleInputType): Media
+  updateMedia(id: String!, autosave: Boolean, data: mutationMediaUpdateInput!, locale: LocaleInputType): Media
   deleteMedia(id: String!): Media
-  createCategory(data: mutationCategoryInput!): Category
-  updateCategory(id: String!, autosave: Boolean, data: mutationCategoryUpdateInput!): Category
+  createCategory(data: mutationCategoryInput!, locale: LocaleInputType): Category
+  updateCategory(id: String!, autosave: Boolean, data: mutationCategoryUpdateInput!, locale: LocaleInputType): Category
   deleteCategory(id: String!): Category
-  createUser(data: mutationUserInput!): User
-  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!): User
+  createUser(data: mutationUserInput!, locale: LocaleInputType): User
+  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, locale: LocaleInputType): User
   deleteUser(id: String!): User
   refreshTokenUser: usersRefreshedUser
   logoutUser: String
@@ -20111,34 +20129,34 @@ type Mutation {
   forgotPasswordUser(disableEmail: Boolean, email: String!, expiration: Int): Boolean!
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
-  createReview(data: mutationReviewInput!, draft: Boolean): Review
-  updateReview(id: String!, autosave: Boolean, data: mutationReviewUpdateInput!, draft: Boolean): Review
+  createReview(data: mutationReviewInput!, draft: Boolean, locale: LocaleInputType): Review
+  updateReview(id: String!, autosave: Boolean, data: mutationReviewUpdateInput!, draft: Boolean, locale: LocaleInputType): Review
   deleteReview(id: String!): Review
   restoreVersionReview(id: String): Review
-  createBooking(data: mutationBookingInput!): Booking
-  updateBooking(id: String!, autosave: Boolean, data: mutationBookingUpdateInput!): Booking
+  createBooking(data: mutationBookingInput!, locale: LocaleInputType): Booking
+  updateBooking(id: String!, autosave: Boolean, data: mutationBookingUpdateInput!, locale: LocaleInputType): Booking
   deleteBooking(id: String!): Booking
-  createAmenity(data: mutationAmenityInput!): Amenity
-  updateAmenity(id: String!, autosave: Boolean, data: mutationAmenityUpdateInput!): Amenity
+  createAmenity(data: mutationAmenityInput!, locale: LocaleInputType): Amenity
+  updateAmenity(id: String!, autosave: Boolean, data: mutationAmenityUpdateInput!, locale: LocaleInputType): Amenity
   deleteAmenity(id: String!): Amenity
-  createFaq(data: mutationFaqInput!): Faq
-  updateFaq(id: String!, autosave: Boolean, data: mutationFaqUpdateInput!): Faq
+  createFaq(data: mutationFaqInput!, locale: LocaleInputType): Faq
+  updateFaq(id: String!, autosave: Boolean, data: mutationFaqUpdateInput!, locale: LocaleInputType): Faq
   deleteFaq(id: String!): Faq
-  createForm(data: mutationFormInput!): Form
-  updateForm(id: String!, autosave: Boolean, data: mutationFormUpdateInput!): Form
+  createForm(data: mutationFormInput!, locale: LocaleInputType): Form
+  updateForm(id: String!, autosave: Boolean, data: mutationFormUpdateInput!, locale: LocaleInputType): Form
   deleteForm(id: String!): Form
-  createFormSubmission(data: mutationFormSubmissionInput!): FormSubmission
-  updateFormSubmission(id: String!, autosave: Boolean, data: mutationFormSubmissionUpdateInput!): FormSubmission
+  createFormSubmission(data: mutationFormSubmissionInput!, locale: LocaleInputType): FormSubmission
+  updateFormSubmission(id: String!, autosave: Boolean, data: mutationFormSubmissionUpdateInput!, locale: LocaleInputType): FormSubmission
   deleteFormSubmission(id: String!): FormSubmission
-  createRedirect(data: mutationRedirectInput!): Redirect
-  updateRedirect(id: String!, autosave: Boolean, data: mutationRedirectUpdateInput!): Redirect
+  createRedirect(data: mutationRedirectInput!, locale: LocaleInputType): Redirect
+  updateRedirect(id: String!, autosave: Boolean, data: mutationRedirectUpdateInput!, locale: LocaleInputType): Redirect
   deleteRedirect(id: String!): Redirect
-  createPayloadPreference(data: mutationPayloadPreferenceInput!): PayloadPreference
-  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!): PayloadPreference
+  createPayloadPreference(data: mutationPayloadPreferenceInput!, locale: LocaleInputType): PayloadPreference
+  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, locale: LocaleInputType): PayloadPreference
   deletePayloadPreference(id: String!): PayloadPreference
-  updateSettings(data: mutationSettingsInput!, draft: Boolean): Settings
-  updateHeader(data: mutationHeaderInput!, draft: Boolean): Header
-  updateFooter(data: mutationFooterInput!, draft: Boolean): Footer
+  updateSettings(data: mutationSettingsInput!, draft: Boolean, locale: LocaleInputType): Settings
+  updateHeader(data: mutationHeaderInput!, draft: Boolean, locale: LocaleInputType): Header
+  updateFooter(data: mutationFooterInput!, draft: Boolean, locale: LocaleInputType): Footer
 }
 
 input mutationPageInput {
@@ -20312,7 +20330,7 @@ input mutationProduct_GalleryInput {
 
 input mutationProduct_CouponsInput {
   nickname: String
-  quantity: Float!
+  nights: Float!
   stripeCoupon: String!
   stripeCouponJSON: String
   id: String
@@ -20373,7 +20391,7 @@ input mutationProductUpdate_GalleryInput {
 
 input mutationProductUpdate_CouponsInput {
   nickname: String
-  quantity: Float!
+  nights: Float!
   stripeCoupon: String!
   stripeCouponJSON: String
   id: String
@@ -20816,7 +20834,7 @@ input mutationForm_EmailsInput {
   bcc: String
   replyTo: String
   emailFrom: String
-  subject: String!
+  subject: String
   message: JSON
   id: String
 }
@@ -20843,7 +20861,7 @@ input mutationFormUpdate_EmailsInput {
   bcc: String
   replyTo: String
   emailFrom: String
-  subject: String!
+  subject: String
   message: JSON
   id: String
 }

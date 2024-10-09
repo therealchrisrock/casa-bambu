@@ -5,8 +5,6 @@ import { Page, Review } from '../../../payload/payload-types'
 
 import { Gutter } from '@/_components/Gutter'
 import { Media } from '@/_components/Media'
-import RichText from '@/_components/RichText'
-import { useId } from '@radix-ui/react-id'
 
 type Props = Extract<Page['layout'][0], { blockType: 'reviewBlock' }>
 
@@ -38,7 +36,7 @@ export const ReviewBlock: React.FC<Props> = props => {
             <div className={'text-sm '}>
               <div className={'font-semibold'}>{review.name}</div>
               {typeof review?.relatedListing === 'object' && (
-                <div className={'tracking-widest'}>Guest of {review.relatedListing.title}</div>
+                <div className={'tracking-widest'}>Guest of {review.relatedListing?.title}</div>
               )}
             </div>
           </div>

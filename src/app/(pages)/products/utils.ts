@@ -18,7 +18,7 @@ export function findFirstAvailableDateRange(
   const sortedBookings = bookings
     .filter(b => new Date(b.endDate) >= new Date()) // Ignore bookings that are entirely in the past
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-  const today = addDays(new Date(), 1)
+  const today = addDays(new Date(), 3)
   const maxBookingDate = addDays(today, lastAvailableBookingDate)
 
   // Check for the gap before the first booking
@@ -84,7 +84,7 @@ export function getUnavailableDates(bookings: Booking[], settings: Settings): Ma
   })
   // Exclude today's date
   const outerBounds: [DateBefore, DateAfter] = [
-    { before: today },
+    { before: addDays(today, 2) },
     {
       after: addDays(
         today,

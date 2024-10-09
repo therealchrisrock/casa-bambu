@@ -78,6 +78,8 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
       res.status(400).json({ error: 'Invalid Booking Dates' })
       return
     }
+    const from = new UTCDate(body.from)
+    const to = new UTCDate(body.to)
     const bookingDetails = calculateBookingDetails(
       product,
       {
@@ -91,6 +93,9 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
       res.status(500).json({ error: 'An unknown error has occurred. Please try again later.' })
       return
     }
+    from.setUTCHours(12, 0, 0, 0)
+    to.setUTCHours(12, 0, 0, 0)
+    console.log(from, to)
     const booking = await payload.create({
       collection: 'bookings',
       data: {
@@ -99,8 +104,8 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
         product: product.id,
         introduction: body.message,
         user: user.id,
-        startDate: body.from,
-        endDate: body.to,
+        startDate: from.toISOString(),
+        endDate: to.toISOString(),
       },
     })
     if (!booking) {
@@ -162,7 +167,7 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
         quantity: f.quantity,
         currency: 'cad',
         invoice: invoice.id,
-        discountable: false
+        discountable: false,
       })
     }
     payload.logger.info('Invoice Items have been added to invoice')
@@ -282,9 +287,9 @@ export const calculateBookingDetails = (
 
   const coupons = []
   const applicableCoupon = product.coupons
-    .sort((a, b) => a.quantity - b.quantity)
+    .sort((a, b) => a.nights - b.nights)
     .reverse()
-    .find(x => x.quantity <= totalNights)
+    .find(x => x.nights <= totalNights)
   if (applicableCoupon) {
     const c = JSON.parse(applicableCoupon.stripeCouponJSON)
     let amt = 0

@@ -47,13 +47,6 @@ export default async function Page({ params: { slug = 'faq' } }) {
     // console.error(error)
   }
 
-  // if no `home` page exists, render a static one using dummy content
-  // you should delete this code once you have a home page in the CMS
-  // this is really only useful for those who are demoing this template
-  if (!page && slug === 'home') {
-    page = staticHome
-  }
-
   if (!page) {
     return notFound()
   }

@@ -15,8 +15,6 @@ import {
   Select,
   SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from '@/_components/ui/select'
 import { Separator } from '@/_components/ui/separator'
 import { Textarea } from '@/_components/ui/textarea'

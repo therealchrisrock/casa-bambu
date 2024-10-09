@@ -23,7 +23,6 @@ export const CouponSelect: React.FC<TextField> = props => {
           'Content-Type': 'application/json',
         },
       })
-      console.log(couponsFetch)
 
       const res = await couponsFetch.json()
 

@@ -42,7 +42,7 @@ export const PRODUCT = `
         priceJSON
         coupons {
           nickname
-          quantity
+          nights
           stripeCoupon
           stripeCouponJSON
         }

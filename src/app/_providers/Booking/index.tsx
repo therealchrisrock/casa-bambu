@@ -109,7 +109,6 @@ export const BookingProvider = ({
 
     const fromDate = booking.dates.from
     const toDate = booking.dates.to
-
     const bookingDates = eachDayOfInterval({ start: fromDate, end: toDate })
     const hasValidDuration = bookingDates.length >= settings.minBooking
     const hasValidGuestCount = booking.guestCount >= 1 && booking.guestCount <= product.maxGuestQuantity

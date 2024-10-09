@@ -71,9 +71,6 @@ export const calculateBookingDetails = (
       if (!priceDetails) return
       const rangeStart = isBefore(bookingStart, seasonStart) ? seasonStart : bookingStart
       let rangeEnd = isAfter(bookingEnd, seasonEnd) ? seasonEnd : bookingEnd
-//
-// // Subtract 1 day from rangeEnd so it doesn't include the checkout date
-//       rangeEnd = new Date(rangeEnd.getTime() - 1 * 24 * 60 * 60 * 1000)
 
       // const daysInRange = rangeStart < rangeEnd ? differenceInDays(rangeEnd, rangeStart) : 0
       //
@@ -148,9 +145,9 @@ export const calculateBookingDetails = (
 
   const coupons = []
   const applicableCoupon = product.coupons
-    .sort((a, b) => a.quantity - b.quantity)
+    .sort((a, b) => a.nights - b.nights)
     .reverse()
-    .find(x => x.quantity <= totalNights)
+    .find(x => x.nights <= totalNights)
   if (applicableCoupon) {
     const c = JSON.parse(applicableCoupon.stripeCouponJSON)
     let amt = 0

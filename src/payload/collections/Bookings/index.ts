@@ -84,6 +84,16 @@ export const Bookings: CollectionConfig = {
       label: 'Introductory Message',
       type: 'textarea',
     },
+    //     ...DateField({
+    //       name: 'startDate',
+    //       admin: {
+    //         date: {
+    //           pickerAppearance: 'dayOnly',
+    //           displayFormat: 'd MMM yyy',
+    //         },
+    //         position: 'sidebar',
+    //       },
+    //     }),
     {
       name: 'startDate',
       label: 'Start Date',
@@ -96,6 +106,7 @@ export const Bookings: CollectionConfig = {
         },
         position: 'sidebar',
       },
+      localized: false
     },
     {
       name: 'endDate',

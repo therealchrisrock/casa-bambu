@@ -173,6 +173,7 @@ const Products: CollectionConfig = {
             },
             {
               name: 'features',
+              label: 'Amenities',
               type: 'relationship',
               relationTo: 'amenities',
               hasMany: true
@@ -243,11 +244,10 @@ const Products: CollectionConfig = {
                   type: 'text',
                 },
                 {
-                  name: 'quantity',
+                  name: 'nights',
                   label: 'By Nights',
                   type: 'number',
                   required: true,
-                  unique: true
                 },
                 {
                   name: 'stripeCoupon',

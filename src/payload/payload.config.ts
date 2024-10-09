@@ -58,6 +58,11 @@ dotenv.config({
 
 export default buildConfig({
   // email,
+  localization: {
+    locales: ['en'], // required
+    defaultLocale: 'en', // required
+    fallback: true,
+  },
   admin: {
     user: Users.slug,
     bundler: webpackBundler(),

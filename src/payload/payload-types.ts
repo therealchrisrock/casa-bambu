@@ -77,10 +77,15 @@ export interface Page {
           link: {
             type?: ('reference' | 'custom') | null;
             newTab?: boolean | null;
-            reference?: {
-              relationTo: 'pages';
-              value: string | Page;
-            } | null;
+            reference?:
+              | ({
+                  relationTo: 'pages';
+                  value: string | Page;
+                } | null)
+              | ({
+                  relationTo: 'policies';
+                  value: string | Policy;
+                } | null);
             url?: string | null;
             label: string;
             appearance?: ('default' | 'primary' | 'secondary' | 'link') | null;
@@ -102,10 +107,15 @@ export interface Page {
                   link: {
                     type?: ('reference' | 'custom') | null;
                     newTab?: boolean | null;
-                    reference?: {
-                      relationTo: 'pages';
-                      value: string | Page;
-                    } | null;
+                    reference?:
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null)
+                      | ({
+                          relationTo: 'policies';
+                          value: string | Policy;
+                        } | null);
                     url?: string | null;
                     label: string;
                     appearance?: ('primary' | 'secondary') | null;
@@ -129,10 +139,15 @@ export interface Page {
                   link?: {
                     type?: ('reference' | 'custom') | null;
                     newTab?: boolean | null;
-                    reference?: {
-                      relationTo: 'pages';
-                      value: string | Page;
-                    } | null;
+                    reference?:
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null)
+                      | ({
+                          relationTo: 'policies';
+                          value: string | Policy;
+                        } | null);
                     url?: string | null;
                     label: string;
                     appearance?: ('default' | 'primary' | 'secondary' | 'link') | null;
@@ -209,6 +224,24 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "policies".
+ */
+export interface Policy {
+  id: string;
+  title: string;
+  attachment?: (string | null) | Media;
+  slug?: string | null;
+  body?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
@@ -279,10 +312,15 @@ export interface Product {
                   link: {
                     type?: ('reference' | 'custom') | null;
                     newTab?: boolean | null;
-                    reference?: {
-                      relationTo: 'pages';
-                      value: string | Page;
-                    } | null;
+                    reference?:
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null)
+                      | ({
+                          relationTo: 'policies';
+                          value: string | Policy;
+                        } | null);
                     url?: string | null;
                     label: string;
                     appearance?: ('primary' | 'secondary') | null;
@@ -306,10 +344,15 @@ export interface Product {
                   link?: {
                     type?: ('reference' | 'custom') | null;
                     newTab?: boolean | null;
-                    reference?: {
-                      relationTo: 'pages';
-                      value: string | Page;
-                    } | null;
+                    reference?:
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null)
+                      | ({
+                          relationTo: 'policies';
+                          value: string | Policy;
+                        } | null);
                     url?: string | null;
                     label: string;
                     appearance?: ('default' | 'primary' | 'secondary' | 'link') | null;
@@ -376,10 +419,15 @@ export interface Product {
                   link: {
                     type?: ('reference' | 'custom') | null;
                     newTab?: boolean | null;
-                    reference?: {
-                      relationTo: 'pages';
-                      value: string | Page;
-                    } | null;
+                    reference?:
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null)
+                      | ({
+                          relationTo: 'policies';
+                          value: string | Policy;
+                        } | null);
                     url?: string | null;
                     label: string;
                     appearance?: ('primary' | 'secondary') | null;
@@ -403,10 +451,15 @@ export interface Product {
                   link?: {
                     type?: ('reference' | 'custom') | null;
                     newTab?: boolean | null;
-                    reference?: {
-                      relationTo: 'pages';
-                      value: string | Page;
-                    } | null;
+                    reference?:
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null)
+                      | ({
+                          relationTo: 'policies';
+                          value: string | Policy;
+                        } | null);
                     url?: string | null;
                     label: string;
                     appearance?: ('default' | 'primary' | 'secondary' | 'link') | null;
@@ -697,24 +750,6 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "policies".
- */
-export interface Policy {
-  id: string;
-  title: string;
-  attachment?: (string | null) | Media;
-  slug?: string | null;
-  body?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
  */
 export interface Order {
@@ -868,10 +903,15 @@ export interface Header {
         link: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'policies';
+                value: string | Policy;
+              } | null);
           url?: string | null;
           label: string;
         };
@@ -892,10 +932,15 @@ export interface Footer {
         link: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'policies';
+                value: string | Policy;
+              } | null);
           url?: string | null;
           label: string;
         };

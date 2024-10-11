@@ -11,11 +11,7 @@ import { formattedPrice } from '@/_components/Price'
 import { Button } from '@/_components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/_components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/_components/ui/form'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-} from '@/_components/ui/select'
+import { Select, SelectContent, SelectItem } from '@/_components/ui/select'
 import { Separator } from '@/_components/ui/separator'
 import { Textarea } from '@/_components/ui/textarea'
 import { useAuth } from '@/_providers/Auth'
@@ -228,9 +224,18 @@ export function BookingForm() {
             <div className={'pt-8'}>
               <p className={'text-xs prose'}>
                 By selecting the button, I agree to the{' '}
-                <a href={'/policies/rental-agreement'}>booking terms</a>. I also agree to the
-                updated <a href={'/policies/terms-and-conditions'}>Terms and Conditions</a>, and I
-                acknowledge the <a href={'/policies/privac-policy'}>Privacy Policy</a>.
+                <a target={'_blank'} href={'/policies/rental-agreement'}>
+                  booking terms
+                </a>
+                . I also agree to the updated{' '}
+                <a target={'_blank'} href={'/policies/terms-and-conditions'}>
+                  Terms and Conditions
+                </a>
+                , and I acknowledge the{' '}
+                <a target={'_blank'} href={'/policies/privacy-policy'}>
+                  Privacy Policy
+                </a>
+                .
               </p>
             </div>
             <div className={'pt-8'}>

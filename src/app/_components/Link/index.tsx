@@ -1,17 +1,22 @@
 import React from 'react'
 import Link from 'next/link'
 
-import { Page } from '../../../payload/payload-types'
+import { Page, Policy } from '../../../payload/payload-types'
 import { Button, Props as ButtonProps } from '../Button'
 
 type CMSLinkType = {
   type?: 'custom' | 'reference'
   url?: string
   newTab?: boolean
-  reference?: {
-    value: string | Page
-    relationTo: 'pages'
-  }
+  reference?:
+    | {
+        value: string | Page
+        relationTo: 'pages'
+      }
+    | {
+        value: string | Policy
+        relationTo: 'policies'
+      }
   label?: string
   appearance?: ButtonProps['appearance']
   children?: React.ReactNode
@@ -32,11 +37,12 @@ export const CMSLink: React.FC<CMSLinkType> = ({
 }) => {
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-      ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
-          reference.value.slug
-        }`
+      ? reference?.relationTo === 'policies'
+        ? `/policies/${reference.value.slug}`
+        : `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
+            reference.value.slug
+          }`
       : url
-
 
   if (!href) return null
 
@@ -59,6 +65,9 @@ export const CMSLink: React.FC<CMSLinkType> = ({
       href={href}
       appearance={appearance}
       invert={invert}
-    >{label}{children}</Button>
+    >
+      {label}
+      {children}
+    </Button>
   )
 }

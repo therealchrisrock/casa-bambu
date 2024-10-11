@@ -15,6 +15,9 @@ export const LINK_FIELDS = ({ disableAppearance, disableLabel }: Args = {}): str
       ...on Page {
         slug
       }
+      ...on Policy {
+        slug
+      }
     }
   }
 }`

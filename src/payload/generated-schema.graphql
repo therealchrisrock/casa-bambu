@@ -141,24 +141,20 @@ type Page_Hero_Links_Link_Reference_Relationship {
 
 enum Page_Hero_Links_Link_Reference_RelationTo {
   pages
+  policies
 }
 
-union Page_Hero_Links_Link_Reference = Page
+union Page_Hero_Links_Link_Reference = Page | Policy
 
-enum LocaleInputType {
-  en
-}
-
-enum FallbackLocaleInputType {
-  en
-  none
-}
-
-enum Page_Hero_Links_Link_appearance {
-  default
-  primary
-  secondary
-  link
+type Policy {
+  id: String
+  title: String
+  attachment(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Media
+  slug: String
+  body(depth: Int): JSON
+  updatedAt: DateTime
+  createdAt: DateTime
+  _status: Policy__status
 }
 
 type Media {
@@ -175,6 +171,27 @@ type Media {
   height: Float
   focalX: Float
   focalY: Float
+}
+
+enum LocaleInputType {
+  en
+}
+
+enum FallbackLocaleInputType {
+  en
+  none
+}
+
+enum Policy__status {
+  draft
+  published
+}
+
+enum Page_Hero_Links_Link_appearance {
+  default
+  primary
+  secondary
+  link
 }
 
 input Page_Hero_Media_where {
@@ -403,9 +420,10 @@ type Cta_Links_Link_Reference_Relationship {
 
 enum Cta_Links_Link_Reference_RelationTo {
   pages
+  policies
 }
 
-union Cta_Links_Link_Reference = Page
+union Cta_Links_Link_Reference = Page | Policy
 
 enum Cta_Links_Link_appearance {
   primary
@@ -456,9 +474,10 @@ type Content_Columns_Link_Reference_Relationship {
 
 enum Content_Columns_Link_Reference_RelationTo {
   pages
+  policies
 }
 
-union Content_Columns_Link_Reference = Page
+union Content_Columns_Link_Reference = Page | Policy
 
 enum Content_Columns_Link_appearance {
   default
@@ -1927,6 +1946,7 @@ input Page_hero__links__link__reference_Relation {
 
 enum Page_hero__links__link__reference_Relation_RelationTo {
   pages
+  policies
 }
 
 input Page_hero__links__link__url_operator {
@@ -2813,9 +2833,10 @@ type PageVersion_Version_Hero_Links_Link_Reference_Relationship {
 
 enum PageVersion_Version_Hero_Links_Link_Reference_RelationTo {
   pages
+  policies
 }
 
-union PageVersion_Version_Hero_Links_Link_Reference = Page
+union PageVersion_Version_Hero_Links_Link_Reference = Page | Policy
 
 enum PageVersion_Version_Hero_Links_Link_appearance {
   default
@@ -3337,6 +3358,7 @@ input versionsPage_version__hero__links__link__reference_Relation {
 
 enum versionsPage_version__hero__links__link__reference_Relation_RelationTo {
   pages
+  policies
 }
 
 input versionsPage_version__hero__links__link__url_operator {
@@ -6046,22 +6068,6 @@ input versionsProduct_where_or {
   id: versionsProduct_id_operator
   AND: [versionsProduct_where_and]
   OR: [versionsProduct_where_or]
-}
-
-type Policy {
-  id: String
-  title: String
-  attachment(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Media
-  slug: String
-  body(depth: Int): JSON
-  updatedAt: DateTime
-  createdAt: DateTime
-  _status: Policy__status
-}
-
-enum Policy__status {
-  draft
-  published
 }
 
 type Policies {
@@ -13174,9 +13180,10 @@ type Header_NavItems_Link_Reference_Relationship {
 
 enum Header_NavItems_Link_Reference_RelationTo {
   pages
+  policies
 }
 
-union Header_NavItems_Link_Reference = Page
+union Header_NavItems_Link_Reference = Page | Policy
 
 type headerDocAccess {
   fields: HeaderDocAccessFields
@@ -13476,9 +13483,10 @@ type Footer_NavItems_Link_Reference_Relationship {
 
 enum Footer_NavItems_Link_Reference_RelationTo {
   pages
+  policies
 }
 
-union Footer_NavItems_Link_Reference = Page
+union Footer_NavItems_Link_Reference = Page | Policy
 
 type footerDocAccess {
   fields: FooterDocAccessFields
@@ -20206,6 +20214,7 @@ input Page_Hero_Links_Link_ReferenceRelationshipInput {
 
 enum Page_Hero_Links_Link_ReferenceRelationshipInputRelationTo {
   pages
+  policies
 }
 
 enum Page_Hero_Links_Link_appearance_MutationInput {
@@ -20273,6 +20282,7 @@ input PageUpdate_Hero_Links_Link_ReferenceRelationshipInput {
 
 enum PageUpdate_Hero_Links_Link_ReferenceRelationshipInputRelationTo {
   pages
+  policies
 }
 
 enum PageUpdate_Hero_Links_Link_appearance_MutationInput {
@@ -21010,6 +21020,7 @@ input Header_NavItems_Link_ReferenceRelationshipInput {
 
 enum Header_NavItems_Link_ReferenceRelationshipInputRelationTo {
   pages
+  policies
 }
 
 input mutationFooterInput {
@@ -21038,4 +21049,5 @@ input Footer_NavItems_Link_ReferenceRelationshipInput {
 
 enum Footer_NavItems_Link_ReferenceRelationshipInputRelationTo {
   pages
+  policies
 }

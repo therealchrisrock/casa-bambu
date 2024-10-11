@@ -15,6 +15,8 @@ export const CALL_TO_ACTION = `
 `
 export const FORM_BLOCK = `
 ...on FormBlock {
+  blockType
+  enableIntro
   introContent
   form {
     id   

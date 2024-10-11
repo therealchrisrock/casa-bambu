@@ -35,7 +35,7 @@ export const ReviewBlock: React.FC<Props> = props => {
             </div>
             <div className={'text-sm '}>
               <div className={'font-semibold'}>{review.name}</div>
-              {typeof review?.relatedListing === 'object' && (
+              {typeof review?.relatedListing === 'object' && review.relatedListing?.title && (
                 <div className={'tracking-widest'}>Guest of {review.relatedListing?.title}</div>
               )}
             </div>

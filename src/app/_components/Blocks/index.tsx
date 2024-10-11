@@ -11,6 +11,7 @@ import { BackgroundColor } from '../BackgroundColor/index'
 import { VerticalPadding, VerticalPaddingOptions } from '../VerticalPadding/index'
 
 import { ReviewBlock } from '@/_blocks/ReviewBlock'
+import { FormBlock } from '@/_blocks/FormBlock'
 
 const blockComponents = {
   cta: CallToActionBlock,
@@ -19,6 +20,7 @@ const blockComponents = {
   archive: ArchiveBlock,
   relatedProducts: RelatedProducts,
   reviewBlock: ReviewBlock,
+  formBlock: FormBlock
 }
 
 export const Blocks: React.FC<{
@@ -28,13 +30,12 @@ export const Blocks: React.FC<{
   const { disableTopPadding, blocks } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
-
   if (hasBlocks) {
     return (
       <Fragment>
         {blocks.map((block, index) => {
           const { blockName, blockType } = block
-
+          console.log(block)
           if (blockType && blockType in blockComponents) {
             const Block = blockComponents[blockType]
 

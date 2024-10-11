@@ -21,6 +21,7 @@ export type Props = {
   disabled?: boolean
   invert?: boolean
   children?: ReactNode
+  form?: string
 }
 
 export const Button: React.FC<Props> = ({
@@ -33,6 +34,7 @@ export const Button: React.FC<Props> = ({
   className,
   onClick,
   type = 'button',
+  form,
   disabled,
   invert,
 }) => {

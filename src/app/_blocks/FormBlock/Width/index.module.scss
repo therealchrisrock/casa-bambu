@@ -1,0 +1,10 @@
+@use '../../../_css/queries.scss' as *;
+
+
+.width {
+  display: inline-block;
+  & > div {
+    display: grid;
+    gap: 0.3rem
+  }
+}

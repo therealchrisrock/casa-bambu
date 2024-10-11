@@ -160,9 +160,9 @@ export default buildConfig({
     FAQs,
   ],
   upload: {
-    limits: {
-      fileSize: 10 * 1000000, // 10MB
-    },
+    // limits: {
+    //   fileSize: 10 * 1000000, // 10MB
+    // },
   },
   globals: [Settings, Header, Footer],
   typescript: {

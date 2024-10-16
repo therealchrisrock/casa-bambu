@@ -18,7 +18,7 @@ export const ReviewBlock: React.FC<Props> = props => {
           'relative xl:aspect-[3/1] min-h-[400px] max-h-[500px] w-full rounded-lg overflow-hidden p-4 md:p-6 xl:p-12   z-10'
         }
       >
-        <div className={'h-full  space-y-6 invert'}>
+        <div className={'h-full space-y-10 md:space-y-6 invert'}>
           <div>
             <img
               className={'w-48 '}

@@ -116,15 +116,12 @@ export const Card: React.FC<{
             </div>
           )}
           <div className={'mt-4 flex gap-3 hidden items-center'}>
-            <Link href={`/products/${slug}`}>
-              <Button>Book Now</Button>
-            </Link>
-            <Link href={`/products/${slug}`}>
-              <button className={'flex text-sm'}>
-                Learn More &nbsp;
-                <MoveRightIcon strokeWidth={1} />
-              </button>
-            </Link>
+            <Button>Book Now</Button>
+            <button className={'flex text-sm items-center'}>
+              Learn More &nbsp;
+              <MoveRightIcon strokeWidth={1} />
+            </button>
+            {/*</Link>*/}
           </div>
         </div>
       </Link>
@@ -151,7 +148,7 @@ export const Card: React.FC<{
           <Link href={`/products/${slug}`}>
             <Button>Book Now</Button>
           </Link>
-          <Link href={`/products/${slug}`}>
+          <Link href={`/products/${slug}`} className={'flex items-center'}>
             <button className={'flex text-sm items-center'}>
               Learn More &nbsp;
               <MoveRightIcon strokeWidth={1} />

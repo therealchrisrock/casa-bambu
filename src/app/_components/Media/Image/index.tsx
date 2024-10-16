@@ -43,9 +43,6 @@ export const Image: React.FC<MediaProps> = props => {
     alt = altFromResource
 
     filename = fullFilename
-
-    src = `https://media.casabambuwestbay.com/${filename}`
-    console.log(src)
   }
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes

@@ -16,7 +16,7 @@ const nextConfig = {
   },
   swcMinify: true,
   images: {
-    domains: ['localhost', process.env.NEXT_PUBLIC_SERVER_URL]
+    domains: ['localhost', process.env.NEXT_PUBLIC_SERVER_URL, 'cdn.casabambuwestbay.com']
       .filter(Boolean)
       .map(url => url.replace(/https?:\/\//, '')),
   },

@@ -11,3 +11,4 @@ appointments-plugin
 ecosystem.config.js
 .env.*
 mongodump
+cloudflare-cloudinary-proxy/

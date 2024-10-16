@@ -7,13 +7,20 @@ import payload from 'payload'
 dotenv.config({
   path: path.resolve(__dirname, '../.env'),
 })
-
 import nodemailer from 'nodemailer'
+import { mediaManagement } from 'payload-cloudinary-plugin'
 
 import { seed } from './payload/seed'
 
 const app = express()
 const PORT = process.env.PORT || 3000
+app.use(
+  mediaManagement({
+    cloud_name: 'deep2qpb8',
+    api_key: '262398781794751',
+    api_secret: 'rKuzqBxOXlrEKIvllF4r5bzJta8',
+  }),
+)
 // Add middleware to parse JSON bodies
 app.use(express.json())
 const start = async (): Promise<void> => {
@@ -71,9 +78,7 @@ const start = async (): Promise<void> => {
   })
 
   const nextHandler = nextApp.getRequestHandler()
-
   app.use((req, res) => nextHandler(req, res))
-
   nextApp.prepare().then(() => {
     payload.logger.info('Starting Next.js...')
 

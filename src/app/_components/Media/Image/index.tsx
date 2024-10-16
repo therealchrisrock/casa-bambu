@@ -2,6 +2,7 @@
 
 import React from 'react'
 import NextImage, { StaticImageData } from 'next/image'
+import { CldImage } from 'next-cloudinary'
 
 import cssVariables from '../../../cssVariables'
 import { Props as MediaProps } from '../types'
@@ -28,7 +29,7 @@ export const Image: React.FC<MediaProps> = props => {
   let height: number | undefined
   let alt = altFromProps
   let src: StaticImageData | string = srcFromProps || ''
-
+  let filename
   if (!src && resource && typeof resource !== 'string') {
     const {
       width: fullWidth,
@@ -41,9 +42,10 @@ export const Image: React.FC<MediaProps> = props => {
     height = fullHeight
     alt = altFromResource
 
-    const filename = fullFilename
+    filename = fullFilename
 
-    src = `${process.env.NEXT_PUBLIC_SERVER_URL}/media/${filename}`
+    src = `https://media.casabambuwestbay.com/${filename}`
+    console.log(src)
   }
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
@@ -51,25 +53,41 @@ export const Image: React.FC<MediaProps> = props => {
     .map(([, value]) => `(max-width: ${value}px) ${value}px`)
     .join(', ')
 
+  if (!filename) return <></>
   return (
-    <NextImage
+    <CldImage
       className={[isLoading && classes.placeholder, classes.image, imgClassName]
         .filter(Boolean)
         .join(' ')}
-      src={src}
       alt={alt || ''}
-      onClick={onClick}
-      onLoad={() => {
-        setIsLoading(false)
-        if (typeof onLoadFromProps === 'function') {
-          onLoadFromProps()
+      height={height}
+      width={width}
+      src={filename}
+      config={{
+        url: {
+          privateCdn: true,
+          secureDistribution: 'media.casabambuwestbay.com', // Set your custom domain here
         }
       }}
-      fill={fill}
-      width={!fill ? width : undefined}
-      height={!fill ? height : undefined}
-      sizes={sizes}
-      priority={priority}
     />
+    // <NextImage
+    //   className={[isLoading && classes.placeholder, classes.image, imgClassName]
+    //     .filter(Boolean)
+    //     .join(' ')}
+    //   src={src}
+    //   alt={alt || ''}
+    //   onClick={onClick}
+    //   onLoad={() => {
+    //     setIsLoading(false)
+    //     if (typeof onLoadFromProps === 'function') {
+    //       onLoadFromProps()
+    //     }
+    //   }}
+    //   fill={fill}
+    //   width={!fill ? width : undefined}
+    //   height={!fill ? height : undefined}
+    //   sizes={sizes}
+    //   priority={priority}
+    // />
   )
 }

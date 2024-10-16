@@ -12,6 +12,7 @@ import dotenv from 'dotenv'
 // import NodePolyfillPlugin from 'node-polyfill-webpack-plugin'
 import path from 'path'
 import { buildConfig } from 'payload/config'
+import cloudinaryPlugin from 'payload-cloudinary-plugin/dist/plugins/cloudinaryPlugin'
 
 // import email from '../email/transport'
 import { Amenities } from './collections/Amenities'
@@ -99,7 +100,7 @@ export default buildConfig({
             assert: require.resolve('assert/'),
             url: require.resolve('url/'),
             os: false,
-            fs: false
+            fs: false,
             // { "assert": require.resolve("assert/") }
           },
           // fallback: {
@@ -117,7 +118,7 @@ export default buildConfig({
           // },
           ...config.resolve,
           alias: {
-            'fs': mockModulePath,
+            fs: mockModulePath,
             'inline-css': mockModulePath,
             ...config.resolve?.alias,
             dotenv: path.resolve(__dirname, './dotenv.js'),
@@ -159,11 +160,11 @@ export default buildConfig({
     Amenities,
     FAQs,
   ],
-  upload: {
-    // limits: {
-    //   fileSize: 10 * 1000000, // 10MB
-    // },
-  },
+  // upload: {
+  //   limits: {
+  //     fileSize: 10 * 1000000, // 10MB
+  //   },
+  // },
   globals: [Settings, Header, Footer],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
@@ -172,14 +173,16 @@ export default buildConfig({
     schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
   },
   cors: [
+    'https://*.casabambuwestbay.com',
     'https://checkout.stripe.com',
     'https://bambu.tilde.technology',
     'http://localhost:3000',
     process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
   ].filter(Boolean),
-  csrf: ['https://checkout.stripe.com', process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(
-    Boolean,
-  ),
+  csrf: [
+    'https://checkout.stripe.com',
+    process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
+  ].filter(Boolean),
   endpoints: [
     {
       path: '/create-payment-intent',
@@ -230,6 +233,7 @@ export default buildConfig({
     },
   ],
   plugins: [
+    cloudinaryPlugin(),
     formBuilder({
       formSubmissionOverrides: {
         admin: {

@@ -9,9 +9,9 @@ import { Product } from '../../../payload/payload-types'
 import { Media } from '../Media'
 
 import { Button } from '@/_components/ui/button'
+import { cn } from '@/_lib/utils'
 
 import classes from './index.module.scss'
-import { cn } from '@/_lib/utils'
 
 const priceFromJSON = (priceJSON): string => {
   let price = ''
@@ -116,11 +116,15 @@ export const Card: React.FC<{
             </div>
           )}
           <div className={'mt-4 flex gap-3 hidden items-center'}>
-            <Button>Book Now</Button>
-            <button className={'flex text-sm'}>
-              Learn More &nbsp;
-              <MoveRightIcon strokeWidth={1} />
-            </button>
+            <Link href={`/products/${slug}`}>
+              <Button>Book Now</Button>
+            </Link>
+            <Link href={`/products/${slug}`}>
+              <button className={'flex text-sm'}>
+                Learn More &nbsp;
+                <MoveRightIcon strokeWidth={1} />
+              </button>
+            </Link>
           </div>
         </div>
       </Link>
@@ -144,11 +148,15 @@ export const Card: React.FC<{
           </div>
         )}
         <div className={'mt-4 flex gap-3 '}>
-          <Button>Book Now</Button>
-          <button className={'flex text-sm items-center'}>
-            Learn More &nbsp;
-            <MoveRightIcon strokeWidth={1} />
-          </button>
+          <Link href={`/products/${slug}`}>
+            <Button>Book Now</Button>
+          </Link>
+          <Link href={`/products/${slug}`}>
+            <button className={'flex text-sm items-center'}>
+              Learn More &nbsp;
+              <MoveRightIcon strokeWidth={1} />
+            </button>
+          </Link>
         </div>
       </div>
       <Link href={href} className={'md:w-1/2 aspect-[6/4] relative rounded-lg overflow-hidden'}>

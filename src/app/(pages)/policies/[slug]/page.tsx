@@ -16,7 +16,6 @@ export default async function PolicyPage({ params: { slug }, searchParams }) {
       slug,
       draft: isDraftMode,
     })
-    console.log(page)
   } catch (error) {
     // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
     // so swallow the error here and simply render the page with fallback data where necessary

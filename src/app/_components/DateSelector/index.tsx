@@ -143,12 +143,13 @@ export function MobileCalendar({
   setSelectedDates,
 }: {
   selectedDates: DateRange
-  setSelectedDates: boolean
+  setSelectedDates: Dispatch<SetStateAction<DateRange>>
 }) {
   const { settings, unavailableDates, product, setBooking, booking } = useBooking()
   const [tmpBooking, setTmpBooking] = useState<BookingDetails | null>(
     calculateBookingDetails(product, selectedDates, booking.guestCount, settings),
   )
+  const [open, setOpen] = useState(false)
   const handleMobileDateChange = (range: DateRange | undefined) => {
     setSelectedDates(range)
     if (range.from && range.to) {
@@ -159,6 +160,8 @@ export function MobileCalendar({
   }
   return (
     <Drawer
+      open={open}
+      onOpenChange={setOpen}
       onClose={() => {
         if (tmpBooking) setBooking(tmpBooking)
       }}
@@ -230,6 +233,7 @@ export function MobileCalendar({
                   disabled={!tmpBooking}
                   onClick={() => {
                     setBooking(tmpBooking)
+                    setOpen(false)
                   }}
                 >
                   Save

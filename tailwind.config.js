@@ -11,6 +11,9 @@ export default {
       },
     },
     extend: {
+      screens: {
+        xs: '400px',
+      },
       typography: {
         DEFAULT: {
           css: {

@@ -7,7 +7,7 @@ export function TruncateText({ children }: { children: ReactNode }) {
   return (
     <div>
       <div className={open ? '' : 'line-clamp-6'}>{children}</div>
-      <button className={'underline font-medium text-copy inline-flex items-center mt-3'} onClick={() => setOpen(!open)}>
+      <button className={'underline font-medium text-base inline-flex items-center mt-3'} onClick={() => setOpen(!open)}>
         {open ? (
           'Show Less'
         ) : (

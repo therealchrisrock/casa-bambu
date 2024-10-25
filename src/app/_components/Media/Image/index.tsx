@@ -60,11 +60,17 @@ export const Image: React.FC<MediaProps> = props => {
       height={height}
       width={width}
       src={filename}
+      onLoad={() => {
+        setIsLoading(false)
+        if (typeof onLoadFromProps === 'function') {
+          onLoadFromProps()
+        }
+      }}
       config={{
         url: {
           privateCdn: true,
           secureDistribution: 'media.casabambuwestbay.com', // Set your custom domain here
-        }
+        },
       }}
     />
     // <NextImage

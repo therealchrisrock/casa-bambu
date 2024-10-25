@@ -199,7 +199,7 @@ export function BookingForm() {
             </div>
             <div className={'prose  pt-8'}>
               <h3 className={'text-xl font-semibold '}>Write a Message to The Host</h3>
-              <p className={' text-copy'}>
+              <p className={' text-base'}>
                 Before you can continue, let us know a little about your trip and why our place is a
                 good fit.
               </p>

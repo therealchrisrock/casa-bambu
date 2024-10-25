@@ -185,7 +185,7 @@ export const CollectionArchive: React.FC<Props> = props => {
         <Gutter>
           {appearance === 'wide' ? (
             <div>
-              <div className={'lg:grid gap-8 hidden'}>
+              <div className={'md:grid gap-8 hidden'}>
                 {results.docs?.map((result, index) => {
                   if (typeof result === 'object' && result !== null) {
                     return (
@@ -197,7 +197,7 @@ export const CollectionArchive: React.FC<Props> = props => {
                   return null
                 })}
               </div>
-              <div className={'lg:hidden block'}>
+              <div className={'md:hidden block'}>
                 <div className={classes.grid}>
                   {results.docs?.map((result, index) => {
                     if (typeof result === 'object' && result !== null) {

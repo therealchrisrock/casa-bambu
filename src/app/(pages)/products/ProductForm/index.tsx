@@ -2,12 +2,25 @@
 
 import React, { ReactNode } from 'react'
 import { DateRange } from 'react-day-picker'
+import { UTCDate } from '@date-fns/utc'
 import { BathIcon, BedSingleIcon, MapPin, UsersIcon } from 'lucide-react'
 
 import { PriceBreakdown } from '@/_components/BookingDetails/PriceBreakdown'
 import { CreateReservationButton } from '@/_components/CreateReservationButton'
-import { DatePickerWithRange } from '@/_components/DateSelector'
+import { DatePickerWithRange, MobileCalendar } from '@/_components/DateSelector'
+import { Gutter } from '@/_components/Gutter'
 import { formattedPrice } from '@/_components/Price'
+import { Button } from '@/_components/ui/button'
+import { Calendar } from '@/_components/ui/calendar'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/_components/ui/drawer'
 import {
   Select,
   SelectContent,
@@ -16,6 +29,7 @@ import {
   SelectValue,
 } from '@/_components/ui/select'
 import { useBooking } from '@/_providers/Booking'
+import { formatDateRange } from '@/_utilities/formatDateTime'
 import { DEFAULT_MIN_DAYS } from '@/(pages)/products/utils'
 
 export function ProductDetails() {
@@ -28,7 +42,7 @@ export function ProductDetails() {
       >
         <div className={''}>
           <h1 className={'text-lg font-semibold'}>{product.title}</h1>
-          <h3 className={'text-copy flex items-center justify-center gap-1'}>
+          <h3 className={'text-base flex items-center justify-center gap-1'}>
             <MapPin width={20} height={20} />
             <span>West Bay, Roatan</span>
           </h3>
@@ -57,6 +71,74 @@ export function ProductDetails() {
     </div>
   )
 }
+export function MobilePrice({ price }: { price?: string }) {
+  return (
+    <div>
+      {price ? (
+        <h3 className={'flex gap-1 items-baseline'}>
+          <span className={'text-lg text-tertiary font-semibold'}>{price}</span>
+          <span className={'text-xs'}>night</span>
+        </h3>
+      ) : (
+        <h3 className={'flex gap-1 items-baseline'}>
+          <span className={'text-lg  font-semibold'}>Add dates for prices</span>
+        </h3>
+      )}
+    </div>
+  )
+}
+export function MobileProductForm() {
+  const { loading, settings, unavailableDates, product, booking, setBooking, clearBooking } =
+    useBooking()
+
+  // Handle guest selection change
+  const handleGuestChange = (value: string) => {
+    if (booking) {
+      const updatedBooking = {
+        ...booking,
+        guestCount: parseInt(value, 10),
+      }
+      setBooking(updatedBooking)
+    }
+  }
+  if (loading) return <MobileProductFormSkeleton />
+  return (
+    <div className="flex px-4 items-center justify-between h-full   mx-auto font-medium">
+      {loading ? (
+        <MobileProductFormSkeleton />
+      ) : (
+        <>
+          <div>
+            <MobilePrice price={formattedPrice(booking.averageRate)} />
+            <DatePickerWithRange />
+          </div>
+          <div>
+            <CreateReservationButton size={'md'} />
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+export function MobileProductDetails() {
+  const { product } = useBooking()
+  return (
+    <div className={'flex gap-2 text-sm'}>
+      <div className={''}>
+      {product.baseGuestQuantity} guest{product.baseGuestQuantity > 1 ? 's' : ''}
+      </div>
+      <div>&#183;</div>
+      <div>
+        {product.bedroomQuantity} bedroom{product.bedroomQuantity > 1 ? 's' : ''}
+      </div>
+      <div>&#183;</div>
+      <div>
+        {product.bathQuantity} bath{product.bathQuantity > 1 ? 's' : ''}
+      </div>
+    </div>
+  )
+}
 
 export function ProductForm() {
   const { loading, settings, unavailableDates, product, booking, setBooking, clearBooking } =
@@ -76,12 +158,16 @@ export function ProductForm() {
   return (
     <>
       <div>
-        {booking?.averageRate && (
+        {booking?.averageRate ? (
           <h3 className={'flex gap-1 items-baseline'}>
             <span className={'text-2xl text-tertiary font-semibold'}>
               {formattedPrice(booking.averageRate)}
             </span>
             <span className={'text-sm'}>night</span>
+          </h3>
+        ) : (
+          <h3 className={'flex gap-1 items-baseline'}>
+            <span className={'text-2xl text-tertiary font-semibold'}>Add dates for prices</span>
           </h3>
         )}
         <h5 className={'text-xs'}>(min. {(settings.minBooking ?? DEFAULT_MIN_DAYS) - 1} nights)</h5>
@@ -102,15 +188,6 @@ export function ProductForm() {
             </SelectContent>
           </Select>
           <CreateReservationButton />
-          {/*<AddToCartButton settings={settings} bookingDetails={bookingDetails} />*/}
-          {/*{CART_MODE === 'invoice' ? (*/}
-          {/*  <CreateReservationButton*/}
-          {/*    dates={dates}*/}
-          {/*    headProduct={product.id}*/}
-          {/*    items={[{ product, quantity: calculateNights(dates) }]}*/}
-          {/*  />*/}
-          {/*) : (*/}
-          {/*)}*/}
         </div>
         {booking && <PriceBreakdown booking={booking} />}
       </div>
@@ -139,7 +216,7 @@ export function ProductFormSkeleton() {
 
       {/* Skeleton for the price breakdown (optional) */}
       <div className="space-y-2">
-        <div className={'flex justify-between'}>
+        <div className={'flex justify-between '}>
           <div className="h-6 bg-gray-200 rounded w-1/3"></div>
           <div className="h-6 bg-gray-200 rounded w-1/3"></div>
         </div>
@@ -156,6 +233,25 @@ export function ProductFormSkeleton() {
         <div className="h-8 bg-gray-200 rounded pt-5"></div>
       </div>
     </div>
+  )
+}
+
+export function MobileProductFormSkeleton() {
+  return (
+    <>
+      <div>
+        <div className={'w-36'}>
+          {/* Skeleton for the price display or prompt */}
+          <div className="h-6 bg-gray-200  rounded w-full mb-2"></div>
+        </div>
+        {/* Skeleton for the date range display */}
+        <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+      </div>
+      <div>
+        {/* Skeleton for the reservation button */}
+        <div className="h-10 bg-gray-200 rounded w-20"></div>
+      </div>
+    </>
   )
 }
 

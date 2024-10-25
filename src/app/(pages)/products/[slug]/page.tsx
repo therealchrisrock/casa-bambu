@@ -2,7 +2,12 @@ import { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 
-import { Booking, Product, Product as ProductType, Settings } from '../../../../payload/payload-types'
+import {
+  Booking,
+  Product,
+  Product as ProductType,
+  Settings,
+} from '../../../../payload/payload-types'
 import { fetchDoc } from '../../../_api/fetchDoc'
 import { fetchDocs } from '../../../_api/fetchDocs'
 import { Blocks } from '../../../_components/Blocks'
@@ -18,8 +23,12 @@ import { Carousel, CarouselContent, CarouselItem } from '@/_components/ui/carous
 import { TruncateText } from '@/_components/ui/truncate-text'
 import { getDefaultProps, getSelectedBookingDetails, isValidBooking } from '@/_lib/bookings'
 import { BookingProvider } from '@/_providers/Booking'
-import { ProductDetails } from '@/(pages)/products/ProductForm'
 import { Amenities } from '@/(pages)/products/Amenities'
+import {
+  MobileProductDetails,
+  MobileProductForm,
+  ProductDetails,
+} from '@/(pages)/products/ProductForm'
 
 // Force this page to be dynamic so that Next.js does not cache it
 // See the note in '../../../[slug]/page.tsx' about this
@@ -81,7 +90,7 @@ export default async function Product({ params: { slug }, searchParams }) {
               <Media
                 htmlElement={null}
                 resource={asset.media}
-                className={'aspect-[4/5] rounded-lg overflow-hidden'}
+                className={'aspect-[4/5] object-cover rounded-lg overflow-hidden'}
               />{' '}
             </CarouselItem>
           ))}
@@ -96,7 +105,12 @@ export default async function Product({ params: { slug }, searchParams }) {
           <div className={' w-full'}>
             <div className={'md:pr-8 max-w-4xl space-y-12'}>
               <div className={'space-y-4  flex-1'}>
-                <h1 className={'text-3xl font-semibold'}>About {product.title}</h1>
+                <div className={'space-y-1'}>
+                  <h1 className={'text-3xl font-semibold'}>About {product.title}</h1>
+                  <div className={'md:hidden block'}>
+                    <MobileProductDetails />
+                  </div>
+                </div>
                 <TruncateText>
                   <RichText
                     content={productDescription}
@@ -107,7 +121,9 @@ export default async function Product({ params: { slug }, searchParams }) {
               {product.features && (
                 <div className={'divide-y space-y-4'}>
                   <h2 className={'text-xl font-semibold'}>What This Place Offers</h2>
-                  <div className={'py-6'}><Amenities amenities={product.features} /></div>
+                  <div className={'py-6'}>
+                    <Amenities amenities={product.features} />
+                  </div>
                 </div>
               )}
             </div>
@@ -117,10 +133,14 @@ export default async function Product({ params: { slug }, searchParams }) {
               <ProductDetails />
             </div>
           </div>
+          <div className={'md:hidden block'}>
+            <div className="fixed bottom-0 left-0 z-50 w-full h-20 bg-white border-t border-gray-200 ">
+              <MobileProductForm />
+            </div>
+          </div>
         </div>
         <Blocks blocks={layout} />
         {product?.enablePaywall && <PaywallBlocks productSlug={slug as string} disableTopPadding />}
-
       </Gutter>
       <div className={'pt-16'}>
         <Blocks

@@ -11,8 +11,8 @@ import { mergeOpenGraph } from './_utilities/mergeOpenGraph'
 
 import './_css/app.scss'
 import './globals.css'
-import { cn } from '@/_lib/utils'
 import { Toaster } from '@/_components/ui/sonner'
+import { cn } from '@/_lib/utils'
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -23,6 +23,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" suppressHydrationWarning>
       <head>
         <InitTheme />
+        {process.env.NODE_ENV !== 'production' && <meta name="robots" content="noindex" />}
         <link rel="icon" href="/favicon.ico" sizes="32x32" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>

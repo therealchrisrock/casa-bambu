@@ -15,6 +15,7 @@ type BaseCalendarProps = React.ComponentProps<typeof DayPicker> & {
    * @default 12
    */
   yearRange?: number
+  hasDynamicWidth?: boolean
   /**
    * Wether to let user switch between months and years view.
    * @default false
@@ -35,6 +36,7 @@ function Calendar({
   showYearSwitcher = false,
   numberOfMonths,
   min,
+  hasDynamicWidth = true,
   ...props
 }: CalendarProps) {
   const [navView, setNavView] = React.useState<'days' | 'years'>('days')
@@ -62,7 +64,7 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       className={cn('p-3', className)}
       style={{
-        width: 248.8 * (columnsDisplayed ?? 1) + 'px',
+        width: hasDynamicWidth ? 248.8 * (columnsDisplayed ?? 1) + 'px' : 'auto',
       }}
       classNames={{
         months: 'relative flex flex-col gap-y-4 sm:flex-row sm:gap-y-0',

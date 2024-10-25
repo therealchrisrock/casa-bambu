@@ -31,7 +31,7 @@ export function getDateForStorage(date: Date): string {
 
 
 
-export function formatDateRange(from: Date, to: Date): string {
+export function formatDateRange(from: Date, to: Date, isVariable = true): string {
   const currentYear = new Date().getFullYear();
 
   const fromMonth = from.toLocaleDateString('en-US', { month: 'short' });
@@ -42,29 +42,30 @@ export function formatDateRange(from: Date, to: Date): string {
 
   const fromYear = from.getFullYear();
   const toYear = to.getFullYear();
-
-  // Same month and year
-  if (fromMonth === toMonth && fromYear === toYear) {
-    // If in the current year
-    if (fromYear === currentYear) {
-      return `${fromMonth} ${fromDay} – ${toDay}`;
-    } else {
-      // If in a future year
-      return `${fromMonth} ${fromDay} – ${toDay}, ${fromYear}`;
+  if (isVariable) {
+    // Same month and year
+    if (fromMonth === toMonth && fromYear === toYear) {
+      // If in the current year
+      if (fromYear === currentYear) {
+        return `${fromMonth} ${fromDay} – ${toDay}`;
+      } else {
+        // If in a future year
+        return `${fromMonth} ${fromDay} – ${toDay}, ${fromYear}`;
+      }
     }
-  }
 
-  // Same year, different months
-  if (fromYear === toYear) {
-    // If in the current year
-    if (fromYear === currentYear) {
-      return `${fromMonth} ${fromDay} – ${toMonth} ${toDay}`;
-    } else {
-      // If in a future year
-      return `${fromMonth} ${fromDay}, ${fromYear} – ${toMonth} ${toDay}, ${toYear}`;
+    // Same year, different months
+    if (fromYear === toYear) {
+      // If in the current year
+      if (fromYear === currentYear) {
+        return `${fromMonth} ${fromDay} – ${toMonth} ${toDay}`;
+      } else {
+        // If in a future year
+        return `${fromMonth} ${fromDay}, ${fromYear} – ${toMonth} ${toDay}, ${toYear}`;
+      }
     }
-  }
 
+  }
   // Different years
   return `${fromMonth} ${fromDay}, ${fromYear} – ${toMonth} ${toDay}, ${toYear}`;
 }

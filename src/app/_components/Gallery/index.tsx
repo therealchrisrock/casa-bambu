@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { clearAllBodyScrollLocks, disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
+import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
 import { ChevronLeft, GripHorizontalIcon, ShareIcon } from 'lucide-react'
 
 import { Product } from '../../../payload/payload-types'

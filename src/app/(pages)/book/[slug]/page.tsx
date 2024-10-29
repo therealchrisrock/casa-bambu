@@ -11,7 +11,6 @@ import { fetchSettings } from '@/_api/fetchGlobals'
 import { Blocks } from '@/_components/Blocks'
 import { Gutter } from '@/_components/Gutter'
 import { Hero } from '@/_components/Hero'
-import { CartPage } from '@/(pages)/cart/CartPage'
 import { BookingProvider } from '@/_providers/Booking'
 import { BookingForm, CreateBooking } from '@/(pages)/book/CreateBooking'
 import { RenderParams } from '@/_components/RenderParams'
@@ -23,7 +22,8 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export default async function Book({ params: { slug }, searchParams }) {
-  const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
+  const allParams = new URLSearchParams(await searchParams).toString();
+
   let page: Page | null = null
   const { user } = await getMeUser()
   page = await fetchDoc<Page>({
@@ -66,14 +66,16 @@ export default async function Book({ params: { slug }, searchParams }) {
             </div>
           ) : (
             <LoginForm
-              overrideSearchParams={`?redirect=/book/${product.slug}${allParams}`}
-              customRedirect={`/book/${product.slug}${allParams}`}
+              overrideSearchParams={`?redirect=${encodeURIComponent(
+                `/book/${product.slug}?${allParams}`,
+              )}`}
+              customRedirect={`/book/${product.slug}?${allParams}`}
             >
               <>
                 To complete your reservation, log in below or{' '}
                 <Link
                   href={`/create-account?redirect=${encodeURIComponent(
-                    `/book/${product.slug}${allParams}`,
+                    `/book/${product.slug}?${allParams}`,
                   )}`}
                   className={'underline underline-offset-4'}
                 >

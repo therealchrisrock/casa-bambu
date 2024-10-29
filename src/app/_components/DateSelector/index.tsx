@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { Dispatch, ReactNode, SetStateAction, useRef, useState } from 'react'
-import { dateMatchModifiers, DateRange, Matcher } from 'react-day-picker'
+import {  DateRange, Matcher } from 'react-day-picker'
 import { UTCDate } from '@date-fns/utc'
 import { addDays, differenceInCalendarDays, differenceInDays, format } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
@@ -22,13 +22,11 @@ import {
   DrawerTrigger,
 } from '@/_components/ui/drawer'
 import { Popover, PopoverContent, PopoverTrigger } from '@/_components/ui/popover'
-import { isBookingAvailable } from '@/_lib/bookings'
 import { cn } from '@/_lib/utils'
 import { useBooking } from '@/_providers/Booking'
 import { BookingDetails, calculateBookingDetails } from '@/_utilities/bookingCalculations'
 import { formatDateRange } from '@/_utilities/formatDateTime'
-import { MobilePrice, MobileProductDetails } from '@/(pages)/products/ProductForm'
-import { DEFAULT_MIN_DAYS } from '@/(pages)/products/utils'
+import { GuestSelector, MobilePrice, MobileProductDetails } from '@/(pages)/products/ProductForm'
 export function DatePickerWithRange({
   className,
   children,
@@ -132,7 +130,7 @@ export function DatePickerWithRange({
         </div>
       </div>
       <div className={'md:hidden block'}>
-        <MobileCalendar selectedDates={selectedDates} setSelectedDates={setSelectedDates} />
+        <MobileCalendar selectedDates={selectedDates} setSelectedDates={setSelectedDates}>{children}</MobileCalendar>
       </div>
     </div>
   )
@@ -141,9 +139,11 @@ export function DatePickerWithRange({
 export function MobileCalendar({
   selectedDates,
   setSelectedDates,
+  children
 }: {
   selectedDates: DateRange
   setSelectedDates: Dispatch<SetStateAction<DateRange>>
+  children?: ReactNode
 }) {
   const { settings, unavailableDates, product, setBooking, booking } = useBooking()
   const [tmpBooking, setTmpBooking] = useState<BookingDetails | null>(
@@ -167,13 +167,17 @@ export function MobileCalendar({
       }}
     >
       <DrawerTrigger asChild>
-        <button className={'text-sm underline'}>
-          {selectedDates.from && selectedDates.to ? (
-            <>{formatDateRange(selectedDates.from, selectedDates.to)}</>
-          ) : (
-            <>Select Booking Dates</>
-          )}
-        </button>
+        {children ? (
+          children
+        ) : (
+          <button className={'text-sm underline'}>
+            {selectedDates.from && selectedDates.to ? (
+              <>{formatDateRange(selectedDates.from, selectedDates.to)}</>
+            ) : (
+              <>Select Booking Dates</>
+            )}
+          </button>
+        )}
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className={'text-left'}>
@@ -222,14 +226,18 @@ export function MobileCalendar({
           <div className=" border-t pt-4 ">
             <div
               className={
-                'flex items-center w-full px-4 justify-between h-full mx-auto font-medium max-w-lg'
+                'flex items-center w-full px-4 justify-between h-full mx-auto font-medium '
               }
             >
-              <MobilePrice
-                price={tmpBooking?.averageRate ? formattedPrice(tmpBooking.averageRate) : null}
-              />
-              <div>
+              <div className={''}>
+                <MobilePrice
+                  price={tmpBooking?.averageRate ? formattedPrice(tmpBooking.averageRate) : null}
+                />
+              </div>
+              <div className={'flex gap-2'}>
+                <GuestSelector />
                 <Button
+                  size={'md'}
                   disabled={!tmpBooking}
                   onClick={() => {
                     setBooking(tmpBooking)

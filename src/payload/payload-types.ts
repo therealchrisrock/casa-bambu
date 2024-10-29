@@ -132,9 +132,12 @@ export interface Page {
             columns?:
               | {
                   size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText: {
-                    [k: string]: unknown;
-                  }[];
+                  media?: string | Media | null;
+                  richText?:
+                    | {
+                        [k: string]: unknown;
+                      }[]
+                    | null;
                   enableLink?: boolean | null;
                   link?: {
                     type?: ('reference' | 'custom') | null;
@@ -252,6 +255,13 @@ export interface Media {
         [k: string]: unknown;
       }[]
     | null;
+  cloudinary?: {
+    public_id?: string | null;
+    original_filename?: string | null;
+    format?: string | null;
+    secure_url?: string | null;
+    resource_type?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -337,9 +347,12 @@ export interface Product {
             columns?:
               | {
                   size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText: {
-                    [k: string]: unknown;
-                  }[];
+                  media?: string | Media | null;
+                  richText?:
+                    | {
+                        [k: string]: unknown;
+                      }[]
+                    | null;
                   enableLink?: boolean | null;
                   link?: {
                     type?: ('reference' | 'custom') | null;
@@ -444,9 +457,12 @@ export interface Product {
             columns?:
               | {
                   size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText: {
-                    [k: string]: unknown;
-                  }[];
+                  media?: string | Media | null;
+                  richText?:
+                    | {
+                        [k: string]: unknown;
+                      }[]
+                    | null;
                   enableLink?: boolean | null;
                   link?: {
                     type?: ('reference' | 'custom') | null;

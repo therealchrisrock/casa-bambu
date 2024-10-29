@@ -16,7 +16,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/_co
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -82,7 +81,6 @@ const CreateAccountForm: React.FC = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      console.log(data)
       const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users`, {
         method: 'POST',
         body: JSON.stringify(data),
@@ -124,7 +122,7 @@ const CreateAccountForm: React.FC = () => {
             <CardTitle className="text-xl">Sign Up</CardTitle>
             <CardDescription>Enter your information to create an account</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className={'px-4'}>
             <Message error={error} />
             <div className="grid gap-4">
               <div className="grid grid-cols-1 space-y-4 gap-4">
@@ -229,7 +227,7 @@ const CreateAccountForm: React.FC = () => {
               Already have an account?{' '}
               <Link
                 href={`/login${
-                  searchParams.get('redirect') ? `?redirect=${searchParams.get('redirect')}` : ''
+                  searchParams.get('redirect') ? `?redirect=${encodeURIComponent(searchParams.get('redirect'))}` : ''
                 }`}
                 className="underline"
               >

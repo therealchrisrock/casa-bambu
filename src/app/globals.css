@@ -77,10 +77,12 @@
       @apply border-border;
     }
     body {
-      @apply bg-background text-foreground;
+      @apply bg-background text-foreground !min-w-full;
     }
   }
-
+  a:focus {
+    @apply opacity-50
+  }
   @layer components {
     .booked--day {
       @apply line-through;

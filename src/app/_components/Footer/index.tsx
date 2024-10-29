@@ -2,8 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 
 import { Footer } from '../../../payload/payload-types'
-import { fetchFooter, fetchGlobals } from '../../_api/fetchGlobals'
-import { ThemeSelector } from '../../_providers/Theme/ThemeSelector'
+import { fetchFooter } from '../../_api/fetchGlobals'
 import { Gutter } from '../Gutter'
 import { CMSLink } from '../Link'
 
@@ -27,7 +26,6 @@ export async function Footer() {
     <footer className={classes.footer}>
       <Gutter className={classes.wrap}>
         <nav className={classes.nav}>
-          {/*<ThemeSelector />*/}
           {navItems.map(({ link }, i) => {
             return <CMSLink appearance={'none'} key={i} {...link} />
           })}

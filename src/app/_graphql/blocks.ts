@@ -31,6 +31,7 @@ export const CONTENT = `
   columns {
     size
     richText
+    ${MEDIA}
     enableLink
     link ${LINK_FIELDS()}
   }

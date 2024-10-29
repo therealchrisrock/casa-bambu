@@ -28,7 +28,13 @@ const columnFields: Field[] = [
       },
     ],
   },
-  richText(),
+  {
+    name: 'media',
+    type: 'upload',
+    relationTo: 'media',
+    required: false,
+  },
+  richText({ required: false }),
   {
     name: 'enableLink',
     type: 'checkbox',

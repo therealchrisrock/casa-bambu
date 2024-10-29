@@ -11,7 +11,7 @@ import { formattedPrice } from '@/_components/Price'
 import { Button } from '@/_components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/_components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/_components/ui/form'
-import { Select, SelectContent, SelectItem } from '@/_components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/_components/ui/select'
 import { Separator } from '@/_components/ui/separator'
 import { Textarea } from '@/_components/ui/textarea'
 import { useAuth } from '@/_providers/Auth'
@@ -19,6 +19,8 @@ import { useBooking } from '@/_providers/Booking'
 import { formatDateRange } from '@/_utilities/formatDateTime'
 
 export function CreateBooking({ children }: { children?: ReactNode }) {
+  const user = useAuth()
+// @TODO align order summary with login card
   return (
     <div className={'max-w-screen-xl'}>
       <div className={'grid grid-cols-1 lg:grid-cols-2 gap-2'}>
@@ -172,15 +174,11 @@ export function BookingForm() {
               <div>
                 <div className={'flex justify-between font-semibold'}>
                   <h3 className={'flex-1'}>Guests</h3>
-                  <button className={'underline flex-0'} onClick={() => setOpenGuestDropdown(true)}>
-                    Edit
-                  </button>
+
                   <Select
-                    open={openGuestDropdown}
-                    onOpenChange={setOpenGuestDropdown}
-                    value={booking?.guestCount.toString()}
-                    onValueChange={handleGuestChange}
+                    value={booking?.guestCount.toString()} onValueChange={handleGuestChange}
                   >
+                    <SelectTrigger appearance={'plain'} className={'underline flex-0'}>Edit</SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: product.maxGuestQuantity }, (_, i) => i + 1).map(
                         num => (

@@ -6,6 +6,7 @@ import { CMSLink } from '../../_components/Link'
 import RichText from '../../_components/RichText'
 
 import classes from './index.module.scss'
+import { Media } from '@/_components/Media'
 
 type Props = Extract<Page['layout'][0], { blockType: 'content' }>
 
@@ -22,11 +23,12 @@ export const ContentBlock: React.FC<
         {columns &&
           columns.length > 0 &&
           columns.map((col, index) => {
-            const { enableLink, richText, link, size } = col
+            const { enableLink, richText, media, link, size } = col
 
             return (
               <div key={index} className={[classes.column, classes[`column--${size}`]].join(' ')}>
-                <RichText content={richText} className={'mx-auto'} />
+                {richText && <RichText content={richText} className={'mx-auto'} />}
+                {media && <Media resource={media} className={'lg:block flex justify-center'} />}
                 {enableLink && <CMSLink className={classes.link} {...link} />}
               </div>
             )

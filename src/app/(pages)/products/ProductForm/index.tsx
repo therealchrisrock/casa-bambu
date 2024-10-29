@@ -112,7 +112,8 @@ export function MobileProductForm() {
             <MobilePrice price={formattedPrice(booking.averageRate)} />
             <DatePickerWithRange />
           </div>
-          <div>
+          <div className={'flex gap-2'}>
+            <GuestSelector  />
             <CreateReservationButton size={'md'} />
           </div>
         </>
@@ -144,16 +145,6 @@ export function ProductForm() {
   const { loading, settings, unavailableDates, product, booking, setBooking, clearBooking } =
     useBooking()
 
-  // Handle guest selection change
-  const handleGuestChange = (value: string) => {
-    if (booking) {
-      const updatedBooking = {
-        ...booking,
-        guestCount: parseInt(value, 10),
-      }
-      setBooking(updatedBooking)
-    }
-  }
   if (loading) return <ProductFormSkeleton />
   return (
     <>
@@ -175,18 +166,7 @@ export function ProductForm() {
       <div className={'space-y-6'}>
         <div className={'space-y-2'}>
           <DatePickerWithRange />
-          <Select value={booking?.guestCount.toString()} onValueChange={handleGuestChange}>
-            <SelectTrigger className="">
-              <SelectValue placeholder="Number of Guests" />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: product.maxGuestQuantity }, (_, i) => i + 1).map(num => (
-                <SelectItem key={num} value={String(num)}>
-                  {num} Guest{num > 1 ? 's' : ''}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <GuestSelector />
           <CreateReservationButton />
         </div>
         {booking && <PriceBreakdown booking={booking} />}
@@ -194,7 +174,35 @@ export function ProductForm() {
     </>
   )
 }
+export function GuestSelector() {
+  const { loading, settings, unavailableDates, product, booking, setBooking, clearBooking } =
+    useBooking()
 
+  // Handle guest selection change
+  const handleGuestChange = (value: string) => {
+    if (booking) {
+      const updatedBooking = {
+        ...booking,
+        guestCount: parseInt(value, 10),
+      }
+      setBooking(updatedBooking)
+    }
+  }
+  return (
+    <Select value={booking?.guestCount.toString()} onValueChange={handleGuestChange}>
+      <SelectTrigger className="min-w-36 h-11">
+        <SelectValue placeholder="Number of Guests" />
+      </SelectTrigger>
+      <SelectContent>
+        {Array.from({ length: product.maxGuestQuantity }, (_, i) => i + 1).map(num => (
+          <SelectItem key={num} value={String(num)}>
+            {num} Guest{num > 1 ? 's' : ''}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
 export function ProductFormSkeleton() {
   return (
     <div className="space-y-4 animate-pulse">

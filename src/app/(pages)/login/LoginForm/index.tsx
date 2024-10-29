@@ -41,10 +41,14 @@ const formSchema = z.object({
   }),
   password: z.string().min(4),
 })
-const LoginForm: React.FC<{ overrideSearchParams?: string, children?: ReactNode, customRedirect?: string }> = ({customRedirect, children, overrideSearchParams }) => {
+const LoginForm: React.FC<{
+  overrideSearchParams?: string
+  children?: ReactNode
+  customRedirect?: string
+}> = ({ customRedirect, children, overrideSearchParams }) => {
   const searchParams = useSearchParams()
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
-  const redirect = useRef( customRedirect ?? searchParams.get('redirect'))
+  const redirect = useRef(customRedirect ?? searchParams.get('redirect'))
   const { login } = useAuth()
   const router = useRouter()
   const [error, setError] = React.useState<string | null>(null)
@@ -87,7 +91,7 @@ const LoginForm: React.FC<{ overrideSearchParams?: string, children?: ReactNode,
             <CardDescription>{children}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4">
+            <div className="grid gap-4 px-4">
               <Message error={error} />
               <FormField
                 control={control}
@@ -121,11 +125,22 @@ const LoginForm: React.FC<{ overrideSearchParams?: string, children?: ReactNode,
             </div>
             <div className="mt-4 text-center text-sm space-y-2">
               Don&apos;t have an account?{' '}
-              <Link href={`/create-account${customRedirect ? `?redirect=${encodeURIComponent(customRedirect)}` : allParams}`} className="underline">
+              <Link
+                href={`/create-account${
+                  customRedirect ? `?redirect=${encodeURIComponent(customRedirect)}` : allParams
+                }`}
+                className="underline"
+              >
                 Sign up
               </Link>
               <br />
-              <Link href={`/recover-password${customRedirect ? `?redirect=${encodeURIComponent(customRedirect)}` : allParams}`}>Recover your password</Link>
+              <Link
+                href={`/recover-password${
+                  customRedirect ? `?redirect=${encodeURIComponent(customRedirect)}` : allParams
+                }`}
+              >
+                Recover your password
+              </Link>
             </div>
           </CardContent>
         </Card>

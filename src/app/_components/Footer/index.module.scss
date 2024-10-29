@@ -1,7 +1,7 @@
 @use '../../_css/queries.scss' as *;
 
 .footer {
-  padding: calc(var(--base) * 4) 0;
+  padding: calc(var(--base) * 4) 0 calc(var(--base)) 0;
   @include small-break {
     padding: calc(var(--base) ) 0;
   }

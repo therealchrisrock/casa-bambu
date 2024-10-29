@@ -22,7 +22,7 @@ export default async function RecoverPassword() {
               how to reset your password.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className={'px-4'}>
             <RecoverPasswordForm />
             <div className="mt-4 text-center text-sm space-y-2">
               Already have an account?{' '}

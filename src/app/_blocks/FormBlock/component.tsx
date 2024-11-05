@@ -171,7 +171,7 @@ export const ClientFormBlock: React.FC<
                     {/*  )}*/}
                     {/*</CardDescription>*/}
                   </CardHeader>
-                  <CardContent className={'grid'}>
+                  <CardContent className={'grid px-4'}>
                     <div className={'grid grid-cols-2 gap-4'}>
                       {formFromProps &&
                         formFromProps.fields &&

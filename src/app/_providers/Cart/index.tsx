@@ -216,7 +216,6 @@ export const CartProvider = props => {
   )
 
   const addCouponToCart = useCallback(incomingItem => {
-    console.log(incomingItem)
   }, [])
   const addBookingDetails = useCallback(details => {
     dispatchCart({

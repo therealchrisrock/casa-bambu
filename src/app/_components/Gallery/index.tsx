@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
 import { ChevronLeft, GripHorizontalIcon, ShareIcon } from 'lucide-react'
 
@@ -7,12 +8,13 @@ import { Product } from '../../../payload/payload-types'
 
 import { Media } from '@/_components/Media'
 import { Button } from '@/_components/ui/button'
+import { useBooking } from '@/_providers/Booking'
 
 export function Gallery({ assets }: { assets: Product['gallery'] }) {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const modalRef = useRef<HTMLDivElement>(null)
-
+  const { product } = useBooking()
   const openModal = index => {
     setSelectedImageIndex(index)
     setIsOpen(true)
@@ -74,9 +76,7 @@ export function Gallery({ assets }: { assets: Product['gallery'] }) {
             <button onClick={closeModal}>
               <ChevronLeft />
             </button>
-            <button className="flex gap-2 items-center">
-              <ShareIcon width={18} height={18} /> <span>Share</span>
-            </button>
+            <ShareButton value={`${process.env.NEXT_PUBLIC_IS_LIVE}/products/${product.slug}`} />
           </div>
           <div
             ref={modalRef}
@@ -98,5 +98,31 @@ export function Gallery({ assets }: { assets: Product['gallery'] }) {
         </div>
       )}
     </section>
+  )
+}
+
+function ShareButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false)
+  useEffect(() => {
+    if (!copied) return
+    // Use setTimeout to update the message after 2000 milliseconds (2 seconds)
+    const timeoutId = setTimeout(() => {
+      setCopied(false)
+    }, 2000)
+
+    // Cleanup function to clear the timeout if the component unmounts
+    return () => clearTimeout(timeoutId)
+  }, [copied]) // Empty dependency array ensures the effect runs only once
+
+  return (
+    <CopyToClipboard text={value} onCopy={() => setCopied(true)}>
+      {copied ? (
+        <p>Copied to Clipboard!</p>
+      ) : (
+        <button className="flex gap-2 items-center">
+          <ShareIcon width={18} height={18} /> <span>Share</span>
+        </button>
+      )}
+    </CopyToClipboard>
   )
 }

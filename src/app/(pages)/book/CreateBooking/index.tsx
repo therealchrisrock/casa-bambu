@@ -211,7 +211,7 @@ export function BookingForm() {
                         {...field}
                         className={'resize-none min-h-28'}
                         placeholder={
-                          'Example: "Hi Whitney, my partner and I are planning to spend a lot of time scuba diving in Roatan and your place is near the dive shop."'
+                          'Example: "Hi Ruth, my partner and I are planning to spend a lot of time scuba diving in Roatan and your place is near the dive shop."'
                         }
                       />
                     </FormControl>
@@ -225,10 +225,10 @@ export function BookingForm() {
                 <a target={'_blank'} href={'/policies/rental-agreement'}>
                   booking terms
                 </a>
-                . I also agree to the updated{' '}
-                <a target={'_blank'} href={'/policies/terms-and-conditions'}>
-                  Terms and Conditions
-                </a>
+                {/*. I also agree to the updated{' '}*/}
+                {/*<a target={'_blank'} href={'/policies/terms-and-conditions'}>*/}
+                {/*  Terms and Conditions*/}
+                {/*</a>*/}
                 , and I acknowledge the{' '}
                 <a target={'_blank'} href={'/policies/privacy-policy'}>
                   Privacy Policy

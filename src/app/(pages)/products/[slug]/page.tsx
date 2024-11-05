@@ -21,7 +21,7 @@ import { Media } from '@/_components/Media'
 import RichText from '@/_components/RichText'
 import { Carousel, CarouselContent, CarouselItem } from '@/_components/ui/carousel'
 import { TruncateText } from '@/_components/ui/truncate-text'
-import { getDefaultProps, getSelectedBookingDetails, isValidBooking } from '@/_lib/bookings'
+import { getDefaultProps, getSelectedBookingDetails } from '@/_lib/bookings'
 import { BookingProvider } from '@/_providers/Booking'
 import { Amenities } from '@/(pages)/products/Amenities'
 import {
@@ -53,7 +53,6 @@ export default async function Product({ params: { slug }, searchParams }) {
     bookings = await fetchDocs<Booking>('bookings', false, {
       product: { equals: product.id },
     })
-    console.log(bookings)
     settings = await fetchSettings()
   } catch (error) {
     console.error(error) // eslint-disable-line no-console
@@ -65,8 +64,7 @@ export default async function Product({ params: { slug }, searchParams }) {
   if (
     !searchParams?.from ||
     !searchParams?.to ||
-    !searchParams?.guests ||
-    !isValidBooking(searchParams, bookings, settings)
+    !searchParams?.guests
   ) {
     // Remove unwanted query parameters
     const { from, to, guests, ...otherParams } = searchParams

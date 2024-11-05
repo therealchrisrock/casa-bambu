@@ -1,20 +1,16 @@
 'use client'
 
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react'
-import { DateRange, Matcher } from 'react-day-picker'
-import { Maybe } from 'graphql/jsutils/Maybe'
+import { dateMatchModifiers, DateRange, Matcher } from 'react-day-picker'
+import { UTCDate } from '@date-fns/utc'
+import { eachDayOfInterval, parseISO } from 'date-fns'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Booking, CartItems, Product, Settings } from '../../../payload/payload-types'
 
 import { BookingDetails, calculateBookingDetails } from '@/_utilities/bookingCalculations'
 import { getSettings, getUnavailableDates } from '@/(pages)/products/utils'
-import { isBookingAvailable, parseDateAsUTC } from '@/_lib/bookings'
-import { UTCDate } from '@date-fns/utc'
-import { eachDayOfInterval } from 'date-fns'
-
-
-
+import { BookingSearchParams } from '@/_lib/bookings'
 
 interface BookingContextType {
   booking: BookingDetails | null
@@ -23,7 +19,7 @@ interface BookingContextType {
   product: Product
   unavailableDates: Matcher[]
   settings: Settings
-  setDates:  (dates: DateRange) => void
+  setDates: (dates: DateRange) => void
   isValidBooking: () => boolean
   loading: boolean
   isAvailable: boolean
@@ -111,7 +107,10 @@ export const BookingProvider = ({
     const toDate = booking.dates.to
     const bookingDates = eachDayOfInterval({ start: fromDate, end: toDate })
     const hasValidDuration = bookingDates.length >= settings.minBooking
-    const hasValidGuestCount = booking.guestCount >= 1 && booking.guestCount <= product.maxGuestQuantity
+
+    const hasValidGuestCount =
+      booking.guestCount >= 1 && booking.guestCount <= product.maxGuestQuantity
+    console.log(isAvailable && hasValidDuration && hasValidGuestCount)
     return isAvailable && hasValidDuration && hasValidGuestCount
   }
 
@@ -141,9 +140,47 @@ export const BookingProvider = ({
 
   return (
     <BookingContext.Provider
-      value={{ booking, setBooking, clearBooking, product, unavailableDates, settings, setDates, isValidBooking, loading, isAvailable}}
+      value={{
+        booking,
+        setBooking,
+        clearBooking,
+        product,
+        unavailableDates,
+        settings,
+        setDates,
+        isValidBooking,
+        loading,
+        isAvailable,
+      }}
     >
       {children}
     </BookingContext.Provider>
   )
+}
+export function isValidBooking(
+  params: BookingSearchParams,
+  bookings: Booking[],
+  settings: Settings,
+): boolean {
+  const fromDate = parseISO(params.from) // Parse the "from" date string into a Date object
+  const toDate = parseISO(params.to)
+  const bookingDates = eachDayOfInterval({ start: fromDate, end: toDate }) // Get each day in the range
+  const unavailableDates = getUnavailableDates(bookings, settings)
+  const isAvailable = isBookingAvailable(params.from, params.to, unavailableDates)
+  const hasValidDuration = bookingDates.length >= settings.minBooking
+  return isAvailable && hasValidDuration
+}
+
+export function isBookingAvailable(
+  from: string | Date,
+  to: string | Date,
+  unavailableDates: Matcher[],
+): boolean {
+  const fromDate = typeof from === 'string' ? parseISO(from) : from
+  const toDate = typeof to === 'string' ? parseISO(to) : to
+  // Normalize the dates to the start of the day to ignore time
+  const bookingDates = eachDayOfInterval({ start: fromDate, end: toDate })
+  const isAvailable = !bookingDates.some(date => dateMatchModifiers(date, unavailableDates))
+  console.log(isAvailable)
+  return isAvailable
 }

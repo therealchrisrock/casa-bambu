@@ -122,7 +122,6 @@ export const Calendar = () => {
   )
 }
 function renderEventContent(eventInfo) {
-  console.log(eventInfo.event)
   return(
     <>
       <b>{eventInfo.event.title} ({eventInfo.event.extendedProps.type === 'blockout' ? 'blockout' : getBookingStatusLabel(eventInfo.event.extendedProps.status)})</b><br></br>

@@ -95,7 +95,6 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
     }
     from.setUTCHours(12, 0, 0, 0)
     to.setUTCHours(12, 0, 0, 0)
-    console.log(from, to)
     const booking = await payload.create({
       collection: 'bookings',
       data: {

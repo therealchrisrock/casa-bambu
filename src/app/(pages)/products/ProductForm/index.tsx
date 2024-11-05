@@ -2,25 +2,12 @@
 
 import React, { ReactNode } from 'react'
 import { DateRange } from 'react-day-picker'
-import { UTCDate } from '@date-fns/utc'
 import { BathIcon, BedSingleIcon, MapPin, UsersIcon } from 'lucide-react'
 
 import { PriceBreakdown } from '@/_components/BookingDetails/PriceBreakdown'
 import { CreateReservationButton } from '@/_components/CreateReservationButton'
 import { DatePickerWithRange, MobileCalendar } from '@/_components/DateSelector'
-import { Gutter } from '@/_components/Gutter'
 import { formattedPrice } from '@/_components/Price'
-import { Button } from '@/_components/ui/button'
-import { Calendar } from '@/_components/ui/calendar'
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/_components/ui/drawer'
 import {
   Select,
   SelectContent,
@@ -113,7 +100,7 @@ export function MobileProductForm() {
             <DatePickerWithRange />
           </div>
           <div className={'flex gap-2'}>
-            <GuestSelector  />
+            <GuestSelector />
             <CreateReservationButton size={'md'} />
           </div>
         </>
@@ -127,7 +114,7 @@ export function MobileProductDetails() {
   return (
     <div className={'flex gap-2 text-sm'}>
       <div className={''}>
-      {product.baseGuestQuantity} guest{product.baseGuestQuantity > 1 ? 's' : ''}
+        {product.baseGuestQuantity} guest{product.baseGuestQuantity > 1 ? 's' : ''}
       </div>
       <div>&#183;</div>
       <div>

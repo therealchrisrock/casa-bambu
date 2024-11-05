@@ -18,8 +18,8 @@ const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     group: 'Business Data',
-    useAsTitle: 'name',
-    defaultColumns: ['name', 'email'],
+    useAsTitle: 'firstName',
+    defaultColumns: ['firstName', 'lastName', 'email'],
   },
   access: {
     read: adminsAndUser,

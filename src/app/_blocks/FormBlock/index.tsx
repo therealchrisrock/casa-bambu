@@ -19,7 +19,6 @@ export async function FormBlock(props: Props) {
     form: data,
     ...otherProps,
   }
-  console.log(componentProps)
   return (
     <section>
       <Suspense fallback={<p>Loading feed...</p>}>

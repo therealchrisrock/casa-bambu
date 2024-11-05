@@ -87,10 +87,6 @@ function getConflicts(newBooking: Partial<Booking>, existingBookings: Booking[])
     endDate: startOfDay(new Date(newBooking.endDate)),
   }
   for (const existingBooking of existingBookings) {
-    console.log(existingBooking, curr,
-      curr.startDate > startOfDay(new UTCDate(existingBooking.endDate)),
-      curr.endDate <= startOfDay(new UTCDate(existingBooking.startDate))
-    )
     const isValid =
       curr.startDate >= startOfDay(new Date(existingBooking.endDate)) ||
       curr.endDate <= startOfDay(new Date(existingBooking.startDate))

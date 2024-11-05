@@ -31,9 +31,9 @@ const FALLBACK_COLORS = [
   '#BA55D3', // Medium Orchid
 ]
 const STATIC_COLOR_MAP: Record<string, string> = {
-  '6722a7e41921e622f1b2aba6': '#FF69B4', // Tomato (red)
-  '6722a8211921e622f1b2ac4c': '#6A5ACD', // Steel Blue
-  '672291791921e622f1b2a3df': '#FFD700', // Lime Green
+  'the-casa-bambu': '#FF69B4', // Tomato (red)
+  'the-tortuga': '#6A5ACD', // Steel Blue
+  'the-seahorse': '#20B2AA', // Lime Green
 }
 import { DefaultTemplate } from 'payload/components/templates'
 import { useConfig } from 'payload/components/utilities'
@@ -131,7 +131,7 @@ function renderEventContent(eventInfo) {
 }
 function formatEventData(e: Booking) {
   const title = typeof e.product === 'string' ? e.product : e.product?.title
-  const pid = typeof e.product === 'string' ? e.product : e.product.id
+  const pid = typeof e.product === 'string' ? e.product : e.product.slug
   return {
     id: e.id,
     title,

@@ -5,6 +5,28 @@ on:
     branches:
       - main
 
+env:
+  PORT: 3000
+  NEXT_PUBLIC_SERVER_URL: https://casabambuwestbay.com
+  PAYLOAD_PUBLIC_SERVER_URL: https://casabambuwestbay.com
+  NEXT_PUBLIC_IS_LIVE: https://casabambuwestbay.com
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_live_51PqLjjRxAaVLSIkiLovi3Tiyc6nPJBSC9aajBAwFCvohud1cJyXHpKqKjz8iEpwms7Tc2PHMEj9zPpjku4MSuOEs00UeDfiYw4
+  NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: deep2qpb8
+  NEXT_CLOUDINARY_ID: deep2qpb8
+  SSH_KEY: ${{ secrets.SSH_KEY }}
+  VPS_USER: ${{ secrets.VPS_USER }}
+  VPS_HOST: ${{ secrets.VPS_HOST }}
+  VPS_PATH: ${{ secrets.VPS_PATH }}
+
+  DATABASE_URI: ${{ secrets.DATABASE_URI }}
+  PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+  STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+  STRIPE_WEBHOOKS_SIGNING_SECRET: ${{ secrets.STRIPE_WEBHOOKS_SIGNING_SECRET }}
+  PAYLOAD_PUBLIC_DRAFT_SECRET: ${{ secrets.PAYLOAD_PUBLIC_DRAFT_SECRET }}
+  NEXT_PRIVATE_DRAFT_SECRET: ${{ secrets.NEXT_PRIVATE_DRAFT_SECRET }}
+  REVALIDATION_KEY: ${{ secrets.REVALIDATION_KEY }}
+  NEXT_PRIVATE_REVALIDATION_KEY: ${{ secrets.NEXT_PRIVATE_REVALIDATION_KEY }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,13 +37,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: '20'
 
       - name: Install dependencies
         run: yarn install
 
       - name: Build project
         run: yarn build
+
 
       - name: Archive production build
         run: tar -czf casa-bambu-build.tar.gz dist
@@ -46,28 +69,6 @@ jobs:
           name: build-artifact
 
       - name: Deploy to VPS
-        env:
-          PORT: 3000
-          NEXT_PUBLIC_SERVER_URL: https://casabambuwestbay.com
-          PAYLOAD_PUBLIC_SERVER_URL: https://casabambuwestbay.com
-          NEXT_PUBLIC_IS_LIVE: https://casabambuwestbay.com
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_live_51PqLjjRxAaVLSIkiLovi3Tiyc6nPJBSC9aajBAwFCvohud1cJyXHpKqKjz8iEpwms7Tc2PHMEj9zPpjku4MSuOEs00UeDfiYw4
-          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: deep2qpb8
-          NEXT_CLOUDINARY_ID: deep2qpb8
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_PATH: ${{ secrets.VPS_PATH }}
-
-          DATABASE_URI: ${{ secrets.DATABASE_URI }}
-          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_WEBHOOKS_SIGNING_SECRET: ${{ secrets.STRIPE_WEBHOOKS_SIGNING_SECRET }}
-          PAYLOAD_PUBLIC_DRAFT_SECRET: ${{ secrets.PAYLOAD_PUBLIC_DRAFT_SECRET }}
-          NEXT_PRIVATE_DRAFT_SECRET: ${{ secrets.NEXT_PRIVATE_DRAFT_SECRET }}
-          REVALIDATION_KEY: ${{ secrets.REVALIDATION_KEY }}
-          NEXT_PRIVATE_REVALIDATION_KEY: ${{ secrets.NEXT_PRIVATE_REVALIDATION_KEY }}
-
         run: |
           # Setup SSH key
           mkdir -p ~/.ssh

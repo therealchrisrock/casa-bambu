@@ -144,7 +144,7 @@ export const ClientFormBlock: React.FC<
     [formID, redirect, confirmationType],
   )
   return (
-    <Gutter top={true} narrow={true} left={false}>
+    <Gutter top={true} narrow={true} >
       <div
         className={[classes.form, hasSubmitted && classes.hasSubmitted].filter(Boolean).join(' ')}
       >
@@ -154,12 +154,12 @@ export const ClientFormBlock: React.FC<
         {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
         {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
         <div className={'grid grid-cols-1 lg:grid-cols-2'}>
-          <div className={'col-span-1'}>
+          <div className={'col-span-1 order-2 md:order-1 pt-14 md:pt-0'}>
             {enableIntro && introContent && !hasSubmitted && (
               <RichText className={classes.intro} content={introContent} />
             )}
           </div>
-          <div className={'col-span-1'}>
+          <div className={'col-span-1 order-1 md:order-2'}>
             {!hasSubmitted && (
               <form id={formID} onSubmit={handleSubmit(onSubmit)} className={'max-w-md mx-auto'}>
                 <Card className={'mx-auto'}>

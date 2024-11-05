@@ -11,28 +11,27 @@ deploy:
 
     - name: Deploy to VPS
       env:
+        PORT: 3000
+        NEXT_PUBLIC_SERVER_URL: https://casabambuwestbay.com
+        PAYLOAD_PUBLIC_SERVER_URL: https://casabambuwestbay.com
+        NEXT_PUBLIC_IS_LIVE: https://casabambuwestbay.com
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_live_51PqLjjRxAaVLSIkiLovi3Tiyc6nPJBSC9aajBAwFCvohud1cJyXHpKqKjz8iEpwms7Tc2PHMEj9zPpjku4MSuOEs00UeDfiYw4
+        NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: deep2qpb8
+        NEXT_CLOUDINARY_ID: deep2qpb8
         SSH_KEY: ${{ secrets.SSH_KEY }}
         VPS_USER: ${{ secrets.VPS_USER }}
         VPS_HOST: ${{ secrets.VPS_HOST }}
         VPS_PATH: ${{ secrets.VPS_PATH }}
 
         # Environment variables
-        PORT: ${{ secrets.PORT }}
         DATABASE_URI: ${{ secrets.DATABASE_URI }}
         PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-        NEXT_PUBLIC_IS_LIVE: ${{ secrets.NEXT_PUBLIC_IS_LIVE }}
-        PAYLOAD_PUBLIC_SERVER_URL: ${{ secrets.PAYLOAD_PUBLIC_SERVER_URL }}
-        NEXT_PUBLIC_SERVER_URL: ${{ secrets.NEXT_PUBLIC_SERVER_URL }}
         STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-        PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY: ${{ secrets.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY }}
-        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
         STRIPE_WEBHOOKS_SIGNING_SECRET: ${{ secrets.STRIPE_WEBHOOKS_SIGNING_SECRET }}
         PAYLOAD_PUBLIC_DRAFT_SECRET: ${{ secrets.PAYLOAD_PUBLIC_DRAFT_SECRET }}
         NEXT_PRIVATE_DRAFT_SECRET: ${{ secrets.NEXT_PRIVATE_DRAFT_SECRET }}
         REVALIDATION_KEY: ${{ secrets.REVALIDATION_KEY }}
         NEXT_PRIVATE_REVALIDATION_KEY: ${{ secrets.NEXT_PRIVATE_REVALIDATION_KEY }}
-        NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
-        NEXT_CLOUDINARY_ID: ${{ secrets.NEXT_CLOUDINARY_ID }}
 
       run: |
         mkdir -p ~/.ssh

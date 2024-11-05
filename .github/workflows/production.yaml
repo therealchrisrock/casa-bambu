@@ -32,6 +32,16 @@ jobs:
     environment:
       name: production
     runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -43,6 +53,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
+
+      - name: Set up MongoDB connection string
+        run: echo "DATABASE_URI=mongodb://localhost:27017/test" >> $GITHUB_ENV
 
       - name: Build project
         run: yarn build
@@ -63,7 +76,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     environment:
       name: production
-    steps:  
+    steps:
       - name: Download build artifact
         uses: actions/download-artifact@v3
         with:

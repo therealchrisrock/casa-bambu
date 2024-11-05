@@ -1,0 +1,74 @@
+deploy:
+  needs: build
+  runs-on: ubuntu-latest
+  if: github.ref == 'refs/heads/main'
+
+  steps:
+    - name: Download build artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifact
+
+    - name: Deploy to VPS
+      env:
+        SSH_KEY: ${{ secrets.SSH_KEY }}
+        VPS_USER: ${{ secrets.VPS_USER }}
+        VPS_HOST: ${{ secrets.VPS_HOST }}
+        VPS_PATH: ${{ secrets.VPS_PATH }}
+
+        # Environment variables
+        PORT: ${{ secrets.PORT }}
+        DATABASE_URI: ${{ secrets.DATABASE_URI }}
+        PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+        NEXT_PUBLIC_IS_LIVE: ${{ secrets.NEXT_PUBLIC_IS_LIVE }}
+        PAYLOAD_PUBLIC_SERVER_URL: ${{ secrets.PAYLOAD_PUBLIC_SERVER_URL }}
+        NEXT_PUBLIC_SERVER_URL: ${{ secrets.NEXT_PUBLIC_SERVER_URL }}
+        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY: ${{ secrets.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY }}
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+        STRIPE_WEBHOOKS_SIGNING_SECRET: ${{ secrets.STRIPE_WEBHOOKS_SIGNING_SECRET }}
+        PAYLOAD_PUBLIC_DRAFT_SECRET: ${{ secrets.PAYLOAD_PUBLIC_DRAFT_SECRET }}
+        NEXT_PRIVATE_DRAFT_SECRET: ${{ secrets.NEXT_PRIVATE_DRAFT_SECRET }}
+        REVALIDATION_KEY: ${{ secrets.REVALIDATION_KEY }}
+        NEXT_PRIVATE_REVALIDATION_KEY: ${{ secrets.NEXT_PRIVATE_REVALIDATION_KEY }}
+        NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
+        NEXT_CLOUDINARY_ID: ${{ secrets.NEXT_CLOUDINARY_ID }}
+
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+        # Copy build to VPS
+        scp -o StrictHostKeyChecking=no casa-bambu-build.tar.gz $VPS_USER@$VPS_HOST:$VPS_PATH
+
+        # SSH into the VPS to create .env and start the app
+        ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
+          cd $VPS_PATH
+          tar -xzf casa-bambu-build.tar.gz
+          rm casa-bambu-build.tar.gz
+        
+          # Create .env file
+          cat <<EOT > .env
+          PORT=$PORT
+          DATABASE_URI=$DATABASE_URI
+          PAYLOAD_SECRET=$PAYLOAD_SECRET
+          NEXT_PUBLIC_IS_LIVE=$NEXT_PUBLIC_IS_LIVE
+          PAYLOAD_PUBLIC_SERVER_URL=$PAYLOAD_PUBLIC_SERVER_URL
+          NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
+          STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY
+          PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY=$PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+          STRIPE_WEBHOOKS_SIGNING_SECRET=$STRIPE_WEBHOOKS_SIGNING_SECRET
+          PAYLOAD_PUBLIC_DRAFT_SECRET=$PAYLOAD_PUBLIC_DRAFT_SECRET
+          NEXT_PRIVATE_DRAFT_SECRET=$NEXT_PRIVATE_DRAFT_SECRET
+          REVALIDATION_KEY=$REVALIDATION_KEY
+          NEXT_PRIVATE_REVALIDATION_KEY=$NEXT_PRIVATE_REVALIDATION_KEY
+          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=$NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+          NEXT_CLOUDINARY_ID=$NEXT_CLOUDINARY_ID
+          EOT
+
+          # Run serve and deploy commands
+          yarn serve
+          yarn deploy
+        EOF

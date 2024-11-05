@@ -1,80 +1,109 @@
+name: Deploy to Production
+
 on:
   push:
     branches:
       - main
 
-deploy:
-  needs: build
-  runs-on: ubuntu-latest
-  environment:
-    name: production
-  if: github.ref == 'refs/heads/main'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-  steps:
-    - name: Download build artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: build-artifact
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
 
-    - name: Deploy to VPS
-      env:
-        PORT: 3000
-        NEXT_PUBLIC_SERVER_URL: https://casabambuwestbay.com
-        PAYLOAD_PUBLIC_SERVER_URL: https://casabambuwestbay.com
-        NEXT_PUBLIC_IS_LIVE: https://casabambuwestbay.com
-        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_live_51PqLjjRxAaVLSIkiLovi3Tiyc6nPJBSC9aajBAwFCvohud1cJyXHpKqKjz8iEpwms7Tc2PHMEj9zPpjku4MSuOEs00UeDfiYw4
-        NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: deep2qpb8
-        NEXT_CLOUDINARY_ID: deep2qpb8
-        SSH_KEY: ${{ secrets.SSH_KEY }}
-        VPS_USER: ${{ secrets.VPS_USER }}
-        VPS_HOST: ${{ secrets.VPS_HOST }}
-        VPS_PATH: ${{ secrets.VPS_PATH }}
+      - name: Install dependencies
+        run: yarn install
 
-        # Environment variables
-        DATABASE_URI: ${{ secrets.DATABASE_URI }}
-        PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-        STRIPE_WEBHOOKS_SIGNING_SECRET: ${{ secrets.STRIPE_WEBHOOKS_SIGNING_SECRET }}
-        PAYLOAD_PUBLIC_DRAFT_SECRET: ${{ secrets.PAYLOAD_PUBLIC_DRAFT_SECRET }}
-        NEXT_PRIVATE_DRAFT_SECRET: ${{ secrets.NEXT_PRIVATE_DRAFT_SECRET }}
-        REVALIDATION_KEY: ${{ secrets.REVALIDATION_KEY }}
-        NEXT_PRIVATE_REVALIDATION_KEY: ${{ secrets.NEXT_PRIVATE_REVALIDATION_KEY }}
+      - name: Build project
+        run: yarn build
 
-      run: |
-        mkdir -p ~/.ssh
-        echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+      - name: Archive production build
+        run: tar -czf casa-bambu-build.tar.gz dist
 
-        # Copy build to VPS
-        scp -o StrictHostKeyChecking=no casa-bambu-build.tar.gz $VPS_USER@$VPS_HOST:$VPS_PATH
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifact
+          path: casa-bambu-build.tar.gz
 
-        # SSH into the VPS to create .env and start the app
-        ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
-          cd $VPS_PATH
-          tar -xzf casa-bambu-build.tar.gz
-          rm casa-bambu-build.tar.gz
-        
-          # Create .env file
-          cat <<EOT > .env
-          PORT=$PORT
-          DATABASE_URI=$DATABASE_URI
-          PAYLOAD_SECRET=$PAYLOAD_SECRET
-          NEXT_PUBLIC_IS_LIVE=$NEXT_PUBLIC_IS_LIVE
-          PAYLOAD_PUBLIC_SERVER_URL=$PAYLOAD_PUBLIC_SERVER_URL
-          NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
-          STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY
-          PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY=$PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-          STRIPE_WEBHOOKS_SIGNING_SECRET=$STRIPE_WEBHOOKS_SIGNING_SECRET
-          PAYLOAD_PUBLIC_DRAFT_SECRET=$PAYLOAD_PUBLIC_DRAFT_SECRET
-          NEXT_PRIVATE_DRAFT_SECRET=$NEXT_PRIVATE_DRAFT_SECRET
-          REVALIDATION_KEY=$REVALIDATION_KEY
-          NEXT_PRIVATE_REVALIDATION_KEY=$NEXT_PRIVATE_REVALIDATION_KEY
-          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=$NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-          NEXT_CLOUDINARY_ID=$NEXT_CLOUDINARY_ID
-          EOT
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    if: github.ref == 'refs/heads/main'
 
-          # Run serve and deploy commands
-          yarn serve
-          yarn deploy
-        EOF
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifact
+
+      - name: Deploy to VPS
+        env:
+          PORT: 3000
+          NEXT_PUBLIC_SERVER_URL: https://casabambuwestbay.com
+          PAYLOAD_PUBLIC_SERVER_URL: https://casabambuwestbay.com
+          NEXT_PUBLIC_IS_LIVE: https://casabambuwestbay.com
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_live_51PqLjjRxAaVLSIkiLovi3Tiyc6nPJBSC9aajBAwFCvohud1cJyXHpKqKjz8iEpwms7Tc2PHMEj9zPpjku4MSuOEs00UeDfiYw4
+          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: deep2qpb8
+          NEXT_CLOUDINARY_ID: deep2qpb8
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PATH: ${{ secrets.VPS_PATH }}
+
+          DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOKS_SIGNING_SECRET: ${{ secrets.STRIPE_WEBHOOKS_SIGNING_SECRET }}
+          PAYLOAD_PUBLIC_DRAFT_SECRET: ${{ secrets.PAYLOAD_PUBLIC_DRAFT_SECRET }}
+          NEXT_PRIVATE_DRAFT_SECRET: ${{ secrets.NEXT_PRIVATE_DRAFT_SECRET }}
+          REVALIDATION_KEY: ${{ secrets.REVALIDATION_KEY }}
+          NEXT_PRIVATE_REVALIDATION_KEY: ${{ secrets.NEXT_PRIVATE_REVALIDATION_KEY }}
+
+        run: |
+          # Setup SSH key
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # Copy build artifact to VPS
+          scp -o StrictHostKeyChecking=no casa-bambu-build.tar.gz $VPS_USER@$VPS_HOST:$VPS_PATH
+
+          # SSH into VPS to deploy
+          ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
+            cd $VPS_PATH
+            tar -xzf casa-bambu-build.tar.gz
+            rm casa-bambu-build.tar.gz
+
+            # Create .env file
+            cat <<EOT > .env
+            PORT=$PORT
+            DATABASE_URI=$DATABASE_URI
+            PAYLOAD_SECRET=$PAYLOAD_SECRET
+            NEXT_PUBLIC_IS_LIVE=$NEXT_PUBLIC_IS_LIVE
+            PAYLOAD_PUBLIC_SERVER_URL=$PAYLOAD_PUBLIC_SERVER_URL
+            NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
+            STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY
+            PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY=$PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY
+            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+            STRIPE_WEBHOOKS_SIGNING_SECRET=$STRIPE_WEBHOOKS_SIGNING_SECRET
+            PAYLOAD_PUBLIC_DRAFT_SECRET=$PAYLOAD_PUBLIC_DRAFT_SECRET
+            NEXT_PRIVATE_DRAFT_SECRET=$NEXT_PRIVATE_DRAFT_SECRET
+            REVALIDATION_KEY=$REVALIDATION_KEY
+            NEXT_PRIVATE_REVALIDATION_KEY=$NEXT_PRIVATE_REVALIDATION_KEY
+            NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=$NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+            NEXT_CLOUDINARY_ID=$NEXT_CLOUDINARY_ID
+            EOT
+
+            # Run serve and deploy commands
+            yarn serve
+            yarn deploy
+          EOF

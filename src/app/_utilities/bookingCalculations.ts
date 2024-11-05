@@ -145,6 +145,10 @@ export const calculateBookingDetails = (
 
   const coupons = []
   const applicableCoupon = product.coupons
+    .filter(a => {
+      const c = JSON.parse(a.stripeCouponJSON)
+      return c.valid
+    })
     .sort((a, b) => a.nights - b.nights)
     .reverse()
     .find(x => x.nights <= totalNights)
@@ -189,16 +193,16 @@ export const calculateBookingDetails = (
 
 function getTotalNights(from: Date, to: Date, isExclusive: boolean): number {
   // Ensure the dates are handled in UTC and the time is reset to midnight
-  const start = new Date(from.toISOString().split('T')[0]);
-  const end = new Date(to.toISOString().split('T')[0]);
+  const start = new Date(from.toISOString().split('T')[0])
+  const end = new Date(to.toISOString().split('T')[0])
 
   // If isExclusive is true, subtract 1 from the end date (i.e., don't count the checkout day)
   if (isExclusive) {
-    end.setDate(end.getDate() - 1);
+    end.setDate(end.getDate() - 1)
   }
 
   // Calculate the difference in days
-  const totalNights = Math.max(0, differenceInDays(end, start));
+  const totalNights = Math.max(0, differenceInDays(end, start))
 
-  return totalNights;
+  return totalNights
 }

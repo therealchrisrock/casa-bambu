@@ -31,9 +31,9 @@ const FALLBACK_COLORS = [
   '#BA55D3', // Medium Orchid
 ]
 const STATIC_COLOR_MAP: Record<string, string> = {
-  '66944696afd4294367b19199': '#FF6347', // Tomato (red)
-  '66944696afd4294367b19191': '#4682B4', // Steel Blue
-  '66944696afd4294367b19189': '#FFD700', // Lime Green
+  '6722a7e41921e622f1b2aba6': '#FF69B4', // Tomato (red)
+  '6722a8211921e622f1b2ac4c': '#6A5ACD', // Steel Blue
+  '672291791921e622f1b2a3df': '#FFD700', // Lime Green
 }
 import { DefaultTemplate } from 'payload/components/templates'
 import { useConfig } from 'payload/components/utilities'
@@ -97,7 +97,7 @@ export const Calendar = () => {
             right: 'dayGridMonth,timeGridWeek',
           }}
           initialView={'dayGridMonth'}
-          aspectRatio={isDesktop ? 2.5 : 9 / 15}
+          height={'85vh'}
           // editable={true}
           // selectable={true}
           selectMirror={true}
@@ -122,9 +122,10 @@ export const Calendar = () => {
   )
 }
 function renderEventContent(eventInfo) {
+  // getBookingStatusLabel(eventInfo.event.extendedProps.status)
   return(
     <>
-      <b>{eventInfo.event.title} ({eventInfo.event.extendedProps.type === 'blockout' ? 'blockout' : getBookingStatusLabel(eventInfo.event.extendedProps.status)})</b><br></br>
+      <b>{eventInfo.event.title} {eventInfo.event.extendedProps.type === 'blockout' ? '(blockout)' : ''}</b><br></br>
     </>
   )
 }
@@ -141,7 +142,7 @@ function formatEventData(e: Booking) {
     type: e.type,
     eventClassNames: [e.type === 'blockout' ? 'blockout' : 'reservation',
       e.bookingStatus],
-    eventBackgroundColor: e.type === 'blockout' ? 'E2E8F0' : getEventColor(pid),
+    eventBackgroundColor: getEventColor(pid),
     eventBorderColor: getEventColor(pid),
     color: getEventColor(pid),
   }

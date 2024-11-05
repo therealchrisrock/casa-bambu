@@ -10,20 +10,21 @@ export const newBookingNotif: CollectionAfterChangeHook<Booking> = async ({
   req,
 }) => {
   if (!checkRole(['admin'], req.user)){
+    const title = typeof doc.product === 'string' ? doc.product : doc.product.title
     const from = format(new Date(doc.startDate), 'd MMM, yyyy')
     const to = format(new Date(doc.endDate), 'd MMM, yyyy')
     req.payload.sendEmail({
       to: 'contact@casabambuwestbay.com',
       from: 'contact@casabambuwestbay.com',
-      subject: `New Booking Request for ${doc.product?.title} (${from} - ${to})`,
+      subject: `New Booking Request for ${title} (${from} - ${to})`,
       html: await generateEmailHTML({
-        headline: `New Booking Request for ${doc.product?.title}`,
+        headline: `New Booking Request for ${title}`,
         content: `
           <div style="padding-bottom: 15px">
             <ul style="padding-bottom: 10px" >
               <li><b>Start Date:</b>${from}</li>
               <li><b>End Date:</b>${to}</li>
-              <li><b>Listing:${doc.product?.title}</b></li>
+              <li><b>Listing:${title}</b></li>
             </ul>
             <div>
               <b>Message from the customer:</b>

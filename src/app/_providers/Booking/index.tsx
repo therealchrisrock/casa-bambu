@@ -110,7 +110,6 @@ export const BookingProvider = ({
 
     const hasValidGuestCount =
       booking.guestCount >= 1 && booking.guestCount <= product.maxGuestQuantity
-    console.log(isAvailable && hasValidDuration && hasValidGuestCount)
     return isAvailable && hasValidDuration && hasValidGuestCount
   }
 
@@ -181,6 +180,5 @@ export function isBookingAvailable(
   // Normalize the dates to the start of the day to ignore time
   const bookingDates = eachDayOfInterval({ start: fromDate, end: toDate })
   const isAvailable = !bookingDates.some(date => dateMatchModifiers(date, unavailableDates))
-  console.log(isAvailable)
   return isAvailable
 }

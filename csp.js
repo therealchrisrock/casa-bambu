@@ -1,5 +1,7 @@
 const policies = {
-  'default-src': ["'self'"],
+  'default-src': ["'self'", 'https://media.casabambuwestbay.com',
+    'https://res.cloudinary.com',
+  ],
   'script-src': [
     "'self'",
     "'unsafe-inline'",
@@ -15,6 +17,7 @@ const policies = {
     'https://*.stripe.com',
     'https://raw.githubusercontent.com',
     'https://media.casabambuwestbay.com',
+    'https://res.cloudinary.com',
   ],
   'font-src': ["'self'"],
   'frame-src': [
@@ -25,6 +28,8 @@ const policies = {
   ],
   'connect-src': [
     "'self'",
+    'https://media.casabambuwestbay.com',
+    'https://res.cloudinary.com',
     'https://checkout.stripe.com',
     'https://api.stripe.com',
     'https://maps.googleapis.com',

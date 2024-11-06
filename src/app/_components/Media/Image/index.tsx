@@ -67,10 +67,10 @@ export const Image: React.FC<MediaProps> = props => {
         }
       }}
       config={{
-        url: {
-          privateCdn: true,
-          secureDistribution: 'media.casabambuwestbay.com', // Set your custom domain here
-        },
+        // url: {
+        //   privateCdn: true,
+        //   secureDistribution: 'media.casabambuwestbay.com', // Set your custom domain here
+        // },
       }}
     />
     // <NextImage

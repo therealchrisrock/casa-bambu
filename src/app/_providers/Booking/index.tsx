@@ -3,7 +3,7 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 import { dateMatchModifiers, DateRange, Matcher } from 'react-day-picker'
 import { UTCDate } from '@date-fns/utc'
-import { eachDayOfInterval, parseISO } from 'date-fns'
+import { eachDayOfInterval, parseISO, subDays } from 'date-fns'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Booking, CartItems, Product, Settings } from '../../../payload/payload-types'
@@ -176,8 +176,7 @@ export function isBookingAvailable(
   unavailableDates: Matcher[],
 ): boolean {
   const fromDate = typeof from === 'string' ? parseISO(from) : from
-  const toDate = typeof to === 'string' ? parseISO(to) : to
-  // Normalize the dates to the start of the day to ignore time
+  const toDate = subDays(typeof to === 'string' ? parseISO(to) : to, 1)
   const bookingDates = eachDayOfInterval({ start: fromDate, end: toDate })
   const isAvailable = !bookingDates.some(date => dateMatchModifiers(date, unavailableDates))
   return isAvailable

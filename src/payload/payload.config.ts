@@ -46,6 +46,7 @@ import { Header } from './globals/Header'
 import { Settings } from './globals/Settings'
 import { priceUpdated } from './stripe/webhooks/priceUpdated'
 import { productUpdated } from './stripe/webhooks/productUpdated'
+import { GraphQLFloat, GraphQLNonNull, GraphQLString } from 'graphql/type'
 
 const generateTitle: GenerateTitle = () => {
   return 'My Store'
@@ -176,6 +177,42 @@ export default buildConfig({
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
   graphQL: {
+    mutations: (GraphQL, payload) => {
+      return {
+        calculateAverageRating: {
+          type: GraphQLFloat, // The mutation returns a float (average rating)
+          args: {
+            relatedListing: {
+              type: new GraphQLNonNull(GraphQLString), // Argument: the ID of the related listing
+            },
+          },
+          resolve: async (_, args) => {
+            const { relatedListing } = args
+
+            // Fetch reviews associated with the listing
+            const reviews = await payload.find({
+              collection: 'reviews',
+              where: {
+                relatedListing: {
+                  equals: relatedListing, // Match reviews by related listing ID
+                },
+              },
+            })
+
+            // Ensure reviews exist
+            if (!reviews.docs.length) {
+              return 0 // No reviews found, return 0
+            }
+
+            // Calculate the average rating
+            const totalRating = reviews.docs.reduce((sum, review) => sum + review.rating, 0);
+            const averageRating = totalRating / reviews.docs.length
+
+            return averageRating
+          },
+        },
+      }
+    },
     schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
   },
   cors: [

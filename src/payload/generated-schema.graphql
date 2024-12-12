@@ -21500,6 +21500,7 @@ type Mutation {
   updateSettings(data: mutationSettingsInput!, draft: Boolean, locale: LocaleInputType): Settings
   updateHeader(data: mutationHeaderInput!, draft: Boolean, locale: LocaleInputType): Header
   updateFooter(data: mutationFooterInput!, draft: Boolean, locale: LocaleInputType): Footer
+  calculateAverageRating(relatedListing: String!): Float
 }
 
 input mutationPageInput {

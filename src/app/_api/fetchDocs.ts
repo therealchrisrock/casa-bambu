@@ -10,6 +10,7 @@ import { payloadToken } from './token'
 import { BOOKINGS } from '@/_graphql/bookings'
 import { Where } from 'payload/types'
 import { FAQS } from '@/_graphql/faqs'
+import { REVIEWS } from '@/_graphql/reviews'
 
 const queryMap = {
   pages: {
@@ -31,6 +32,10 @@ const queryMap = {
   faqs: {
     query: FAQS,
     key: 'Faqs',
+  },
+  reviews: {
+    query: REVIEWS,
+    key: 'Reviews'
   }
 }
 

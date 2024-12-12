@@ -1,10 +1,11 @@
-import React, { ReactNode } from 'react'
-import { StarHalfIcon, StarIcon, StarOffIcon } from 'lucide-react'
+import React, { ReactNode, Suspense } from 'react'
+import { StarHalfIcon, StarIcon } from 'lucide-react'
 
 import { Page, Review } from '../../../payload/payload-types'
 
 import { Gutter } from '@/_components/Gutter'
 import { Media } from '@/_components/Media'
+import { cn } from '@/_lib/utils'
 
 type Props = Extract<Page['layout'][0], { blockType: 'reviewBlock' }>
 
@@ -30,7 +31,9 @@ export const ReviewBlock: React.FC<Props> = props => {
           </div>
           <div className={'space-y-6 prose  max-w-2xl text-foreground'}>
             <div className={'space-y-2'}>
-              <Score review={review} />
+              <Suspense>
+                <Rating review={review} />
+              </Suspense>
               {review.statement && <div className={'text-lg font-medium '}>{review.statement}</div>}
             </div>
             <div className={'text-sm '}>
@@ -53,19 +56,39 @@ export const ReviewBlock: React.FC<Props> = props => {
     </Gutter>
   )
 }
-function Score({ review }: { review: Review }) {
-  const hasRemainder = review.rating % 2
-  const whole = Math.floor(review.rating / 2)
+
+export function Rating({ review, className}: { review: Review, className?: string }) {
+  return (
+    <div className={'flex gap-1'}>
+      <Score className={cn(['fill-foreground stroke-foreground', className])} rating={review.rating} />
+    </div>
+  )
+}
+export function Score({ rating, className }: { className?: string; rating: number }) {
+  const hasRemainder = rating % 2
+  const whole = Math.floor(rating / 2)
   const stars: ReactNode[] = []
   const size = 18
   for (let i = 1; i <= 5; i++) {
     if (i <= whole) {
-      stars.push(<StarIcon key={`pt--${i}`} size={size} className={'fill-foreground'}></StarIcon>)
+      stars.push(
+        <StarIcon
+          key={`pt--${i}`}
+          size={size}
+          className={cn(['fill-tertiary stroke-tertiary', className])}
+        ></StarIcon>,
+      )
     } else if (i === whole + 1 && hasRemainder) {
-      stars.push(<StarHalfIcon key={`pt--${i}`} size={size} className={'fill-foreground'}></StarHalfIcon>)
+      stars.push(
+        <StarHalfIcon
+          key={`pt--${i}`}
+          size={size}
+          className={cn(['fill-tertiary stroke-tertiary', className])}
+        ></StarHalfIcon>,
+      )
     } else {
       stars.push(<StarIcon size={size} key={`pt--${i}`} />)
     }
   }
-  return <div className={'flex gap-1'}>{stars}</div>
+  return <>{stars}</>
 }

@@ -18,7 +18,7 @@ export function CreateReservationButton({
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger className={'w-full'}>
+          <TooltipTrigger className={'w-full'} asChild>
             <ShadButton size={size} className={'w-full'} variant={'tertiary'} disabled>
               Reserve
             </ShadButton>

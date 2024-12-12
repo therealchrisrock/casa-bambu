@@ -1,4 +1,5 @@
 import React from 'react'
+import { GoogleAnalytics } from '@next/third-parties/google'
 import { Metadata } from 'next'
 import { Inter as FontSans } from 'next/font/google'
 
@@ -39,6 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Footer />
           <Toaster />
         </Providers>
+        <GoogleAnalytics gaId="G-KWXH7S68M9" />
       </body>
     </html>
   )
@@ -48,7 +50,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL || 'https://payloadcms.com'),
   twitter: {
     card: 'summary_large_image',
-    creator: '@payloadcms',
+    creator: '@tilde',
   },
   openGraph: mergeOpenGraph(),
 }

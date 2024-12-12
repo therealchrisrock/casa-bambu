@@ -36,7 +36,7 @@ export async function Header() {
             */}
             <img
               className={classes.logo}
-              alt="Payload Logo"
+              alt="Casa Bambu Logo"
               src="/media/small-logo.png"
             />
           </Link>

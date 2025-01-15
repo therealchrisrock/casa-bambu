@@ -6,7 +6,7 @@ REMOTE_HOST="51.222.86.74"
 REMOTE_DIR="/var/www/casabambuwestbay.com"
 
 # Directories to remove and copy
-DIRS=("build" "dist" ".next" "ecosystem.config.js" "public")
+DIRS=("build" "dist" ".next" "ecosystem.config.js" "public" "media")
 
 
 # Step 1: Remove existing directories on the remote server

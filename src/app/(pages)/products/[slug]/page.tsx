@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { formatDate } from 'date-fns'
 import { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
@@ -33,7 +34,6 @@ import {
   MobileProductForm,
   ProductDetails,
 } from '@/(pages)/products/ProductForm'
-import { formatDate } from 'date-fns'
 
 // Force this page to be dynamic so that Next.js does not cache it
 // See the note in '../../../[slug]/page.tsx' about this
@@ -190,15 +190,20 @@ async function ListingReviews({ pid }: { pid: string }) {
             <div className={'grid md:grid-cols-2 grid-cols-1 col-span-1 gap-0'}>
               <div className={'col-span-1 pb-4'}>
                 <hgroup>
-                  <h5 className={'font-medium'}>{r.name}</h5>
-                  <h6 className={'text-muted-foreground text-sm'}>{new Date(r.publishedOn).toLocaleDateString('en-US', { month: 'short', year: 'numeric', day: 'numeric' })}</h6>
+                  <h5 className={'font-medium m-0'}>{r.name}</h5>
+                  <h6 className={'text-muted-foreground m-0 text-sm'}>
+                    {new Date(r.publishedOn).toLocaleDateString('en-US', {
+                      month: 'short',
+                      year: 'numeric',
+                      day: 'numeric',
+                    })}
+                  </h6>
                 </hgroup>
               </div>
               <div className={'col-span-1 pb-2'}>
                 <div className={'flex items-center '}>
-
-                <Rating review={r} className={'fill-tertiary stroke-tertiary'} />
-                  <span className={'text-sm font-semibold pl-2'}>{r.rating}</span>
+                  <Rating review={r} className={'fill-tertiary stroke-tertiary'} />
+                  <span className={'text-sm font-semibold pl-2'}>{r.rating / 2}</span>
                 </div>
               </div>
             </div>

@@ -5,6 +5,7 @@ import type { Maybe } from 'graphql/jsutils/Maybe'
 import type { CartItems, Product, Settings } from '../../payload/payload-types'
 
 import type { CartItem } from '@/_providers/Cart/reducer'
+import { UTCDate } from '@date-fns/utc'
 
 export interface AdditionalFee {
   label: string
@@ -58,9 +59,8 @@ export const calculateBookingDetails = (
   let totalNights = 0
 
   // Ensure dates are handled in UTC without local timezone conversion
-  const bookingStart = new Date(dates.from.toISOString().split('T')[0])
-  const bookingEnd = new Date(dates.to.toISOString().split('T')[0])
-
+  const bookingStart = new UTCDate(dates.from.toISOString().split('T')[0])
+  const bookingEnd = new UTCDate(dates.to.toISOString().split('T')[0])
   let coveredNights = 0
   variants.forEach(variant => {
     const seasonStart = startOfDay(new Date(variant.seasonStart))

@@ -93,7 +93,6 @@ export const calculateBookingDetails = (
   const defaultPrice = prices[0]
   const uncoveredNights = differenceInDays(bookingEnd, bookingStart) - coveredNights
   if (uncoveredNights > 0) {
-    console.log('uncoveredNights', uncoveredNights)
     subtotal += uncoveredNights * defaultPrice.unit_amount
     totalNights += uncoveredNights
 
@@ -144,6 +143,7 @@ export const calculateBookingDetails = (
     }
   }
 
+  let total = subtotal;
   const coupons = []
   const applicableCoupon = product.coupons
     .filter(a => {
@@ -164,14 +164,13 @@ export const calculateBookingDetails = (
       const p = (subtotal * c.percent_off) / 100
       amt += p
     }
-    subtotal -= amt
+    total -= amt
     coupons.push({
       label: applicableCoupon.nickname,
       total: Math.ceil(amt / 100),
       couponID: applicableCoupon.stripeCoupon,
     })
   }
-  console.log('duration', totalNights)
   return {
     listing: product.title,
     productID: product.id,
@@ -184,7 +183,7 @@ export const calculateBookingDetails = (
     to: bookingEnd.toISOString().split('T')[0],
     subtotal: Math.ceil(subtotal / 100),
     guestFee,
-    total: Math.ceil(subtotal / 100),
+    total: Math.ceil(total / 100),
     guestCount: guestsQuantity,
     currency: 'cad',
     additionalFees,

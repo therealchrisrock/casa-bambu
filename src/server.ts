@@ -4,6 +4,7 @@ import next from 'next'
 import nextBuild from 'next/dist/build'
 import path from 'path'
 import payload from 'payload'
+
 dotenv.config({
   path: path.resolve(__dirname, '../.env'),
 })
@@ -38,22 +39,18 @@ const transport = nodemailer.createTransport({
 })
 const start = async (): Promise<void> => {
   await payload.init({
-    email: {
-      fromName: 'Casa Bambu Support',
-      fromAddress: 'contact@casabambuwestbay.com',
-      transport,
-    },
-    // process.env.NODE_ENV === 'production'
-    //   ? {
-    //       fromName: 'Casa Bambu Support',
-    //       fromAddress: 'contact@casabambuwestbay.com',
-    //       transport
-    //     }
-    //   : {
-    //       fromName: 'Ethereal Email',
-    //       fromAddress: 'example@ethereal.com',
-    //       logMockCredentials: true,
-    //     },
+    email:
+      process.env.NODE_ENV === 'development'
+        ? {
+            fromName: 'Ethereal Email',
+            fromAddress: 'example@ethereal.com',
+            logMockCredentials: true,
+          }
+        : {
+            fromName: 'Casa Bambu Support',
+            fromAddress: 'contact@casabambuwestbay.com',
+            transport,
+          },
     secret: process.env.PAYLOAD_SECRET || '',
     express: app,
     onInit: () => {

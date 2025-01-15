@@ -281,7 +281,6 @@ function CartLines() {
   if (loading || !booking) {
     return <CartLinesSkeleton /> // Display skeleton while loading
   }
-
   return (
     <Card className="overflow-hidden">
       <CardHeader className="flex flex-row items-start bg-muted/50">
@@ -324,7 +323,7 @@ function CartLines() {
                 <span className="text-primary">
                   <span>{f.label}</span>
                 </span>
-                <span className="text-primary">{formattedPrice(f.total)}</span>
+                <span className="text-primary">- {formattedPrice(f.total)}</span>
               </li>
             ))}
             <li className="flex items-center justify-between">

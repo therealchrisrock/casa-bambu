@@ -7,7 +7,7 @@ import Stripe from 'stripe'
 import type { Product, Settings } from '../payload-types'
 
 import type { CartItem } from '@/_providers/Cart/reducer'
-import type { BookingDetails } from '@/_utilities/bookingCalculations'
+import type { BookingDetails, GuestFee } from '@/_utilities/bookingCalculations'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2022-08-01',
@@ -95,26 +95,26 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
     }
     from.setUTCHours(12, 0, 0, 0)
     to.setUTCHours(12, 0, 0, 0)
-    const booking = await payload.create({
-      collection: 'bookings',
-      data: {
-        type: 'reservation',
-        bookingStatus: 'pending',
-        product: product.id,
-        introduction: body.message,
-        user: user.id,
-        startDate: from.toISOString(),
-        endDate: to.toISOString(),
-      },
-    })
-    if (!booking) {
-      res.status(500).json({
-        error: 'An unknown error has occurred creating the booking. Please try again later.',
-      })
-      return
-    } else {
-      payload.logger.info(`New Booking Successfully created — ${booking.id}`)
-    }
+    // const booking = await payload.create({
+    //   collection: 'bookings',
+    //   data: {
+    //     type: 'reservation',
+    //     bookingStatus: 'pending',
+    //     product: product.id,
+    //     introduction: body.message,
+    //     user: user.id,
+    //     startDate: from.toISOString(),
+    //     endDate: to.toISOString(),
+    //   },
+    // })
+    // if (!booking) {
+    //   res.status(500).json({
+    //     error: 'An unknown error has occurred creating the booking. Please try again later.',
+    //   })
+    //   return
+    // } else {
+    //   payload.logger.info(`New Booking Successfully created — ${booking.id}`)
+    // }
     const invoice = await stripe.invoices.create({
       customer: stripeCustomerID,
       collection_method: 'send_invoice',
@@ -143,13 +143,13 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
     } else {
       payload.logger.info(`New Invoice Successfully created — ${invoice.id}`)
     }
-    const invoiceAdded = await payload.update({
-      collection: 'bookings',
-      id: booking.id,
-      data: {
-        invoice: invoice.id,
-      },
-    })
+    // const invoiceAdded = await payload.update({
+    //   collection: 'bookings',
+    //   id: booking.id,
+    //   data: {
+    //     invoice: invoice.id,
+    //   },
+    // })
     for (const item of bookingDetails.items) {
       await stripe.invoiceItems.create({
         customer: stripeCustomerID,
@@ -166,7 +166,7 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
         quantity: f.quantity,
         currency: 'cad',
         invoice: invoice.id,
-        discountable: false,
+        // discountable: false,
       })
     }
     payload.logger.info('Invoice Items have been added to invoice')
@@ -188,8 +188,7 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
 function formatDateToDayMonthYear(date: Date): string {
   return format(date, 'd MMM, yyyy')
 }
-
-export const calculateBookingDetails = (
+const calculateBookingDetails = (
   product: Product,
   dates: DateRange,
   guestsQuantity: number,
@@ -204,13 +203,12 @@ export const calculateBookingDetails = (
   let totalNights = 0
 
   // Ensure dates are handled in UTC without local timezone conversion
-  const bookingStart = new Date(dates.from.toISOString().split('T')[0])
-  const bookingEnd = new Date(dates.to.toISOString().split('T')[0])
-
+  const bookingStart = new UTCDate(dates.from.toISOString().split('T')[0])
+  const bookingEnd = new UTCDate(dates.to.toISOString().split('T')[0])
   let coveredNights = 0
   variants.forEach(variant => {
-    const seasonStart = startOfDay(new Date(variant.seasonStart))
-    const seasonEnd = endOfDay(new Date(variant.seasonEnd))
+    const seasonStart = startOfDay(new UTCDate(variant.seasonStart))
+    const seasonEnd = endOfDay(new UTCDate(variant.seasonEnd))
 
     if (isAfter(bookingEnd, seasonStart) && isBefore(bookingStart, seasonEnd)) {
       const priceDetails = prices.find(price => price.id === variant.priceID)
@@ -218,7 +216,11 @@ export const calculateBookingDetails = (
       const rangeStart = isBefore(bookingStart, seasonStart) ? seasonStart : bookingStart
       let rangeEnd = isAfter(bookingEnd, seasonEnd) ? seasonEnd : bookingEnd
 
-      const daysInRange = rangeStart < rangeEnd ? differenceInDays(rangeEnd, rangeStart) : 0
+      let daysInRange = rangeStart < rangeEnd ? differenceInDays(rangeEnd, rangeStart) : 0
+      if (isAfter(bookingEnd, rangeEnd)) {
+        daysInRange++
+      }
+      // console.log('daysInRange', daysInRange, priceDetails.unit_amount, rangeStart, rangeEnd)
       subtotal += daysInRange * priceDetails.unit_amount
       totalNights += daysInRange
       coveredNights += daysInRange
@@ -251,7 +253,7 @@ export const calculateBookingDetails = (
   const basePrice = Math.ceil(subtotal / 100)
   const extraGuests = guestsQuantity - product.baseGuestQuantity
   const guestFeeJSON = JSON.parse(product.guestFeePriceJSON)
-  let guestFee
+  let guestFee: GuestFee
   if (extraGuests > 0 && guestFeeJSON?.data) {
     const guestP = guestFeeJSON.data[0]
     const u = guestP?.unit_amount ?? 0
@@ -259,6 +261,7 @@ export const calculateBookingDetails = (
     guestFee = {
       extraGuests,
       priceID: guestP.id,
+      unitAmount: Math.ceil(u / 100),
       total: Math.ceil(t / 100),
     }
     additionalFees.push({
@@ -286,6 +289,10 @@ export const calculateBookingDetails = (
 
   const coupons = []
   const applicableCoupon = product.coupons
+    .filter(a => {
+      const c = JSON.parse(a.stripeCouponJSON)
+      return c.valid
+    })
     .sort((a, b) => a.nights - b.nights)
     .reverse()
     .find(x => x.nights <= totalNights)
@@ -307,7 +314,6 @@ export const calculateBookingDetails = (
       couponID: applicableCoupon.stripeCoupon,
     })
   }
-
   return {
     listing: product.title,
     productID: product.id,

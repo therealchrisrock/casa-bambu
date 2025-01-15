@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react'
-import { Copy, CreditCard, MoreVertical, Truck } from 'lucide-react'
+import { Copy} from 'lucide-react'
 
 import { formattedPrice } from '@/_components/Price'
 import { Button } from '@/_components/ui/button'

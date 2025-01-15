@@ -63,8 +63,8 @@ export const calculateBookingDetails = (
   const bookingEnd = new UTCDate(dates.to.toISOString().split('T')[0])
   let coveredNights = 0
   variants.forEach(variant => {
-    const seasonStart = startOfDay(new Date(variant.seasonStart))
-    const seasonEnd = endOfDay(new Date(variant.seasonEnd))
+    const seasonStart = startOfDay(new UTCDate(variant.seasonStart))
+    const seasonEnd = endOfDay(new UTCDate(variant.seasonEnd))
 
     if (isAfter(bookingEnd, seasonStart) && isBefore(bookingStart, seasonEnd)) {
       const priceDetails = prices.find(price => price.id === variant.priceID)
@@ -72,11 +72,11 @@ export const calculateBookingDetails = (
       const rangeStart = isBefore(bookingStart, seasonStart) ? seasonStart : bookingStart
       let rangeEnd = isAfter(bookingEnd, seasonEnd) ? seasonEnd : bookingEnd
 
-      // const daysInRange = rangeStart < rangeEnd ? differenceInDays(rangeEnd, rangeStart) : 0
-      //
-      // let rangeEnd = isAfter(bookingEnd, seasonEnd) ? seasonEnd : bookingEnd
-      //
-      const daysInRange = rangeStart < rangeEnd ? differenceInDays(rangeEnd, rangeStart) : 0
+      let daysInRange = rangeStart < rangeEnd ? differenceInDays(rangeEnd, rangeStart) : 0
+      if (isAfter(bookingEnd, rangeEnd)) {
+        daysInRange++
+      }
+      // console.log('daysInRange', daysInRange, priceDetails.unit_amount, rangeStart, rangeEnd)
       subtotal += daysInRange * priceDetails.unit_amount
       totalNights += daysInRange
       coveredNights += daysInRange
@@ -93,6 +93,7 @@ export const calculateBookingDetails = (
   const defaultPrice = prices[0]
   const uncoveredNights = differenceInDays(bookingEnd, bookingStart) - coveredNights
   if (uncoveredNights > 0) {
+    console.log('uncoveredNights', uncoveredNights)
     subtotal += uncoveredNights * defaultPrice.unit_amount
     totalNights += uncoveredNights
 
@@ -170,7 +171,7 @@ export const calculateBookingDetails = (
       couponID: applicableCoupon.stripeCoupon,
     })
   }
-
+  console.log('duration', totalNights)
   return {
     listing: product.title,
     productID: product.id,

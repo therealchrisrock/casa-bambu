@@ -64,7 +64,7 @@
     "next": "13.5.2",
     "next-cloudinary": "^6.15.0",
     "next-themes": "^0.3.0",
-    "payload": "^2.0.0",
+    "payload": "2.30.0",
     "payload-admin-bar": "^1.0.6",
     "payload-cloudinary-plugin": "^0.1.14",
     "qs": "6.11.2",

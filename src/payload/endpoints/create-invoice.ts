@@ -95,26 +95,26 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
     }
     from.setUTCHours(12, 0, 0, 0)
     to.setUTCHours(12, 0, 0, 0)
-    // const booking = await payload.create({
-    //   collection: 'bookings',
-    //   data: {
-    //     type: 'reservation',
-    //     bookingStatus: 'pending',
-    //     product: product.id,
-    //     introduction: body.message,
-    //     user: user.id,
-    //     startDate: from.toISOString(),
-    //     endDate: to.toISOString(),
-    //   },
-    // })
-    // if (!booking) {
-    //   res.status(500).json({
-    //     error: 'An unknown error has occurred creating the booking. Please try again later.',
-    //   })
-    //   return
-    // } else {
-    //   payload.logger.info(`New Booking Successfully created — ${booking.id}`)
-    // }
+    const booking = await payload.create({
+      collection: 'bookings',
+      data: {
+        type: 'reservation',
+        bookingStatus: 'pending',
+        product: product.id,
+        introduction: body.message,
+        user: user.id,
+        startDate: from.toISOString(),
+        endDate: to.toISOString(),
+      },
+    })
+    if (!booking) {
+      res.status(500).json({
+        error: 'An unknown error has occurred creating the booking. Please try again later.',
+      })
+      return
+    } else {
+      payload.logger.info(`New Booking Successfully created — ${booking.id}`)
+    }
     const invoice = await stripe.invoices.create({
       customer: stripeCustomerID,
       collection_method: 'send_invoice',
@@ -143,13 +143,13 @@ export const createInvoice: PayloadHandler = async (req, res): Promise<void> => 
     } else {
       payload.logger.info(`New Invoice Successfully created — ${invoice.id}`)
     }
-    // const invoiceAdded = await payload.update({
-    //   collection: 'bookings',
-    //   id: booking.id,
-    //   data: {
-    //     invoice: invoice.id,
-    //   },
-    // })
+    const invoiceAdded = await payload.update({
+      collection: 'bookings',
+      id: booking.id,
+      data: {
+        invoice: invoice.id,
+      },
+    })
     for (const item of bookingDetails.items) {
       await stripe.invoiceItems.create({
         customer: stripeCustomerID,

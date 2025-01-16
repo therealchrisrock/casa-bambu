@@ -9,6 +9,7 @@ import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 import stripePlugin from '@payloadcms/plugin-stripe'
 import { slateEditor } from '@payloadcms/richtext-slate'
 import dotenv from 'dotenv'
+import { GraphQLFloat, GraphQLNonNull, GraphQLString } from 'graphql/type'
 // import NodePolyfillPlugin from 'node-polyfill-webpack-plugin'
 import path from 'path'
 import { buildConfig } from 'payload/config'
@@ -46,7 +47,6 @@ import { Header } from './globals/Header'
 import { Settings } from './globals/Settings'
 import { priceUpdated } from './stripe/webhooks/priceUpdated'
 import { productUpdated } from './stripe/webhooks/productUpdated'
-import { GraphQLFloat, GraphQLNonNull, GraphQLString } from 'graphql/type'
 
 const generateTitle: GenerateTitle = () => {
   return 'My Store'
@@ -205,7 +205,7 @@ export default buildConfig({
             }
 
             // Calculate the average rating
-            const totalRating = reviews.docs.reduce((sum, review) => sum + review.rating, 0);
+            const totalRating = reviews.docs.reduce((sum, review) => sum + review.rating, 0)
             const averageRating = totalRating / reviews.docs.length
 
             return averageRating
@@ -222,10 +222,9 @@ export default buildConfig({
     'http://localhost:3000',
     process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
   ].filter(Boolean),
-  csrf: [
-    'https://checkout.stripe.com',
-    process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
-  ].filter(Boolean),
+  csrf: ['https://checkout.stripe.com', process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(
+    Boolean,
+  ),
   endpoints: [
     {
       path: '/create-payment-intent',
@@ -276,6 +275,7 @@ export default buildConfig({
     },
   ],
   plugins: [
+    // @ts-expect-error
     cloudinaryPlugin(),
     formBuilder({
       formSubmissionOverrides: {
